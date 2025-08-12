@@ -14,6 +14,11 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
+
+        // 프레임 제한 추가 (모바일 최적화)
+        Application.targetFrameRate = 60;
+        QualitySettings.vSyncCount = 1;
+
         Debug.Log("마법사 준비 완료!");
     }
 
