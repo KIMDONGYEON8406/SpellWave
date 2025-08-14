@@ -137,7 +137,6 @@ GameObject:
   - component: {fileID: 268555395}
   - component: {fileID: 268555394}
   - component: {fileID: 268555399}
-  - component: {fileID: 268555400}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Enemy
@@ -270,23 +269,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33f4bf37c7f3c054f8dac842753b17ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 0.5
-  followRange: 10
-  attackRange: 5
---- !u!114 &268555400
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 268555393}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1819f981042e0fd48a80af45f1189398, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 100
-  currentHealth: 0
+  enemyStats: {fileID: 11400000, guid: 2922aabd845313e4cbb7f5685ad66f98, type: 2}
 --- !u!1 &351331383
 GameObject:
   m_ObjectHideFlags: 0
@@ -744,8 +727,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ae4d90d9503b604d9bcc2ce6f91d954, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 8
-  rotationSpeed: 10
+  playerStats: {fileID: 11400000, guid: 7206cf7252a7d7347bd5d53aac836447, type: 2}
 --- !u!136 &1194627153
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -781,8 +763,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdf836f9da8f00741b0012986339a02b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackRange: 30
-  attackSpeed: 5
+  playerStats: {fileID: 11400000, guid: 7206cf7252a7d7347bd5d53aac836447, type: 2}
   magicProjectilePrefab: {fileID: 7677694619646138299, guid: 0adf575e33d2e9c46bf965d0e8df9569, type: 3}
   firePoint: {fileID: 0}
 --- !u!95 &1194627155
