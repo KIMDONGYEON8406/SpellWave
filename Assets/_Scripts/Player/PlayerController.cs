@@ -124,4 +124,5 @@ public class PlayerController : MonoBehaviour
         Debug.Log("플레이어 사망!");
         // 게임 오버 처리
     }
+   
 }
