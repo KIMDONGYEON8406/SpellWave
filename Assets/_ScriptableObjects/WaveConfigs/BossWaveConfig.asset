@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b1b1ffa45e896c4e89bb1f2e7da8f87, type: 3}
   m_Name: BossWaveConfig
   m_EditorClassIdentifier: 
-  waveIndex: 1
+  waveIndex: 5
   durationSec: 60
-  waveType: 0
+  waveType: 1
   initialEnemies: 5
   spawnRatePerSec: 0.5
-  monsterBase: {fileID: 0}
+  monsterBase: {fileID: 11400000, guid: 2922aabd845313e4cbb7f5685ad66f98, type: 2}
   bossEnemyStats: {fileID: 0}
   spawnBossAfterClear: 1
   hpScalePerWave: 1.2
@@ -26,4 +26,4 @@ MonoBehaviour:
   spawnRadius: 15
   minDistanceFromPlayer: 8
   showCardSelection: 1
-  canShowSkillCards: 0
+  canShowSkillCards: 1
