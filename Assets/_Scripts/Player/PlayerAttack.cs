@@ -3,10 +3,14 @@ using UnityEngine;
 public class PlayerAttack : MonoBehaviour
 {
     [Header("공격 설정")]
-    public float attackRange = 8f; // 원거리라 범위 늘림
-    public float attackSpeed = 1f;
+    [SerializeField] private PlayerStats playerStats; // ScriptableObject 참조
     public GameObject magicProjectilePrefab; // 마법 프리팹 참조
     public Transform firePoint; // 발사 위치
+
+    // 런타임 변수들
+    private float currentAttackRange;
+    private float currentAttackSpeed;
+    private float currentAttackDamage;
 
     private float lastAttackTime;
     private float lastTargetCheck;
@@ -22,19 +26,49 @@ public class PlayerAttack : MonoBehaviour
         {
             firePoint = transform;
         }
+
+        // ScriptableObject에서 값들을 복사
+        InitializeStats();
+    }
+
+    void InitializeStats()
+    {
+        if (playerStats != null)
+        {
+            currentAttackRange = playerStats.attackRange;
+            currentAttackSpeed = playerStats.attackSpeed;
+            currentAttackDamage = playerStats.attackDamage;
+        }
+        else
+        {
+            Debug.LogError("PlayerStats가 할당되지 않았습니다!");
+        }
     }
 
     void Update()
     {
+        // 런타임에 스탯이 변경될 수 있으므로 업데이트
+        UpdateStatsFromSO();
+
         if (Time.time >= lastTargetCheck + 0.1f)
         {
             FindTarget();
             lastTargetCheck = Time.time;
         }
 
-        if (Time.time >= lastAttackTime + (1f / attackSpeed))
+        if (Time.time >= lastAttackTime + (1f / currentAttackSpeed))
         {
             TryAttack();
+        }
+    }
+
+    void UpdateStatsFromSO()
+    {
+        if (playerStats != null)
+        {
+            currentAttackRange = playerStats.attackRange;
+            currentAttackSpeed = playerStats.attackSpeed;
+            currentAttackDamage = playerStats.attackDamage;
         }
     }
 
@@ -51,13 +85,11 @@ public class PlayerAttack : MonoBehaviour
         if (currentTarget != null && magicProjectilePrefab != null)
         {
             float distance = Vector3.Distance(transform.position, currentTarget.transform.position);
-
-            if (distance <= attackRange)
+            if (distance <= currentAttackRange)
             {
                 // 마법 발사!
                 FireMagic();
-
-                Debug.Log($" {currentTarget.name}에게 마법 발사!");
+                Debug.Log($"{currentTarget.name}에게 마법 발사! 데미지: {currentAttackDamage}");
                 animator.SetTrigger("Attack");
                 lastAttackTime = Time.time;
             }
@@ -76,17 +108,22 @@ public class PlayerAttack : MonoBehaviour
         // 타겟 방향 계산
         Vector3 direction = (currentTarget.transform.position - firePoint.position).normalized;
 
-        // 발사체에 방향 설정
+        // 발사체에 방향과 데미지 설정
         MagicBullet projectile = magic.GetComponent<MagicBullet>();
         if (projectile != null)
         {
             projectile.SetDirection(direction);
+            projectile.SetDamage(currentAttackDamage); // 데미지도 설정
         }
     }
 
     void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.blue; // 마법이니까 파란색으로
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        // 런타임에는 현재 공격 범위로, 에디터에서는 SO의 값으로 표시
+        float displayRange = Application.isPlaying ? currentAttackRange :
+                           (playerStats != null ? playerStats.attackRange : 8f);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, displayRange);
     }
 }
