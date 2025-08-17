@@ -1,4 +1,3 @@
-using UnityEngine.TextCore.Text;
 using UnityEngine;
 using System;
 
@@ -19,27 +18,26 @@ public class GameManager : MonoBehaviour
 
     [Header("게임 상태")]
     public GameState currentState = GameState.Playing;
-    public int currentWave = 1;
     public Character player;
 
-    [Header("웨이브 설정")] // [추가] ScriptableObject 기반 웨이브 시스템 - [KDY]
-    public WaveConfig normalWaveConfig;  // NormalWaveConfig 할당
-    public WaveConfig bossWaveConfig;    // BossWaveConfig 할당
-    private WaveConfig currentWaveConfig; // 현재 사용중인 설정
+    [Header("타임라인 설정")] // [수정] Timeline 시스템 - [KDY]
+    public TimelineConfig timelineConfig;
 
-    [Header("웨이브 타이머")]
-    // [삭제] public float waveTimeLimit = 60f; // WaveConfig.durationSec로 대체 - [KDY]
-    public float currentWaveTime = 0f;       // 현재 웨이브 경과 시간
-    public bool isWaveActive = false;        // 웨이브 진행 중인지
+    [Header("타임라인 진행상황")] // [추가] Timeline 진행 관리 - [KDY]
+    public float currentTime = 0f;           // 현재 스테이지 진행 시간
+    public bool isStageActive = false;       // 스테이지 진행 중인지
+    public int currentLevel = 1;             // 현재 레벨
+    public int currentExp = 0;               // 현재 경험치
+    public int expToNextLevel = 100;         // 다음 레벨까지 필요한 경험치
 
     [Header("게임 타이머")]
     public float totalGameTime = 0f;         // 전체 게임 시간
 
-    // ===== 이벤트들 =====
-    public static event Action<int> OnWaveChanged;              // 웨이브 변경
-    public static event Action<int> OnWaveTimeChanged;          // 웨이브 남은 시간 (UI용)
-    public static event Action OnWaveTimeUp;                    // 웨이브 시간 종료
-    public static event Action OnWaveCompleted;                 // 웨이브 클리어
+    // ===== 이벤트들 ===== [수정] Timeline 기반으로 변경 - [KDY]
+    public static event Action<float> OnProgressChanged;        // 진척도 변경 (0~100%)
+    public static event Action<int> OnLevelUp;                  // 레벨업
+    public static event Action<int, int> OnExpChanged;          // 경험치 변경 (현재경험치, 필요경험치)
+    public static event Action OnStageCompleted;               // 스테이지 완료
     public static event Action<GameState> OnGameStateChanged;   // 상태 변경
 
     void Awake()
@@ -57,15 +55,33 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // [추가] WaveConfig 유효성 검사 - [KDY]
-        if (normalWaveConfig == null || bossWaveConfig == null)
+        // [수정] Timeline 시스템 시작 - [KDY]
+        if (timelineConfig == null)
         {
-            Debug.LogError("GameManager: WaveConfig가 할당되지 않았습니다!");
+            Debug.LogError("GameManager: TimelineConfig가 할당되지 않았습니다!");
             return;
         }
 
-        // 게임 시작 시 첫 웨이브 시작
-        StartWave(1);
+        StartStage();
+    }
+
+    // [추가] 스테이지 시작 함수 - [KDY]
+    public void StartStage()
+    {
+        currentTime = 0f;
+        isStageActive = true;
+        currentLevel = 1;
+        currentExp = 0;
+        expToNextLevel = timelineConfig.GetExpToLevelUp(currentLevel);
+
+        //// 플레이어 스탯 초기화 (스테이지 시작 시)
+        //if (player != null && player.GetPlayerStats() != null)
+        //{
+        //    player.GetPlayerStats().ResetToDefault();
+        //}
+
+        //Debug.Log($"스테이지 시작! 목표 시간: {timelineConfig.totalDuration / 60f:F1}분");
+        //OnExpChanged?.Invoke(currentExp, expToNextLevel);
     }
 
     // 게임 상태 변경 메서드
@@ -83,171 +99,102 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (currentState == GameState.Playing)
+        if (currentState == GameState.Playing && isStageActive)
         {
-            UpdateTimers();
+            UpdateTimeline(); // [수정] Timeline 업데이트 - [KDY]
         }
     }
 
-    private void UpdateTimers()
+    // [추가] Timeline 업데이트 함수 - [KDY]
+    private void UpdateTimeline()
     {
-        // 전체 게임 시간 업데이트
+        // 시간 업데이트
+        currentTime += Time.deltaTime;
         totalGameTime += Time.deltaTime;
 
-        // 웨이브가 활성화된 경우에만 웨이브 타이머 업데이트
-        if (isWaveActive && currentWaveConfig != null) // [수정] WaveConfig null 체크 추가 - [KDY]
+        // 진척도 업데이트 (0~100%)
+        float progress = timelineConfig.GetProgress(currentTime);
+        OnProgressChanged?.Invoke(progress);
+
+        // 스테이지 완료 체크
+        if (timelineConfig.IsStageComplete(currentTime))
         {
-            currentWaveTime += Time.deltaTime;
-
-            // UI 업데이트용 이벤트 (1초마다)
-            if (Mathf.FloorToInt(currentWaveTime) != Mathf.FloorToInt(currentWaveTime - Time.deltaTime))
-            {
-                // [수정] waveTimeLimit → currentWaveConfig.durationSec 변경 - [KDY]
-                int remainingTime = Mathf.Max(0, Mathf.CeilToInt(currentWaveConfig.durationSec - currentWaveTime));
-                OnWaveTimeChanged?.Invoke(remainingTime);
-            }
-
-            // [수정] 웨이브 시간 종료 체크를 WaveConfig 기반으로 변경 - [KDY]
-            if (currentWaveTime >= currentWaveConfig.durationSec)
-            {
-                OnWaveTimeExpired();
-            }
+            CompleteStage();
         }
     }
 
-    // ===== 웨이브 관리 =====
-    public void StartWave(int waveNumber)
+    // [추가] 경험치 획득 함수 - [KDY]
+    public void AddExperience(int expAmount)
     {
-        currentWave = waveNumber;
-        currentWaveTime = 0f;
-        isWaveActive = true;
+        currentExp += expAmount;
+        Debug.Log($"경험치 +{expAmount} (총: {currentExp}/{expToNextLevel})");
 
-        // [추가] 웨이브 타입에 따라 WaveConfig 선택 - [KDY]
-        SelectWaveConfig(waveNumber);
-
-        OnWaveChanged?.Invoke(currentWave);
-
-        // [수정] WaveConfig 기반 로그 출력 - [KDY]
-        Debug.Log($"웨이브 {currentWave} 시작! ({GetWaveTypeText()}, 제한시간: {currentWaveConfig.durationSec}초)");
-
-        // [추가] WaveConfig 정보 출력 - [KDY]
-        currentWaveConfig.PrintWaveInfo();
-    }
-
-    // [추가] 웨이브 타입에 따른 WaveConfig 선택 함수 - [KDY]
-    private void SelectWaveConfig(int waveNumber)
-    {
-        // 5웨이브마다 보스 웨이브
-        if (WaveConfig.IsBossWaveByNumber(waveNumber))
+        // 레벨업 체크
+        while (currentExp >= expToNextLevel && currentLevel < timelineConfig.maxLevel)
         {
-            currentWaveConfig = bossWaveConfig;
-            // 보스 웨이브용으로 웨이브 인덱스 설정
-            bossWaveConfig.waveIndex = waveNumber;
+            LevelUp();
         }
-        else
-        {
-            currentWaveConfig = normalWaveConfig;
-            // 일반 웨이브용으로 웨이브 인덱스 설정
-            normalWaveConfig.waveIndex = waveNumber;
-        }
+
+        OnExpChanged?.Invoke(currentExp, expToNextLevel);
     }
 
-    // [추가] 웨이브 타입 텍스트 반환 함수 - [KDY]
-    private string GetWaveTypeText()
+    // [추가] 레벨업 처리 - [KDY]
+    private void LevelUp()
     {
-        return currentWaveConfig != null && currentWaveConfig.IsBossWave() ? "보스 웨이브" : "일반 웨이브";
+        currentExp -= expToNextLevel;
+        currentLevel++;
+        expToNextLevel = timelineConfig.GetExpToLevelUp(currentLevel);
+
+        Debug.Log($"레벨업! 레벨 {currentLevel}");
+        OnLevelUp?.Invoke(currentLevel);
+
+        // 카드 선택 표시
+        ShowCardSelection();
     }
 
-    // ===== 웨이브 시간 종료 처리 =====
-    private void OnWaveTimeExpired()
+    // [추가] 스테이지 완료 처리 - [KDY]
+    private void CompleteStage()
     {
-        Debug.Log($"웨이브 {currentWave} 시간 종료!");
+        isStageActive = false;
+        OnStageCompleted?.Invoke();
 
-        isWaveActive = false;
-        OnWaveTimeUp?.Invoke();
-
-        // 강제로 웨이브 완료 처리
-        CompleteWave();
+        Debug.Log($"스테이지 완료! 총 시간: {currentTime / 60f:F1}분, 최종 레벨: {currentLevel}");
+        ChangeState(GameState.Victory);
     }
 
-    // ===== 웨이브 완료 처리 =====
-    public void CompleteWave()
-    {
-        isWaveActive = false;
-        OnWaveCompleted?.Invoke();
-
-        Debug.Log($"웨이브 {currentWave} 완료!");
-
-        // 카드 선택 여부 결정 (WaveConfig 기반)
-        if (ShouldShowCards())
-        {
-            ShowCardSelection();
-        }
-        else
-        {
-            // 짧은 휴식 후 다음 웨이브
-            StartCoroutine(StartNextWaveWithDelay());
-        }
-    }
-
-    private System.Collections.IEnumerator StartNextWaveWithDelay()
-    {
-        // 2초 휴식
-        yield return new WaitForSeconds(2f);
-        StartWave(currentWave + 1);
-    }
-
-    // ===== 수동 웨이브 완료 (모든 적 처치 시) =====
-    public void ForceCompleteWave()
-    {
-        if (isWaveActive)
-        {
-            Debug.Log($"웨이브 {currentWave} 조기 완료! (모든 적 처치)");
-            CompleteWave();
-        }
-    }
-
-    // ===== 카드 시스템 (WaveConfig 기반) ===== [수정] - [KDY]
-    private bool ShouldShowCards()
-    {
-        if (currentWaveConfig == null) return false;
-
-        // [수정] WaveConfig의 showCardSelection 설정 사용 (기존: 3웨이브마다) - [KDY]
-        return currentWaveConfig.showCardSelection;
-    }
-
+    // ===== 카드 시스템 ===== [수정] 레벨업 기반으로 변경 - [KDY]
     private void ShowCardSelection()
     {
         ChangeState(GameState.CardSelection);
 
-        // [추가] 보스 웨이브인지 확인해서 스킬 카드 표시 여부 결정 - [KDY]
-        bool showSkillCards = currentWaveConfig != null && currentWaveConfig.canShowSkillCards;
-
-        // CardManager에 스킬 카드 표시 여부 전달 (CardManager 함수 수정 필요할 수 있음)
-        CardManager.Instance.ShowRandomCards();
+        // [수정] CardManager null 체크 추가 - [KDY]
+        if (CardManager.Instance != null)
+        {
+            CardManager.Instance.ShowRandomCards();
+        }
+        else
+        {
+            Debug.LogWarning("CardManager가 없어서 카드 선택을 건너뜁니다.");
+            ChangeState(GameState.Playing);
+        }
     }
 
     public void OnCardSelected(CardData selectedCard)
     {
         ApplyCardEffect(selectedCard);
         ChangeState(GameState.Playing);
-        // 카드 선택 후 다음 웨이브
-        StartCoroutine(StartNextWaveWithDelay());
     }
 
-    // ===== 게임 정보 접근 메서드들 ===== [수정] WaveConfig 기반으로 변경 - [KDY]
-    public float GetWaveProgress()
+    // ===== 게임 정보 접근 메서드들 ===== [수정] Timeline 기반으로 변경 - [KDY]
+    public float GetStageProgress()
     {
-        // [수정] WaveConfig.durationSec 사용 - [KDY]
-        if (!isWaveActive || currentWaveConfig == null) return 0f;
-        return currentWaveTime / currentWaveConfig.durationSec;
+        return timelineConfig != null ? timelineConfig.GetProgress(currentTime) : 0f;
     }
 
-    public int GetRemainingWaveTime()
+    public int GetRemainingTime()
     {
-        // [수정] WaveConfig.durationSec 사용 - [KDY]
-        if (!isWaveActive || currentWaveConfig == null) return 0;
-        return Mathf.Max(0, Mathf.CeilToInt(currentWaveConfig.durationSec - currentWaveTime));
+        if (timelineConfig == null) return 0;
+        return Mathf.Max(0, Mathf.CeilToInt(timelineConfig.totalDuration - currentTime));
     }
 
     public string GetFormattedGameTime()
@@ -257,33 +204,55 @@ public class GameManager : MonoBehaviour
         return $"{minutes:00}:{seconds:00}";
     }
 
-    // ===== WaveConfig 정보 접근 ===== [추가] - [KDY]
-    public WaveConfig GetCurrentWaveConfig()
+    public string GetFormattedStageTime()
     {
-        return currentWaveConfig;
+        int minutes = Mathf.FloorToInt(currentTime / 60);
+        int seconds = Mathf.FloorToInt(currentTime % 60);
+        return $"{minutes:00}:{seconds:00}";
     }
 
-    public bool IsCurrentWaveBoss()
+    // ===== Timeline 정보 접근 ===== [추가] - [KDY]
+    public TimelineConfig GetTimelineConfig()
     {
-        return currentWaveConfig != null && currentWaveConfig.IsBossWave();
+        return timelineConfig;
     }
 
-    // ===== 디버그용 ===== [추가] - [KDY]
-    [ContextMenu("강제 다음 웨이브")]
-    public void ForceNextWave()
+    public float GetCurrentDifficultyMultiplier()
+    {
+        return timelineConfig != null ? timelineConfig.GetDifficultyMultiplier(currentTime) : 1f;
+    }
+
+    public float GetCurrentSpawnRate()
+    {
+        return timelineConfig != null ? timelineConfig.GetCurrentSpawnRate(currentTime) : 0.5f;
+    }
+
+    // ===== 디버그용 ===== [수정] Timeline 기반으로 변경 - [KDY]
+    [ContextMenu("경험치 +100")]
+    public void AddTestExp()
     {
         if (Application.isPlaying)
         {
-            CompleteWave();
+            AddExperience(100);
         }
     }
 
-    [ContextMenu("강제 보스 웨이브")]
-    public void ForceBossWave()
+    [ContextMenu("강제 스테이지 완료")]
+    public void ForceCompleteStage()
     {
         if (Application.isPlaying)
         {
-            StartWave(5); // 5웨이브로 강제 이동
+            CompleteStage();
+        }
+    }
+
+    [ContextMenu("스테이지 재시작")]
+    public void RestartStage()
+    {
+        if (Application.isPlaying)
+        {
+            ChangeState(GameState.Playing);
+            StartStage();
         }
     }
 }

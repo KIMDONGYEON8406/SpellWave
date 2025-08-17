@@ -585,7 +585,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &483760191
 RectTransform:
   m_ObjectHideFlags: 0
@@ -730,12 +730,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 2
-  currentWave: 1
   player: {fileID: 1194627156}
-  normalWaveConfig: {fileID: 11400000, guid: 66d9ef6daf2c13f4389460f0c76427fe, type: 2}
-  bossWaveConfig: {fileID: 11400000, guid: f83eb3534ab8fc4488ee9ddb9e2b526f, type: 2}
-  currentWaveTime: 0
-  isWaveActive: 0
+  timelineConfig: {fileID: 11400000, guid: 5a9dd0dfeff24f74eb056a9c0be7686f, type: 2}
+  currentTime: 0
+  isStageActive: 0
+  currentLevel: 1
+  currentExp: 0
+  expToNextLevel: 100
   totalGameTime: 0
 --- !u!4 &677839856
 Transform:
