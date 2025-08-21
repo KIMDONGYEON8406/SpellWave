@@ -126,6 +126,13 @@ public class EnemyAI : MonoBehaviour
     void Die()
     {
         Debug.Log($"{name} 사망!");
+
+        // [추가] 경험치 지급
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.AddExperience(25); // 몬스터당 25 경험치
+        }
+
         Destroy(gameObject);
     }
 
