@@ -112,7 +112,9 @@ public class CardManager : MonoBehaviour
 
     private bool ShouldShowSkillCards()
     {
-        return GameManager.Instance.currentWave % 3 == 0;
+        //return GameManager.Instance.currentWave % 3 == 0;
+        // [수정] Timeline 시스템용
+        return true; // 임시로 항상 스킬카드 표시
     }
 
     public void SelectCard(CardData selectedCard)
