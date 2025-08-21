@@ -1,33 +1,39 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
+/*
+[ëª©ì ]
+- íƒ€ê²Ÿ íƒìƒ‰/ì‚¬ê±°ë¦¬ ì²´í¬ ì—†ìŒ.
+- í”Œë ˆì´ì–´ê°€ ë°”ë¼ë³´ëŠ” "ì •ë©´ ë°©í–¥(transform.forward)"ìœ¼ë¡œ ì£¼ê¸°ì ìœ¼ë¡œ ë°œì‚¬.
+- ê³µê²© ì†ë„/ë°ë¯¸ì§€ëŠ” PlayerStats(SO)ì—ì„œ ì½ì–´ì˜´.
+
+[ì¸ìŠ¤í™í„°]
+- playerStats           : í”Œë ˆì´ì–´ ìŠ¤íƒ¯ SO (ê³µê²©ì†ë„/ë°ë¯¸ì§€ ì‚¬ìš©)
+- projectilePrefab      : ë°œì‚¬ì²´ í”„ë¦¬íŒ¹(MagicBullet ë“±)
+- firePoint             : ë°œì‚¬ ìœ„ì¹˜(ì—†ìœ¼ë©´ í”Œë ˆì´ì–´ transform ì‚¬ìš©)
+- autoFire              : ìë™ ë°œì‚¬ ON/OFF
+*/
 public class PlayerAttack : MonoBehaviour
 {
-    [Header("°ø°İ ¼³Á¤")]
-    [SerializeField] private PlayerStats playerStats; // ScriptableObject ÂüÁ¶
-    public GameObject magicProjectilePrefab; // ¸¶¹ı ÇÁ¸®ÆÕ ÂüÁ¶
-    public Transform firePoint; // ¹ß»ç À§Ä¡
+    [Header("ê³µê²© ì„¤ì •")]
+    [SerializeField] private PlayerStats playerStats;  // ScriptableObject ì°¸ì¡°
+    [SerializeField] private GameObject projectilePrefab; // ë°œì‚¬ì²´ í”„ë¦¬íŒ¹
+    [SerializeField] private Transform firePoint;      // ë°œì‚¬ ìœ„ì¹˜(ì—†ìœ¼ë©´ transform)
+    [SerializeField] private bool autoFire = true;     // ìë™ ë°œì‚¬ ì—¬ë¶€
 
-    // ·±Å¸ÀÓ º¯¼öµé
-    private float currentAttackRange;
-    private float currentAttackSpeed;
-    private float currentAttackDamage;
+    // ëŸ°íƒ€ì„ ìŠ¤íƒ¯ ìºì‹œ
+    private float currentAttackSpeed;  // ë°œì‚¬ íšŸìˆ˜(íšŒ/ì´ˆ)
+    private float currentAttackDamage; // ë°ë¯¸ì§€
 
+    // íƒ€ì´ë°/ì• ë‹ˆë©”ì´ì…˜
     private float lastAttackTime;
-    private float lastTargetCheck;
     private Animator animator;
-    private EnemyAI currentTarget;
 
     void Start()
     {
         animator = GetComponent<Animator>();
 
-        // firePoint°¡ ¾øÀ¸¸é ÇÃ·¹ÀÌ¾î À§Ä¡¿¡¼­ ¹ß»ç
-        if (firePoint == null)
-        {
-            firePoint = transform;
-        }
+        if (firePoint == null) firePoint = transform;
 
-        // ScriptableObject¿¡¼­ °ªµéÀ» º¹»ç
         InitializeStats();
     }
 
@@ -35,95 +41,53 @@ public class PlayerAttack : MonoBehaviour
     {
         if (playerStats != null)
         {
-            currentAttackRange = playerStats.attackRange;
             currentAttackSpeed = playerStats.attackSpeed;
             currentAttackDamage = playerStats.attackDamage;
         }
         else
         {
-            Debug.LogError("PlayerStats°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogError("PlayerStatsê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
+            currentAttackSpeed = 1f;
+            currentAttackDamage = 10f;
         }
     }
 
     void Update()
     {
-        // ·±Å¸ÀÓ¿¡ ½ºÅÈÀÌ º¯°æµÉ ¼ö ÀÖÀ¸¹Ç·Î ¾÷µ¥ÀÌÆ®
-        UpdateStatsFromSO();
-
-        if (Time.time >= lastTargetCheck + 0.1f)
-        {
-            FindTarget();
-            lastTargetCheck = Time.time;
-        }
-
-        if (Time.time >= lastAttackTime + (1f / currentAttackSpeed))
-        {
-            TryAttack();
-        }
-    }
-
-    void UpdateStatsFromSO()
-    {
+        // ë§¤ í”„ë ˆì„ ìŠ¤íƒ¯ ê°±ì‹  (ë ˆë²¨ì—…/ìŠ¤í‚¬ ë“± ë°˜ì˜)
         if (playerStats != null)
         {
-            currentAttackRange = playerStats.attackRange;
             currentAttackSpeed = playerStats.attackSpeed;
             currentAttackDamage = playerStats.attackDamage;
         }
-    }
 
-    void FindTarget()
-    {
-        if (EnemyManager.instance != null)
+        if (!autoFire) return;
+
+        if (Time.time >= lastAttackTime + (1f / Mathf.Max(0.01f, currentAttackSpeed)))
         {
-            currentTarget = EnemyManager.instance.GetNearestEnemy(transform.position);
+            FireForward();
+            animator?.SetTrigger("Attack");
+            lastAttackTime = Time.time;
         }
     }
 
-    void TryAttack()
+    /// <summary>í”Œë ˆì´ì–´ ì •ë©´(transform.forward)ìœ¼ë¡œ ë°œì‚¬</summary>
+    public void FireForward()
     {
-        if (currentTarget != null && magicProjectilePrefab != null)
+        if (projectilePrefab == null || firePoint == null) return;
+
+        Vector3 dir = transform.forward;
+
+        // ë°œì‚¬ì²´ ìƒì„± + íšŒì „ ì •ë ¬
+        Quaternion rot = dir.sqrMagnitude > 0f ? Quaternion.LookRotation(dir) : Quaternion.identity;
+        GameObject proj = Instantiate(projectilePrefab, firePoint.position, rot);
+
+        // ë°œì‚¬ì²´ì— ë°©í–¥/ë°ë¯¸ì§€ ì „ë‹¬
+        var bullet = proj.GetComponent<MagicBullet>();
+        if (bullet != null)
         {
-            float distance = Vector3.Distance(transform.position, currentTarget.transform.position);
-            if (distance <= currentAttackRange)
-            {
-                // ¸¶¹ı ¹ß»ç!
-                FireMagic();
-                Debug.Log($"{currentTarget.name}¿¡°Ô ¸¶¹ı ¹ß»ç! µ¥¹ÌÁö: {currentAttackDamage}");
-                animator.SetTrigger("Attack");
-                lastAttackTime = Time.time;
-            }
-            else
-            {
-                currentTarget = null;
-            }
+            bullet.SetDirection(dir.normalized);
+            bullet.SetDamage(currentAttackDamage);
         }
-    }
-
-    void FireMagic()
-    {
-        // ¸¶¹ı ¹ß»çÃ¼ »ı¼º
-        GameObject magic = Instantiate(magicProjectilePrefab, firePoint.position, Quaternion.identity);
-
-        // Å¸°Ù ¹æÇâ °è»ê
-        Vector3 direction = (currentTarget.transform.position - firePoint.position).normalized;
-
-        // ¹ß»çÃ¼¿¡ ¹æÇâ°ú µ¥¹ÌÁö ¼³Á¤
-        MagicBullet projectile = magic.GetComponent<MagicBullet>();
-        if (projectile != null)
-        {
-            projectile.SetDirection(direction);
-            projectile.SetDamage(currentAttackDamage); // µ¥¹ÌÁöµµ ¼³Á¤
-        }
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        // ·±Å¸ÀÓ¿¡´Â ÇöÀç °ø°İ ¹üÀ§·Î, ¿¡µğÅÍ¿¡¼­´Â SOÀÇ °ªÀ¸·Î Ç¥½Ã
-        float displayRange = Application.isPlaying ? currentAttackRange :
-                           (playerStats != null ? playerStats.attackRange : 8f);
-
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireSphere(transform.position, displayRange);
     }
 }

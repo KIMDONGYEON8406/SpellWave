@@ -88,4 +88,13 @@ public class EnemyManager : MonoBehaviour
     {
         Debug.Log($"전체 적: {allEnemies.Count}마리, 공격 범위 내: {enemiesInRange.Count}마리");
     }
+
+    // EnemyManager.cs 내부 어딘가에 유틸리티 추가(선택)
+    public int GetAllEnemiesCountSafe()
+    {
+        int c = 0;
+        foreach (var e in allEnemies)
+            if (e != null && e.gameObject.activeInHierarchy) c++;
+        return c;
+    }
 }
