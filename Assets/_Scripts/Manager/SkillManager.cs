@@ -1,10 +1,10 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
 public class SkillManager : MonoBehaviour
 {
-    [Header("½ºÅ³ ¼³Á¤")]
+    [Header("ìŠ¤í‚¬ ì„¤ì •")]
     public int maxSkills = 3;
 
     private Dictionary<string, SkillInstance> equippedSkills = new Dictionary<string, SkillInstance>();
@@ -16,7 +16,7 @@ public class SkillManager : MonoBehaviour
 
         if (owner == null)
         {
-            Debug.LogError("Character ÄÄÆ÷³ÍÆ®¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù!");
+            Debug.LogError("Character ì»´í¬ë„ŒíŠ¸ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
         }
     }
 
@@ -24,22 +24,22 @@ public class SkillManager : MonoBehaviour
     {
         if (skillData == null)
         {
-            Debug.LogError("SkillData°¡ nullÀÔ´Ï´Ù!");
+            Debug.LogError("SkillDataê°€ nullì…ë‹ˆë‹¤!");
             return false;
         }
 
-        // ÀÌ¹Ì °¡Áø ½ºÅ³ÀÌ¸é ·¹º§¾÷
+        // ì´ë¯¸ ê°€ì§„ ìŠ¤í‚¬ì´ë©´ ë ˆë²¨ì—…
         if (equippedSkills.ContainsKey(skillData.skillName))
         {
             equippedSkills[skillData.skillName].LevelUp();
-            Debug.Log($"½ºÅ³ ·¹º§¾÷: {skillData.skillName}");
+            Debug.Log($"ìŠ¤í‚¬ ë ˆë²¨ì—…: {skillData.skillName}");
             return true;
         }
 
-        // »õ·Î¿î ½ºÅ³ Ãß°¡
+        // ìƒˆë¡œìš´ ìŠ¤í‚¬ ì¶”ê°€
         if (equippedSkills.Count < maxSkills)
         {
-            // ÇÁ¸®ÆÕÀÌ ÀÖÀ¸¸é ÇÁ¸®ÆÕ »ç¿ë, ¾øÀ¸¸é ºó GameObject¿¡ SkillInstance Ãß°¡
+            // í”„ë¦¬íŒ¹ì´ ìˆìœ¼ë©´ í”„ë¦¬íŒ¹ ì‚¬ìš©, ì—†ìœ¼ë©´ ë¹ˆ GameObjectì— SkillInstance ì¶”ê°€
             GameObject skillObj;
 
             if (skillData.skillPrefab != null)
@@ -48,7 +48,7 @@ public class SkillManager : MonoBehaviour
             }
             else
             {
-                // ÇÁ¸®ÆÕÀÌ ¾ø´Â °æ¿ì ºó GameObject »ı¼º
+                // í”„ë¦¬íŒ¹ì´ ì—†ëŠ” ê²½ìš° ë¹ˆ GameObject ìƒì„±
                 skillObj = new GameObject($"Skill_{skillData.skillName}");
                 skillObj.transform.SetParent(transform);
             }
@@ -62,12 +62,12 @@ public class SkillManager : MonoBehaviour
             skill.Initialize(owner, skillData);
             equippedSkills[skillData.skillName] = skill;
 
-            Debug.Log($"»õ ½ºÅ³ Ãß°¡: {skillData.skillName} (ÃÑ {equippedSkills.Count}°³)");
+            Debug.Log($"ìƒˆ ìŠ¤í‚¬ ì¶”ê°€: {skillData.skillName} (ì´ {equippedSkills.Count}ê°œ)");
             return true;
         }
         else
         {
-            Debug.LogWarning($"½ºÅ³ ½½·ÔÀÌ °¡µæÂü! ÃÖ´ë {maxSkills}°³");
+            Debug.LogWarning($"ìŠ¤í‚¬ ìŠ¬ë¡¯ì´ ê°€ë“ì°¸! ìµœëŒ€ {maxSkills}ê°œ");
             return false;
         }
     }
@@ -87,7 +87,7 @@ public class SkillManager : MonoBehaviour
         return equippedSkills.Count;
     }
 
-    // Æ¯Á¤ ½ºÅ³ Á¦°Å (ÇÊ¿äÇÑ °æ¿ì)
+    // íŠ¹ì • ìŠ¤í‚¬ ì œê±° (í•„ìš”í•œ ê²½ìš°)
     public bool RemoveSkill(string skillName)
     {
         if (equippedSkills.ContainsKey(skillName))
@@ -100,14 +100,14 @@ public class SkillManager : MonoBehaviour
                 Destroy(skillToRemove.gameObject);
             }
 
-            Debug.Log($"½ºÅ³ Á¦°Å: {skillName}");
+            Debug.Log($"ìŠ¤í‚¬ ì œê±°: {skillName}");
             return true;
         }
 
         return false;
     }
 
-    // ¸ğµç ½ºÅ³ Á¦°Å (°ÔÀÓ Àç½ÃÀÛ ½Ã)
+    // ëª¨ë“  ìŠ¤í‚¬ ì œê±° (ê²Œì„ ì¬ì‹œì‘ ì‹œ)
     public void ClearAllSkills()
     {
         foreach (var skill in equippedSkills.Values)
@@ -119,22 +119,22 @@ public class SkillManager : MonoBehaviour
         }
 
         equippedSkills.Clear();
-        Debug.Log("¸ğµç ½ºÅ³ Á¦°Å");
+        Debug.Log("ëª¨ë“  ìŠ¤í‚¬ ì œê±°");
     }
 
-    // ½ºÅ³ Á¤º¸ Ãâ·Â (µğ¹ö±×¿ë)
+    // ìŠ¤í‚¬ ì •ë³´ ì¶œë ¥ (ë””ë²„ê·¸ìš©)
     public void PrintSkillInfo()
     {
-        Debug.Log($"=== º¸À¯ ½ºÅ³ ({equippedSkills.Count}/{maxSkills}) ===");
+        Debug.Log($"=== ë³´ìœ  ìŠ¤í‚¬ ({equippedSkills.Count}/{maxSkills}) ===");
         foreach (var kvp in equippedSkills)
         {
             SkillInstance skill = kvp.Value;
             Debug.Log($"- {skill.skillData.skillName} Lv.{skill.currentLevel} " +
-                     $"(µ¥¹ÌÁö: {skill.CurrentDamage:F1}, ÄğÅ¸ÀÓ: {skill.CurrentCooldown:F1}ÃÊ)");
+                     $"(ë°ë¯¸ì§€: {skill.CurrentDamage:F1}, ì¿¨íƒ€ì„: {skill.CurrentCooldown:F1}ì´ˆ)");
         }
     }
 
-    // PlayerStats¿¡¼­ °ø°İ °ü·Ã ½ºÅÈ °¡Á®¿À±â
+    // PlayerStatsì—ì„œ ê³µê²© ê´€ë ¨ ìŠ¤íƒ¯ ê°€ì ¸ì˜¤ê¸°
     public float GetPlayerAttackDamage()
     {
         return owner != null ? owner.AttackPower : 0f;

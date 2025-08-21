@@ -1,66 +1,71 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Skill Data", menuName = "Game/Skill Data")]
 public class SkillData : ScriptableObject
 {
-    [Header("±âº» Á¤º¸")]
+    [Header("ìë™ ë°œë™ ì„¤ì •")]
+    public bool autoTarget = true;          // ìë™ íƒ€ê²ŸíŒ…
+    public float autoCastPriority = 1f;     // ë°œë™ ìš°ì„ ìˆœìœ„ (ë†’ì„ìˆ˜ë¡ ë¨¼ì €)
+    public bool requiresTarget = true;      // íƒ€ê²Ÿ í•„ìš” ì—¬ë¶€
+
+    [Header("ê¸°ë³¸ ì •ë³´")]
     public string skillName;
     [TextArea(2, 4)]
     public string description;
     public Sprite skillIcon;
 
-    [Header("½ºÅ³ Å¸ÀÔ")]
+    [Header("ìŠ¤í‚¬ íƒ€ì…")]
     public SkillType skillType;
 
-    [Header("±âº» ½ºÅÈ")]
+    [Header("ê¸°ë³¸ ìŠ¤íƒ¯")]
     public float baseDamage = 50f;
     public float baseCooldown = 2f;
     public float baseRange = 5f;
     public int maxLevel = 5;
 
-    [Header("·¹º§º° Áõ°¡·®")]
+    [Header("ë ˆë²¨ë³„ ì¦ê°€ëŸ‰")]
     public float damagePerLevel = 10f;
-    public float cooldownReductionPerLevel = 0.1f; // ·¹º§´ç ÄğÅ¸ÀÓ 10% °¨¼Ò
+    public float cooldownReductionPerLevel = 0.1f; // ë ˆë²¨ë‹¹ ì¿¨íƒ€ì„ 10% ê°ì†Œ
     public float rangeIncreasePerLevel = 0.5f;
 
-    [Header("½ºÅ³ ÇÁ¸®ÆÕ")]
-    public GameObject skillPrefab; // ½ÇÁ¦ ½ºÅ³ ·ÎÁ÷ÀÌ µé¾î°£ ÇÁ¸®ÆÕ
+    [Header("ìŠ¤í‚¬ í”„ë¦¬íŒ¹")]
+    public GameObject skillPrefab; // ì‹¤ì œ ìŠ¤í‚¬ ë¡œì§ì´ ë“¤ì–´ê°„ í”„ë¦¬íŒ¹
 
-    [Header("ÀÌÆåÆ® ÇÁ¸®ÆÕ (¼±ÅÃ»çÇ×)")]
+    [Header("ì´í™íŠ¸ í”„ë¦¬íŒ¹ (ì„ íƒì‚¬í•­)")]
     public GameObject hitEffectPrefab;
     public GameObject castEffectPrefab;
 
-    [Header("½ºÅ³ Æ¯¼º")]
+    [Header("ìŠ¤í‚¬ íŠ¹ì„±")]
     public bool canLevelUp = true;
-    public bool isPassive = false; // ÆĞ½Ãºê ½ºÅ³ ¿©ºÎ
+    public bool isPassive = false; // íŒ¨ì‹œë¸Œ ìŠ¤í‚¬ ì—¬ë¶€
 
-    // ·¹º§¿¡ µû¸¥ µ¥¹ÌÁö °è»ê
+    // ë ˆë²¨ì— ë”°ë¥¸ ë°ë¯¸ì§€ ê³„ì‚°
     public float GetDamageAtLevel(int level)
     {
         return baseDamage + (damagePerLevel * (level - 1));
     }
 
-    // ·¹º§¿¡ µû¸¥ ÄğÅ¸ÀÓ °è»ê
+    // ë ˆë²¨ì— ë”°ë¥¸ ì¿¨íƒ€ì„ ê³„ì‚°
     public float GetCooldownAtLevel(int level)
     {
         float reduction = cooldownReductionPerLevel * (level - 1);
         return Mathf.Max(0.1f, baseCooldown * (1f - reduction));
     }
 
-    // ·¹º§¿¡ µû¸¥ ¹üÀ§ °è»ê
+    // ë ˆë²¨ì— ë”°ë¥¸ ë²”ìœ„ ê³„ì‚°
     public float GetRangeAtLevel(int level)
     {
         return baseRange + (rangeIncreasePerLevel * (level - 1));
     }
 }
 
-// ½ºÅ³ Å¸ÀÔ enum
+// ìŠ¤í‚¬ íƒ€ì… enum
 public enum SkillType
 {
-    Projectile,     // ¹ß»çÃ¼ (ÆÄÀÌ¾îº¼)
-    AreaAttack,     // ¹üÀ§°ø°İ (¸ŞÅ×¿À)
-    AreaDOT,        // Áö¼Óµ¥¹ÌÁö (ÆÄÀÌ¾î½¯µå)
-    Passive,        // ÆĞ½Ãºê (È­»ó)
-    Buff,           // ¹öÇÁ (°ø°İ·Â Áõ°¡)
-    Summon          // ¼ÒÈ¯ (¹Ì´Ï¾ğ ¼ÒÈ¯)
+    Projectile,     // ë°œì‚¬ì²´ (íŒŒì´ì–´ë³¼)
+    AreaAttack,     // ë²”ìœ„ê³µê²© (ë©”í…Œì˜¤)
+    AreaDOT,        // ì§€ì†ë°ë¯¸ì§€ (íŒŒì´ì–´ì‰´ë“œ)
+    Passive,        // íŒ¨ì‹œë¸Œ (í™”ìƒ)
+    Buff,           // ë²„í”„ (ê³µê²©ë ¥ ì¦ê°€)
+    Summon          // ì†Œí™˜ (ë¯¸ë‹ˆì–¸ ì†Œí™˜)
 }

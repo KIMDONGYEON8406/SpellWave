@@ -1,50 +1,50 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Card Data", menuName = "Game/Card Data")]
 public class CardData : ScriptableObject
 {
-    [Header("Ä«µå ±âº» Á¤º¸")]
+    [Header("ì¹´ë“œ ê¸°ë³¸ ì •ë³´")]
     public string cardName;
     [TextArea(2, 4)]
     public string description;
     public Sprite cardIcon;
     public Sprite cardBackground;
 
-    [Header("Ä«µå Å¸ÀÔ")]
+    [Header("ì¹´ë“œ íƒ€ì…")]
     public CardType cardType;
 
-    [Header("½ºÅÈ Ä«µå¿ë (StatCardÀÏ ¶§¸¸ »ç¿ë)")]
+    [Header("ìŠ¤íƒ¯ ì¹´ë“œìš© (StatCardì¼ ë•Œë§Œ ì‚¬ìš©)")]
     public StatType statType;
-    public float increasePercentage = 10f; // ±âº» 10% Áõ°¡
+    public float increasePercentage = 10f; // ê¸°ë³¸ 10% ì¦ê°€
 
-    [Header("½ºÅ³ Ä«µå¿ë (SkillCardÀÏ ¶§¸¸ »ç¿ë)")]
+    [Header("ìŠ¤í‚¬ ì¹´ë“œìš© (SkillCardì¼ ë•Œë§Œ ì‚¬ìš©)")]
     public SkillData skillToAdd;
 
-    [Header("Ä«µå µî±Ş")]
+    [Header("ì¹´ë“œ ë“±ê¸‰")]
     public CardRarity rarity = CardRarity.Common;
     public Color rarityColor = Color.white;
 }
 
-// Ä«µå °ü·Ã Enumµé
+// ì¹´ë“œ ê´€ë ¨ Enumë“¤
 public enum CardType
 {
-    StatCard,    // ½ºÅÈ Áõ°¡ Ä«µå
-    SkillCard    // ½ºÅ³ È¹µæ Ä«µå
+    StatCard,    // ìŠ¤íƒ¯ ì¦ê°€ ì¹´ë“œ
+    SkillCard    // ìŠ¤í‚¬ íšë“ ì¹´ë“œ
 }
 
 public enum StatType
 {
-    AttackPower,    // °ø°İ·Â
-    MoveSpeed,      // ÀÌµ¿¼Óµµ
-    AttackRange,    // °ø°İ ¹üÀ§
-    Health,         // Ã¼·Â
-    AttackSpeed     // °ø°İ ¼Óµµ
+    AttackPower,    // ê³µê²©ë ¥
+    MoveSpeed,      // ì´ë™ì†ë„
+    AttackRange,    // ê³µê²© ë²”ìœ„
+    Health,         // ì²´ë ¥
+    AttackSpeed     // ê³µê²© ì†ë„
 }
 
 public enum CardRarity
 {
-    Common,     // ÀÏ¹İ
-    Rare,       // Èñ±Í
-    Epic,       // ¿¡ÇÈ
-    Legendary   // Àü¼³
+    Common,     // ì¼ë°˜
+    Rare,       // í¬ê·€
+    Epic,       // ì—í”½
+    Legendary   // ì „ì„¤
 }

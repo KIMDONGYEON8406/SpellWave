@@ -1,25 +1,25 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 [CreateAssetMenu(fileName = "New EnemyStats", menuName = "SpellWave/Enemy Stats")]
 public class EnemyStats : ScriptableObject
 {
-    [Header("±âº» ½ºÅÈ")]
+    [Header("ê¸°ë³¸ ìŠ¤íƒ¯")]
     public float baseHP = 100f;
     public float baseATK = 25f;
     public float baseMoveSpeed = 2f;
 
-    [Header("Çàµ¿ ¼³Á¤")]
+    [Header("í–‰ë™ ì„¤ì •")]
     public float followRange = 10f;
     public float attackRange = 5f;
-    public float attackInterval = 1f; // °ø°İ ÁÖ±â (ÃÊ)
-    public float contactDamage = 10f; // Á¢ÃË ÇÇÇØ
+    public float attackInterval = 1f; // ê³µê²© ì£¼ê¸° (ì´ˆ)
+    public float contactDamage = 10f; // ì ‘ì´‰ í”¼í•´
 
-    [Header("¸ó½ºÅÍ Á¤º¸")]
-    public string enemyName = "±âº» Àû";
+    [Header("ëª¬ìŠ¤í„° ì •ë³´")]
+    public string enemyName = "ê¸°ë³¸ ì ";
     [TextArea(2, 3)]
-    public string description = "Àû ¼³¸í";
+    public string description = "ì  ì„¤ëª…";
 
-    // ¿şÀÌºêº° ½ºÄÉÀÏ¸µ Àû¿ëµÈ ½ºÅÈÀ» °è»êÇÏ´Â ÇÔ¼öµé
+    // ì›¨ì´ë¸Œë³„ ìŠ¤ì¼€ì¼ë§ ì ìš©ëœ ìŠ¤íƒ¯ì„ ê³„ì‚°í•˜ëŠ” í•¨ìˆ˜ë“¤
     public float GetScaledHP(int waveIndex, float hpScalePerWave = 1.2f)
     {
         return baseHP * Mathf.Pow(hpScalePerWave, waveIndex - 1);
@@ -35,7 +35,7 @@ public class EnemyStats : ScriptableObject
         return baseMoveSpeed * Mathf.Pow(msScalePerWave, waveIndex - 1);
     }
 
-    // ¸ó½ºÅÍ ½ºÅÈÀ» º¹»çÇØ¼­ ·±Å¸ÀÓ µ¥ÀÌÅÍ »ı¼º
+    // ëª¬ìŠ¤í„° ìŠ¤íƒ¯ì„ ë³µì‚¬í•´ì„œ ëŸ°íƒ€ì„ ë°ì´í„° ìƒì„±
     public EnemyRuntimeStats CreateRuntimeStats(int currentWave = 1)
     {
         EnemyRuntimeStats runtimeStats = new EnemyRuntimeStats();
@@ -53,7 +53,7 @@ public class EnemyStats : ScriptableObject
     }
 }
 
-// ·±Å¸ÀÓ¿¡ »ç¿ëÇÒ Àû ½ºÅÈ Å¬·¡½º
+// ëŸ°íƒ€ì„ì— ì‚¬ìš©í•  ì  ìŠ¤íƒ¯ í´ë˜ìŠ¤
 [System.Serializable]
 public class EnemyRuntimeStats
 {
@@ -66,20 +66,20 @@ public class EnemyRuntimeStats
     public float attackInterval;
     public float contactDamage;
 
-    // µ¥¹ÌÁö ¹Ş±â
+    // ë°ë¯¸ì§€ ë°›ê¸°
     public void TakeDamage(float damage)
     {
         currentHP -= damage;
         if (currentHP < 0) currentHP = 0;
     }
 
-    // Á×¾ú´ÂÁö È®ÀÎ
+    // ì£½ì—ˆëŠ”ì§€ í™•ì¸
     public bool IsDead()
     {
         return currentHP <= 0;
     }
 
-    // Ã¼·Â ºñÀ² ¹İÈ¯ (UI¿ë)
+    // ì²´ë ¥ ë¹„ìœ¨ ë°˜í™˜ (UIìš©)
     public float GetHealthPercentage()
     {
         return maxHP > 0 ? currentHP / maxHP : 0f;

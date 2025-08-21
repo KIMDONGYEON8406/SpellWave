@@ -1,27 +1,27 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "New Character Data", menuName = "Game/Character Data")]
 public class CharacterData : ScriptableObject
 {
-    [Header("Ä³¸¯ÅÍ Á¤º¸")]
+    [Header("ìºë¦­í„° ì •ë³´")]
     public string characterName;
     public Sprite portrait;
     public GameObject characterPrefab;
     [TextArea(2, 4)]
     public string description;
 
-    [Header("±âº» ½ºÅÈ")]
+    [Header("ê¸°ë³¸ ìŠ¤íƒ¯")]
     public float baseHealth = 100f;
     public float baseAttackPower = 50f;
     public float baseMoveSpeed = 5f;
     public float baseAttackRange = 3f;
     public float baseAttackSpeed = 1f;
 
-    [Header("°íÀ¯ ½ºÅ³")]
+    [Header("ê³ ìœ  ìŠ¤í‚¬")]
     public SkillData basicAttackSkill;
     public SkillData passiveSkill;
 
-    [Header("»ç¿ë °¡´ÉÇÑ ½ºÅ³µé")]
+    [Header("ì‚¬ìš© ê°€ëŠ¥í•œ ìŠ¤í‚¬ë“¤")]
     public List<SkillData> availableSkills = new List<SkillData>();
 }

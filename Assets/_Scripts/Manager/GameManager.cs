@@ -1,44 +1,44 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System;
 
 public enum GameState
 {
-    MainMenu,      // ¸ŞÀÎ ¸Ş´º
-    CharacterSelect, // Ä³¸¯ÅÍ ¼±ÅÃ
-    Playing,       // °ÔÀÓ ÇÃ·¹ÀÌ Áß
-    Paused,        // ÀÏ½ÃÁ¤Áö
-    CardSelection, // Ä«µå ¼±ÅÃ Áß
-    GameOver,      // °ÔÀÓ ¿À¹ö
-    Victory        // °ÔÀÓ Å¬¸®¾î
+    MainMenu,      // ë©”ì¸ ë©”ë‰´
+    CharacterSelect, // ìºë¦­í„° ì„ íƒ
+    Playing,       // ê²Œì„ í”Œë ˆì´ ì¤‘
+    Paused,        // ì¼ì‹œì •ì§€
+    CardSelection, // ì¹´ë“œ ì„ íƒ ì¤‘
+    GameOver,      // ê²Œì„ ì˜¤ë²„
+    Victory        // ê²Œì„ í´ë¦¬ì–´
 }
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    [Header("°ÔÀÓ »óÅÂ")]
+    [Header("ê²Œì„ ìƒíƒœ")]
     public GameState currentState = GameState.Playing;
     public Character player;
 
-    [Header("Å¸ÀÓ¶óÀÎ ¼³Á¤")] // [¼öÁ¤] Timeline ½Ã½ºÅÛ - [KDY]
+    [Header("íƒ€ì„ë¼ì¸ ì„¤ì •")] // [ìˆ˜ì •] Timeline ì‹œìŠ¤í…œ - [KDY]
     public TimelineConfig timelineConfig;
 
-    [Header("Å¸ÀÓ¶óÀÎ ÁøÇà»óÈ²")] // [Ãß°¡] Timeline ÁøÇà °ü¸® - [KDY]
-    public float currentTime = 0f;           // ÇöÀç ½ºÅ×ÀÌÁö ÁøÇà ½Ã°£
-    public bool isStageActive = false;       // ½ºÅ×ÀÌÁö ÁøÇà ÁßÀÎÁö
-    public int currentLevel = 1;             // ÇöÀç ·¹º§
-    public int currentExp = 0;               // ÇöÀç °æÇèÄ¡
-    public int expToNextLevel = 100;         // ´ÙÀ½ ·¹º§±îÁö ÇÊ¿äÇÑ °æÇèÄ¡
+    [Header("íƒ€ì„ë¼ì¸ ì§„í–‰ìƒí™©")] // [ì¶”ê°€] Timeline ì§„í–‰ ê´€ë¦¬ - [KDY]
+    public float currentTime = 0f;           // í˜„ì¬ ìŠ¤í…Œì´ì§€ ì§„í–‰ ì‹œê°„
+    public bool isStageActive = false;       // ìŠ¤í…Œì´ì§€ ì§„í–‰ ì¤‘ì¸ì§€
+    public int currentLevel = 1;             // í˜„ì¬ ë ˆë²¨
+    public int currentExp = 0;               // í˜„ì¬ ê²½í—˜ì¹˜
+    public int expToNextLevel = 100;         // ë‹¤ìŒ ë ˆë²¨ê¹Œì§€ í•„ìš”í•œ ê²½í—˜ì¹˜
 
-    [Header("°ÔÀÓ Å¸ÀÌ¸Ó")]
-    public float totalGameTime = 0f;         // ÀüÃ¼ °ÔÀÓ ½Ã°£
+    [Header("ê²Œì„ íƒ€ì´ë¨¸")]
+    public float totalGameTime = 0f;         // ì „ì²´ ê²Œì„ ì‹œê°„
 
-    // ===== ÀÌº¥Æ®µé ===== [¼öÁ¤] Timeline ±â¹İÀ¸·Î º¯°æ - [KDY]
-    public static event Action<float> OnProgressChanged;        // ÁøÃ´µµ º¯°æ (0~100%)
-    public static event Action<int> OnLevelUp;                  // ·¹º§¾÷
-    public static event Action<int, int> OnExpChanged;          // °æÇèÄ¡ º¯°æ (ÇöÀç°æÇèÄ¡, ÇÊ¿ä°æÇèÄ¡)
-    public static event Action OnStageCompleted;               // ½ºÅ×ÀÌÁö ¿Ï·á
-    public static event Action<GameState> OnGameStateChanged;   // »óÅÂ º¯°æ
+    // ===== ì´ë²¤íŠ¸ë“¤ ===== [ìˆ˜ì •] Timeline ê¸°ë°˜ìœ¼ë¡œ ë³€ê²½ - [KDY]
+    public static event Action<float> OnProgressChanged;        // ì§„ì²™ë„ ë³€ê²½ (0~100%)
+    public static event Action<int> OnLevelUp;                  // ë ˆë²¨ì—…
+    public static event Action<int, int> OnExpChanged;          // ê²½í—˜ì¹˜ ë³€ê²½ (í˜„ì¬ê²½í—˜ì¹˜, í•„ìš”ê²½í—˜ì¹˜)
+    public static event Action OnStageCompleted;               // ìŠ¤í…Œì´ì§€ ì™„ë£Œ
+    public static event Action<GameState> OnGameStateChanged;   // ìƒíƒœ ë³€ê²½
 
     void Awake()
     {
@@ -55,17 +55,17 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // [¼öÁ¤] Timeline ½Ã½ºÅÛ ½ÃÀÛ - [KDY]
+        // [ìˆ˜ì •] Timeline ì‹œìŠ¤í…œ ì‹œì‘ - [KDY]
         if (timelineConfig == null)
         {
-            Debug.LogError("GameManager: TimelineConfig°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogError("GameManager: TimelineConfigê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
             return;
         }
 
         StartStage();
     }
 
-    // [Ãß°¡] ½ºÅ×ÀÌÁö ½ÃÀÛ ÇÔ¼ö - [KDY]
+    // [ì¶”ê°€] ìŠ¤í…Œì´ì§€ ì‹œì‘ í•¨ìˆ˜ - [KDY]
     public void StartStage()
     {
         currentTime = 0f;
@@ -74,62 +74,62 @@ public class GameManager : MonoBehaviour
         currentExp = 0;
         expToNextLevel = timelineConfig.GetExpToLevelUp(currentLevel);
 
-        //// ÇÃ·¹ÀÌ¾î ½ºÅÈ ÃÊ±âÈ­ (½ºÅ×ÀÌÁö ½ÃÀÛ ½Ã)
+        //// í”Œë ˆì´ì–´ ìŠ¤íƒ¯ ì´ˆê¸°í™” (ìŠ¤í…Œì´ì§€ ì‹œì‘ ì‹œ)
         //if (player != null && player.GetPlayerStats() != null)
         //{
         //    player.GetPlayerStats().ResetToDefault();
         //}
 
-        //Debug.Log($"½ºÅ×ÀÌÁö ½ÃÀÛ! ¸ñÇ¥ ½Ã°£: {timelineConfig.totalDuration / 60f:F1}ºĞ");
+        //Debug.Log($"ìŠ¤í…Œì´ì§€ ì‹œì‘! ëª©í‘œ ì‹œê°„: {timelineConfig.totalDuration / 60f:F1}ë¶„");
         //OnExpChanged?.Invoke(currentExp, expToNextLevel);
     }
 
-    // °ÔÀÓ »óÅÂ º¯°æ ¸Ş¼­µå
+    // ê²Œì„ ìƒíƒœ ë³€ê²½ ë©”ì„œë“œ
     public void ChangeState(GameState newState)
     {
         currentState = newState;
         OnGameStateChanged?.Invoke(currentState);
-        Debug.Log($"°ÔÀÓ »óÅÂ º¯°æ: {currentState}");
+        Debug.Log($"ê²Œì„ ìƒíƒœ ë³€ê²½: {currentState}");
     }
 
     private void ApplyCardEffect(CardData selectedCard)
     {
-        Debug.Log($"GameManager: Ä«µå È¿°ú Àû¿ë ¿Ï·á - {selectedCard.cardName}");
+        Debug.Log($"GameManager: ì¹´ë“œ íš¨ê³¼ ì ìš© ì™„ë£Œ - {selectedCard.cardName}");
     }
 
     void Update()
     {
         if (currentState == GameState.Playing && isStageActive)
         {
-            UpdateTimeline(); // [¼öÁ¤] Timeline ¾÷µ¥ÀÌÆ® - [KDY]
+            UpdateTimeline(); // [ìˆ˜ì •] Timeline ì—…ë°ì´íŠ¸ - [KDY]
         }
     }
 
-    // [Ãß°¡] Timeline ¾÷µ¥ÀÌÆ® ÇÔ¼ö - [KDY]
+    // [ì¶”ê°€] Timeline ì—…ë°ì´íŠ¸ í•¨ìˆ˜ - [KDY]
     private void UpdateTimeline()
     {
-        // ½Ã°£ ¾÷µ¥ÀÌÆ®
+        // ì‹œê°„ ì—…ë°ì´íŠ¸
         currentTime += Time.deltaTime;
         totalGameTime += Time.deltaTime;
 
-        // ÁøÃ´µµ ¾÷µ¥ÀÌÆ® (0~100%)
+        // ì§„ì²™ë„ ì—…ë°ì´íŠ¸ (0~100%)
         float progress = timelineConfig.GetProgress(currentTime);
         OnProgressChanged?.Invoke(progress);
 
-        // ½ºÅ×ÀÌÁö ¿Ï·á Ã¼Å©
+        // ìŠ¤í…Œì´ì§€ ì™„ë£Œ ì²´í¬
         if (timelineConfig.IsStageComplete(currentTime))
         {
             CompleteStage();
         }
     }
 
-    // [Ãß°¡] °æÇèÄ¡ È¹µæ ÇÔ¼ö - [KDY]
+    // [ì¶”ê°€] ê²½í—˜ì¹˜ íšë“ í•¨ìˆ˜ - [KDY]
     public void AddExperience(int expAmount)
     {
         currentExp += expAmount;
-        Debug.Log($"°æÇèÄ¡ +{expAmount} (ÃÑ: {currentExp}/{expToNextLevel})");
+        Debug.Log($"ê²½í—˜ì¹˜ +{expAmount} (ì´: {currentExp}/{expToNextLevel})");
 
-        // ·¹º§¾÷ Ã¼Å©
+        // ë ˆë²¨ì—… ì²´í¬
         while (currentExp >= expToNextLevel && currentLevel < timelineConfig.maxLevel)
         {
             LevelUp();
@@ -138,43 +138,43 @@ public class GameManager : MonoBehaviour
         OnExpChanged?.Invoke(currentExp, expToNextLevel);
     }
 
-    // [Ãß°¡] ·¹º§¾÷ Ã³¸® - [KDY]
+    // [ì¶”ê°€] ë ˆë²¨ì—… ì²˜ë¦¬ - [KDY]
     private void LevelUp()
     {
         currentExp -= expToNextLevel;
         currentLevel++;
         expToNextLevel = timelineConfig.GetExpToLevelUp(currentLevel);
 
-        Debug.Log($"·¹º§¾÷! ·¹º§ {currentLevel}");
+        Debug.Log($"ë ˆë²¨ì—…! ë ˆë²¨ {currentLevel}");
         OnLevelUp?.Invoke(currentLevel);
 
-        // Ä«µå ¼±ÅÃ Ç¥½Ã
+        // ì¹´ë“œ ì„ íƒ í‘œì‹œ
         ShowCardSelection();
     }
 
-    // [Ãß°¡] ½ºÅ×ÀÌÁö ¿Ï·á Ã³¸® - [KDY]
+    // [ì¶”ê°€] ìŠ¤í…Œì´ì§€ ì™„ë£Œ ì²˜ë¦¬ - [KDY]
     private void CompleteStage()
     {
         isStageActive = false;
         OnStageCompleted?.Invoke();
 
-        Debug.Log($"½ºÅ×ÀÌÁö ¿Ï·á! ÃÑ ½Ã°£: {currentTime / 60f:F1}ºĞ, ÃÖÁ¾ ·¹º§: {currentLevel}");
+        Debug.Log($"ìŠ¤í…Œì´ì§€ ì™„ë£Œ! ì´ ì‹œê°„: {currentTime / 60f:F1}ë¶„, ìµœì¢… ë ˆë²¨: {currentLevel}");
         ChangeState(GameState.Victory);
     }
 
-    // ===== Ä«µå ½Ã½ºÅÛ ===== [¼öÁ¤] ·¹º§¾÷ ±â¹İÀ¸·Î º¯°æ - [KDY]
+    // ===== ì¹´ë“œ ì‹œìŠ¤í…œ ===== [ìˆ˜ì •] ë ˆë²¨ì—… ê¸°ë°˜ìœ¼ë¡œ ë³€ê²½ - [KDY]
     private void ShowCardSelection()
     {
         ChangeState(GameState.CardSelection);
 
-        // [¼öÁ¤] CardManager null Ã¼Å© Ãß°¡ - [KDY]
+        // [ìˆ˜ì •] CardManager null ì²´í¬ ì¶”ê°€ - [KDY]
         if (CardManager.Instance != null)
         {
             CardManager.Instance.ShowRandomCards();
         }
         else
         {
-            Debug.LogWarning("CardManager°¡ ¾ø¾î¼­ Ä«µå ¼±ÅÃÀ» °Ç³Ê¶İ´Ï´Ù.");
+            Debug.LogWarning("CardManagerê°€ ì—†ì–´ì„œ ì¹´ë“œ ì„ íƒì„ ê±´ë„ˆëœë‹ˆë‹¤.");
             ChangeState(GameState.Playing);
         }
     }
@@ -185,7 +185,7 @@ public class GameManager : MonoBehaviour
         ChangeState(GameState.Playing);
     }
 
-    // ===== °ÔÀÓ Á¤º¸ Á¢±Ù ¸Ş¼­µåµé ===== [¼öÁ¤] Timeline ±â¹İÀ¸·Î º¯°æ - [KDY]
+    // ===== ê²Œì„ ì •ë³´ ì ‘ê·¼ ë©”ì„œë“œë“¤ ===== [ìˆ˜ì •] Timeline ê¸°ë°˜ìœ¼ë¡œ ë³€ê²½ - [KDY]
     public float GetStageProgress()
     {
         return timelineConfig != null ? timelineConfig.GetProgress(currentTime) : 0f;
@@ -211,7 +211,7 @@ public class GameManager : MonoBehaviour
         return $"{minutes:00}:{seconds:00}";
     }
 
-    // ===== Timeline Á¤º¸ Á¢±Ù ===== [Ãß°¡] - [KDY]
+    // ===== Timeline ì •ë³´ ì ‘ê·¼ ===== [ì¶”ê°€] - [KDY]
     public TimelineConfig GetTimelineConfig()
     {
         return timelineConfig;
@@ -227,8 +227,8 @@ public class GameManager : MonoBehaviour
         return timelineConfig != null ? timelineConfig.GetCurrentSpawnRate(currentTime) : 0.5f;
     }
 
-    // ===== µğ¹ö±×¿ë ===== [¼öÁ¤] Timeline ±â¹İÀ¸·Î º¯°æ - [KDY]
-    [ContextMenu("°æÇèÄ¡ +100")]
+    // ===== ë””ë²„ê·¸ìš© ===== [ìˆ˜ì •] Timeline ê¸°ë°˜ìœ¼ë¡œ ë³€ê²½ - [KDY]
+    [ContextMenu("ê²½í—˜ì¹˜ +100")]
     public void AddTestExp()
     {
         if (Application.isPlaying)
@@ -237,7 +237,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    [ContextMenu("°­Á¦ ½ºÅ×ÀÌÁö ¿Ï·á")]
+    [ContextMenu("ê°•ì œ ìŠ¤í…Œì´ì§€ ì™„ë£Œ")]
     public void ForceCompleteStage()
     {
         if (Application.isPlaying)
@@ -246,7 +246,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    [ContextMenu("½ºÅ×ÀÌÁö Àç½ÃÀÛ")]
+    [ContextMenu("ìŠ¤í…Œì´ì§€ ì¬ì‹œì‘")]
     public void RestartStage()
     {
         if (Application.isPlaying)

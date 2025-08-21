@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,17 +6,17 @@ public class CardManager : MonoBehaviour
 {
     public static CardManager Instance { get; private set; }
 
-    [Header("Ä«µå Ç® ¼³Á¤")]
+    [Header("ì¹´ë“œ í’€ ì„¤ì •")]
     public List<CardData> allStatCards = new List<CardData>();
     public List<CardData> allSkillCards = new List<CardData>();
 
-    [Header("Ä«µå ¼±ÅÃ ¼³Á¤")]
+    [Header("ì¹´ë“œ ì„ íƒ ì„¤ì •")]
     public int cardsToShow = 3;
 
-    [Header("UI ÂüÁ¶")]
+    [Header("UI ì°¸ì¡°")]
     public CardSelectionUI cardSelectionUI;
 
-    // ÇÃ·¹ÀÌ¾î°¡ ÀÌ¹Ì °¡Áø ½ºÅ³µé ÃßÀû
+    // í”Œë ˆì´ì–´ê°€ ì´ë¯¸ ê°€ì§„ ìŠ¤í‚¬ë“¤ ì¶”ì 
     private HashSet<SkillData> playerSkills = new HashSet<SkillData>();
 
     void Awake()
@@ -42,29 +42,29 @@ public class CardManager : MonoBehaviour
 
     public void ShowRandomCards()
     {
-        // ¸Å¹ø cardSelectionUI Ã¼Å© (¾ÈÀüÀåÄ¡)
+        // ë§¤ë²ˆ cardSelectionUI ì²´í¬ (ì•ˆì „ì¥ì¹˜)
         if (cardSelectionUI == null)
         {
             cardSelectionUI = FindObjectOfType<CardSelectionUI>();
-            Debug.Log("CardSelectionUI ´Ù½Ã Ã£À½");
+            Debug.Log("CardSelectionUI ë‹¤ì‹œ ì°¾ìŒ");
         }
 
         List<CardData> randomCards = GetRandomCards(cardsToShow);
 
         if (randomCards.Count == 0)
         {
-            Debug.LogError("»ç¿ë °¡´ÉÇÑ Ä«µå°¡ ¾ø½À´Ï´Ù!");
+            Debug.LogError("ì‚¬ìš© ê°€ëŠ¥í•œ ì¹´ë“œê°€ ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
 
         if (cardSelectionUI == null)
         {
-            Debug.LogError("CardSelectionUI¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù!");
+            Debug.LogError("CardSelectionUIë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
 
         cardSelectionUI.DisplayCards(randomCards);
-        Debug.Log($"Ä«µå {randomCards.Count}Àå Ç¥½Ã");
+        Debug.Log($"ì¹´ë“œ {randomCards.Count}ì¥ í‘œì‹œ");
     }
 
     private List<CardData> GetRandomCards(int count)
@@ -99,12 +99,12 @@ public class CardManager : MonoBehaviour
                     availableCards.Add(skillCard);
                 }
             }
-            Debug.Log($"½ºÅ³ Ä«µå Ç®: {availableCards.Count}Àå");
+            Debug.Log($"ìŠ¤í‚¬ ì¹´ë“œ í’€: {availableCards.Count}ì¥");
         }
         else
         {
             availableCards.AddRange(allStatCards);
-            Debug.Log($"½ºÅÈ Ä«µå Ç®: {availableCards.Count}Àå");
+            Debug.Log($"ìŠ¤íƒ¯ ì¹´ë“œ í’€: {availableCards.Count}ì¥");
         }
 
         return availableCards;
@@ -113,13 +113,13 @@ public class CardManager : MonoBehaviour
     private bool ShouldShowSkillCards()
     {
         //return GameManager.Instance.currentWave % 3 == 0;
-        // [¼öÁ¤] Timeline ½Ã½ºÅÛ¿ë
-        return true; // ÀÓ½Ã·Î Ç×»ó ½ºÅ³Ä«µå Ç¥½Ã
+        // [ìˆ˜ì •] Timeline ì‹œìŠ¤í…œìš©
+        return true; // ì„ì‹œë¡œ í•­ìƒ ìŠ¤í‚¬ì¹´ë“œ í‘œì‹œ
     }
 
     public void SelectCard(CardData selectedCard)
     {
-        Debug.Log($"Ä«µå ¼±ÅÃµÊ: {selectedCard.cardName}");
+        Debug.Log($"ì¹´ë“œ ì„ íƒë¨: {selectedCard.cardName}");
 
         ApplyCardEffect(selectedCard);
         GameManager.Instance.OnCardSelected(selectedCard);
@@ -144,11 +144,11 @@ public class CardManager : MonoBehaviour
         Character player = GameManager.Instance.player;
         if (player == null)
         {
-            Debug.LogError("ÇÃ·¹ÀÌ¾î¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù!");
+            Debug.LogError("í”Œë ˆì´ì–´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
 
-        // PlayerStats ¹æ½ÄÀ¸·Î ½ºÅÈ Áõ°¡ Àû¿ë
+        // PlayerStats ë°©ì‹ìœ¼ë¡œ ìŠ¤íƒ¯ ì¦ê°€ ì ìš©
         switch (card.statType)
         {
             case StatType.AttackPower:
@@ -168,7 +168,7 @@ public class CardManager : MonoBehaviour
                 break;
         }
 
-        Debug.Log($"{card.statType} {card.increasePercentage}% Áõ°¡ Àû¿ë!");
+        Debug.Log($"{card.statType} {card.increasePercentage}% ì¦ê°€ ì ìš©!");
     }
 
     private void ApplySkillCard(CardData card)
@@ -176,14 +176,14 @@ public class CardManager : MonoBehaviour
         Character player = GameManager.Instance.player;
         if (player == null)
         {
-            Debug.LogError("ÇÃ·¹ÀÌ¾î¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù!");
+            Debug.LogError("í”Œë ˆì´ì–´ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
 
         SkillManager skillManager = player.GetComponent<SkillManager>();
         if (skillManager == null)
         {
-            Debug.LogError("SkillManager¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù!");
+            Debug.LogError("SkillManagerë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
             return;
         }
 
@@ -192,25 +192,25 @@ public class CardManager : MonoBehaviour
         if (success)
         {
             playerSkills.Add(card.skillToAdd);
-            Debug.Log($"½ºÅ³ È¹µæ: {card.skillToAdd.skillName}");
+            Debug.Log($"ìŠ¤í‚¬ íšë“: {card.skillToAdd.skillName}");
         }
         else
         {
-            Debug.LogWarning($"½ºÅ³ Ãß°¡ ½ÇÆĞ: {card.skillToAdd.skillName}");
+            Debug.LogWarning($"ìŠ¤í‚¬ ì¶”ê°€ ì‹¤íŒ¨: {card.skillToAdd.skillName}");
         }
     }
 
     public void ResetPlayerSkills()
     {
         playerSkills.Clear();
-        Debug.Log("ÇÃ·¹ÀÌ¾î ½ºÅ³ ¸ñ·Ï ÃÊ±âÈ­");
+        Debug.Log("í”Œë ˆì´ì–´ ìŠ¤í‚¬ ëª©ë¡ ì´ˆê¸°í™”");
     }
 
-    // µğ¹ö±×¿ë ¸Ş¼­µåµé
+    // ë””ë²„ê·¸ìš© ë©”ì„œë“œë“¤
     public void PrintAvailableCards()
     {
         List<CardData> available = GetAvailableCards();
-        Debug.Log($"»ç¿ë °¡´ÉÇÑ Ä«µå: {available.Count}Àå");
+        Debug.Log($"ì‚¬ìš© ê°€ëŠ¥í•œ ì¹´ë“œ: {available.Count}ì¥");
         foreach (CardData card in available)
         {
             Debug.Log($"- {card.cardName} ({card.cardType})");

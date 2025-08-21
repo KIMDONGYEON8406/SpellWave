@@ -1,13 +1,13 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
-    [Header("°ø°İ ¼³Á¤")]
-    [SerializeField] private PlayerStats playerStats; // ScriptableObject ÂüÁ¶
-    public GameObject magicProjectilePrefab; // ¸¶¹ı ÇÁ¸®ÆÕ ÂüÁ¶
-    public Transform firePoint; // ¹ß»ç À§Ä¡
+    [Header("ê³µê²© ì„¤ì •")]
+    [SerializeField] private PlayerStats playerStats; // ScriptableObject ì°¸ì¡°
+    public GameObject magicProjectilePrefab; // ë§ˆë²• í”„ë¦¬íŒ¹ ì°¸ì¡°
+    public Transform firePoint; // ë°œì‚¬ ìœ„ì¹˜
 
-    // ·±Å¸ÀÓ º¯¼öµé
+    // ëŸ°íƒ€ì„ ë³€ìˆ˜ë“¤
     private float currentAttackRange;
     private float currentAttackSpeed;
     private float currentAttackDamage;
@@ -21,13 +21,13 @@ public class PlayerAttack : MonoBehaviour
     {
         animator = GetComponent<Animator>();
 
-        // firePoint°¡ ¾øÀ¸¸é ÇÃ·¹ÀÌ¾î À§Ä¡¿¡¼­ ¹ß»ç
+        // firePointê°€ ì—†ìœ¼ë©´ í”Œë ˆì´ì–´ ìœ„ì¹˜ì—ì„œ ë°œì‚¬
         if (firePoint == null)
         {
             firePoint = transform;
         }
 
-        // ScriptableObject¿¡¼­ °ªµéÀ» º¹»ç
+        // ScriptableObjectì—ì„œ ê°’ë“¤ì„ ë³µì‚¬
         InitializeStats();
     }
 
@@ -41,13 +41,13 @@ public class PlayerAttack : MonoBehaviour
         }
         else
         {
-            Debug.LogError("PlayerStats°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogError("PlayerStatsê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
         }
     }
 
     void Update()
     {
-        // ·±Å¸ÀÓ¿¡ ½ºÅÈÀÌ º¯°æµÉ ¼ö ÀÖÀ¸¹Ç·Î ¾÷µ¥ÀÌÆ®
+        // ëŸ°íƒ€ì„ì— ìŠ¤íƒ¯ì´ ë³€ê²½ë  ìˆ˜ ìˆìœ¼ë¯€ë¡œ ì—…ë°ì´íŠ¸
         UpdateStatsFromSO();
 
         if (Time.time >= lastTargetCheck + 0.1f)
@@ -87,9 +87,9 @@ public class PlayerAttack : MonoBehaviour
             float distance = Vector3.Distance(transform.position, currentTarget.transform.position);
             if (distance <= currentAttackRange)
             {
-                // ¸¶¹ı ¹ß»ç!
+                // ë§ˆë²• ë°œì‚¬!
                 FireMagic();
-                Debug.Log($"{currentTarget.name}¿¡°Ô ¸¶¹ı ¹ß»ç! µ¥¹ÌÁö: {currentAttackDamage}");
+                Debug.Log($"{currentTarget.name}ì—ê²Œ ë§ˆë²• ë°œì‚¬! ë°ë¯¸ì§€: {currentAttackDamage}");
                 animator.SetTrigger("Attack");
                 lastAttackTime = Time.time;
             }
@@ -102,24 +102,24 @@ public class PlayerAttack : MonoBehaviour
 
     void FireMagic()
     {
-        // ¸¶¹ı ¹ß»çÃ¼ »ı¼º
+        // ë§ˆë²• ë°œì‚¬ì²´ ìƒì„±
         GameObject magic = Instantiate(magicProjectilePrefab, firePoint.position, Quaternion.identity);
 
-        // Å¸°Ù ¹æÇâ °è»ê
+        // íƒ€ê²Ÿ ë°©í–¥ ê³„ì‚°
         Vector3 direction = (currentTarget.transform.position - firePoint.position).normalized;
 
-        // ¹ß»çÃ¼¿¡ ¹æÇâ°ú µ¥¹ÌÁö ¼³Á¤
+        // ë°œì‚¬ì²´ì— ë°©í–¥ê³¼ ë°ë¯¸ì§€ ì„¤ì •
         MagicBullet projectile = magic.GetComponent<MagicBullet>();
         if (projectile != null)
         {
             projectile.SetDirection(direction);
-            projectile.SetDamage(currentAttackDamage); // µ¥¹ÌÁöµµ ¼³Á¤
+            projectile.SetDamage(currentAttackDamage); // ë°ë¯¸ì§€ë„ ì„¤ì •
         }
     }
 
     void OnDrawGizmosSelected()
     {
-        // ·±Å¸ÀÓ¿¡´Â ÇöÀç °ø°İ ¹üÀ§·Î, ¿¡µğÅÍ¿¡¼­´Â SOÀÇ °ªÀ¸·Î Ç¥½Ã
+        // ëŸ°íƒ€ì„ì—ëŠ” í˜„ì¬ ê³µê²© ë²”ìœ„ë¡œ, ì—ë””í„°ì—ì„œëŠ” SOì˜ ê°’ìœ¼ë¡œ í‘œì‹œ
         float displayRange = Application.isPlaying ? currentAttackRange :
                            (playerStats != null ? playerStats.attackRange : 8f);
 

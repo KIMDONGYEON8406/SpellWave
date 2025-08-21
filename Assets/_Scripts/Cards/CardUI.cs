@@ -1,11 +1,11 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
 
 public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("Ä«µå UI ¿ä¼Ò")]
+    [Header("ì¹´ë“œ UI ìš”ì†Œ")]
     public Image cardBackground;
     public Image cardIcon;
     public Text cardTitle;
@@ -13,7 +13,7 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public Button cardButton;
     public Image rarityBorder;
 
-    [Header("È£¹ö È¿°ú")]
+    [Header("í˜¸ë²„ íš¨ê³¼")]
     public Vector3 hoverScale = new Vector3(1.1f, 1.1f, 1f);
     public float hoverSpeed = 5f;
 
@@ -26,7 +26,7 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         originalScale = transform.localScale;
 
-        // ¹öÆ° ÀÌº¥Æ® µî·Ï
+        // ë²„íŠ¼ ì´ë²¤íŠ¸ ë“±ë¡
         if (cardButton != null)
         {
             cardButton.onClick.AddListener(OnCardClicked);
@@ -35,13 +35,13 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     void Update()
     {
-        // È£¹ö È¿°ú ¾Ö´Ï¸ŞÀÌ¼Ç
+        // í˜¸ë²„ íš¨ê³¼ ì• ë‹ˆë©”ì´ì…˜
         Vector3 targetScale = isHovered ? hoverScale : originalScale;
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale,
                                            hoverSpeed * Time.unscaledDeltaTime);
     }
 
-    // Ä«µå µ¥ÀÌÅÍ·Î UI ÃÊ±âÈ­
+    // ì¹´ë“œ ë°ì´í„°ë¡œ UI ì´ˆê¸°í™”
     public void Initialize(CardData data, int index)
     {
         cardData = data;
@@ -51,62 +51,62 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         SetupCardContent();
     }
 
-    // Ä«µå ºñÁÖ¾ó ¼³Á¤
+    // ì¹´ë“œ ë¹„ì£¼ì–¼ ì„¤ì •
     private void SetupCardVisuals()
     {
-        // ¹è°æ ÀÌ¹ÌÁö
+        // ë°°ê²½ ì´ë¯¸ì§€
         if (cardBackground != null && cardData.cardBackground != null)
         {
             cardBackground.sprite = cardData.cardBackground;
         }
 
-        // µî±Ş Å×µÎ¸® »ö»ó
+        // ë“±ê¸‰ í…Œë‘ë¦¬ ìƒ‰ìƒ
         if (rarityBorder != null)
         {
             rarityBorder.color = cardData.rarityColor;
         }
     }
 
-    // Ä«µå ³»¿ë ¼³Á¤
+    // ì¹´ë“œ ë‚´ìš© ì„¤ì •
     private void SetupCardContent()
     {
-        // ¾ÆÀÌÄÜ
+        // ì•„ì´ì½˜
         if (cardIcon != null && cardData.cardIcon != null)
         {
             cardIcon.sprite = cardData.cardIcon;
         }
 
-        // Á¦¸ñ
+        // ì œëª©
         if (cardTitle != null)
         {
             cardTitle.text = cardData.cardName;
         }
 
-        // ¼³¸í
+        // ì„¤ëª…
         if (cardDescription != null)
         {
             cardDescription.text = GetFormattedDescription();
         }
     }
 
-    // Ä«µå ¼³¸í Æ÷¸ËÆÃ (½ºÅÈ ¼öÄ¡ Æ÷ÇÔ)
+    // ì¹´ë“œ ì„¤ëª… í¬ë§·íŒ… (ìŠ¤íƒ¯ ìˆ˜ì¹˜ í¬í•¨)
     private string GetFormattedDescription()
     {
         string description = cardData.description;
 
         if (cardData.cardType == CardType.StatCard)
         {
-            description += $"\n+{cardData.increasePercentage}% Áõ°¡";
+            description += $"\n+{cardData.increasePercentage}% ì¦ê°€";
         }
 
         return description;
     }
 
-    // ¸¶¿ì½º È£¹ö ÀÌº¥Æ®
+    // ë§ˆìš°ìŠ¤ í˜¸ë²„ ì´ë²¤íŠ¸
     public void OnPointerEnter(PointerEventData eventData)
     {
         isHovered = true;
-        Debug.Log($"Ä«µå È£¹ö: {cardData.cardName}");
+        Debug.Log($"ì¹´ë“œ í˜¸ë²„: {cardData.cardName}");
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -114,29 +114,29 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         isHovered = false;
     }
 
-    // Ä«µå Å¬¸¯ ÀÌº¥Æ®
+    // ì¹´ë“œ í´ë¦­ ì´ë²¤íŠ¸
     private void OnCardClicked()
     {
-        Debug.Log($"Ä«µå ¼±ÅÃ: {cardData.cardName}");
+        Debug.Log($"ì¹´ë“œ ì„ íƒ: {cardData.cardName}");
 
-        // CardManager¿¡°Ô ¼±ÅÃ ¾Ë¸²
+        // CardManagerì—ê²Œ ì„ íƒ ì•Œë¦¼
         CardManager.Instance.SelectCard(cardData);
 
-        // ¼±ÅÃ È¿°ú (¼±ÅÃ»çÇ×)
+        // ì„ íƒ íš¨ê³¼ (ì„ íƒì‚¬í•­)
         StartCoroutine(SelectionEffect());
     }
 
-    // ¼±ÅÃ È¿°ú ¾Ö´Ï¸ŞÀÌ¼Ç
+    // ì„ íƒ íš¨ê³¼ ì• ë‹ˆë©”ì´ì…˜
     private IEnumerator SelectionEffect()
     {
-        // Ä«µå°¡ ºû³ª´Â È¿°ú µî
+        // ì¹´ë“œê°€ ë¹›ë‚˜ëŠ” íš¨ê³¼ ë“±
         float duration = 0.3f;
         float elapsedTime = 0f;
 
         while (elapsedTime < duration)
         {
             elapsedTime += Time.unscaledDeltaTime;
-            // ¼±ÅÃ È¿°ú ¾Ö´Ï¸ŞÀÌ¼Ç (¿¹: »ö»ó º¯°æ, ½ºÄÉÀÏ º¯°æ µî)
+            // ì„ íƒ íš¨ê³¼ ì• ë‹ˆë©”ì´ì…˜ (ì˜ˆ: ìƒ‰ìƒ ë³€ê²½, ìŠ¤ì¼€ì¼ ë³€ê²½ ë“±)
             yield return null;
         }
     }

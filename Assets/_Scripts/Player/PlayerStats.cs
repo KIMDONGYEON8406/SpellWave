@@ -1,32 +1,32 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 [CreateAssetMenu(fileName = "New PlayerStats", menuName = "SpellWave/Player Stats")]
 public class PlayerStats : ScriptableObject
 {
-    [Header("ÀÌµ¿ ¼³Á¤")]
+    [Header("ì´ë™ ì„¤ì •")]
     public float moveSpeed = 5f;
     public float rotationSpeed = 10f;
 
-    [Header("Ã¼·Â ¼³Á¤")]
+    [Header("ì²´ë ¥ ì„¤ì •")]
     public float maxHP = 100f;
     public float currentHP = 100f;
 
-    [Header("°ø°İ ¼³Á¤")]
+    [Header("ê³µê²© ì„¤ì •")]
     public float attackRange = 8f;
-    public float attackSpeed = 1f; // ÃÊ´ç °ø°İ È½¼ö
+    public float attackSpeed = 1f; // ì´ˆë‹¹ ê³µê²© íšŸìˆ˜
     public float attackDamage = 25f;
 
-    [Header("Åõ»çÃ¼ ¼³Á¤")]
+    [Header("íˆ¬ì‚¬ì²´ ì„¤ì •")]
     public float projectileSpeed = 10f;
     public float projectileLifetime = 3f;
 
-    // ·±Å¸ÀÓ¿¡ ½ºÅÈÀ» ¸®¼ÂÇÏ´Â ÇÔ¼ö (°ÔÀÓ ½ÃÀÛ ½Ã »ç¿ë)
+    // ëŸ°íƒ€ì„ì— ìŠ¤íƒ¯ì„ ë¦¬ì…‹í•˜ëŠ” í•¨ìˆ˜ (ê²Œì„ ì‹œì‘ ì‹œ ì‚¬ìš©)
     public void ResetToDefault()
     {
         currentHP = maxHP;
     }
 
-    // Ä«µå ½Ã½ºÅÛ¿¡¼­ »ç¿ëÇÒ ½ºÅÈ Áõ°¡ ÇÔ¼öµé
+    // ì¹´ë“œ ì‹œìŠ¤í…œì—ì„œ ì‚¬ìš©í•  ìŠ¤íƒ¯ ì¦ê°€ í•¨ìˆ˜ë“¤
     public void IncreaseAttackSpeed(float percentage)
     {
         attackSpeed *= (1f + percentage / 100f);
@@ -41,7 +41,7 @@ public class PlayerStats : ScriptableObject
     {
         float oldMaxHP = maxHP;
         maxHP *= (1f + percentage / 100f);
-        // ÃÖ´ë Ã¼·ÂÀÌ Áõ°¡ÇÏ¸é ÇöÀç Ã¼·Âµµ ºñ·ÊÇØ¼­ Áõ°¡
+        // ìµœëŒ€ ì²´ë ¥ì´ ì¦ê°€í•˜ë©´ í˜„ì¬ ì²´ë ¥ë„ ë¹„ë¡€í•´ì„œ ì¦ê°€
         currentHP = (currentHP / oldMaxHP) * maxHP;
     }
 
@@ -55,7 +55,7 @@ public class PlayerStats : ScriptableObject
         currentHP = Mathf.Min(currentHP + (maxHP * percentage / 100f), maxHP);
     }
 
-    // °íÁ¤°ª Áõ°¡ ÇÔ¼öµé
+    // ê³ ì •ê°’ ì¦ê°€ í•¨ìˆ˜ë“¤
     public void AddAttackSpeed(float value)
     {
         attackSpeed += value;

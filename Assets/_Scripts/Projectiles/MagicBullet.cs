@@ -1,11 +1,11 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class MagicBullet : MonoBehaviour
 {
-    [Header("¹ß»çÃ¼ ¼³Á¤")]
+    [Header("ë°œì‚¬ì²´ ì„¤ì •")]
     public float speed = 10f;
-    public float damage = 25f; // int¿¡¼­ floatÀ¸·Î º¯°æ (ScriptableObject¿Í ¸ÂÃã)
-    public float lifeTime = 3f; // 3ÃÊ ÈÄ ÀÚµ¿ ¼Ò¸ê
+    public float damage = 25f; // intì—ì„œ floatìœ¼ë¡œ ë³€ê²½ (ScriptableObjectì™€ ë§ì¶¤)
+    public float lifeTime = 3f; // 3ì´ˆ í›„ ìë™ ì†Œë©¸
 
     private Vector3 direction;
     private Rigidbody rb;
@@ -13,48 +13,48 @@ public class MagicBullet : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        // Áß·Â ¿µÇâ ¾È ¹Ş°Ô
+        // ì¤‘ë ¥ ì˜í–¥ ì•ˆ ë°›ê²Œ
         rb.useGravity = false;
-        // ÀÏÁ¤ ½Ã°£ ÈÄ ÀÚµ¿ ÆÄ±«
+        // ì¼ì • ì‹œê°„ í›„ ìë™ íŒŒê´´
         Destroy(gameObject, lifeTime);
     }
 
     void FixedUpdate()
     {
-        // ¼³Á¤µÈ ¹æÇâÀ¸·Î ³¯¾Æ°¡±â
+        // ì„¤ì •ëœ ë°©í–¥ìœ¼ë¡œ ë‚ ì•„ê°€ê¸°
         rb.velocity = direction * speed;
     }
 
-    // ¹ß»ç ¹æÇâ ¼³Á¤ ÇÔ¼ö
+    // ë°œì‚¬ ë°©í–¥ ì„¤ì • í•¨ìˆ˜
     public void SetDirection(Vector3 dir)
     {
         direction = dir.normalized;
     }
 
-    // µ¥¹ÌÁö ¼³Á¤ ÇÔ¼ö (PlayerAttack¿¡¼­ »ç¿ë)
+    // ë°ë¯¸ì§€ ì„¤ì • í•¨ìˆ˜ (PlayerAttackì—ì„œ ì‚¬ìš©)
     public void SetDamage(float newDamage)
     {
         damage = newDamage;
     }
 
-    // Àû°ú Ãæµ¹½Ã Ã³¸®
+    // ì ê³¼ ì¶©ëŒì‹œ ì²˜ë¦¬
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Enemy"))
         {
-            // EnemyAI¿¡¼­ Á÷Á¢ TakeDamage È£Ãâ
+            // EnemyAIì—ì„œ ì§ì ‘ TakeDamage í˜¸ì¶œ
             EnemyAI enemyAI = other.GetComponent<EnemyAI>();
             if (enemyAI != null)
             {
                 enemyAI.TakeDamage(damage);
-                Debug.Log($"{other.name}¿¡°Ô {damage} µ¥¹ÌÁö!");
+                Debug.Log($"{other.name}ì—ê²Œ {damage} ë°ë¯¸ì§€!");
             }
             else
             {
-                Debug.LogWarning($"{other.name}¿¡ EnemyAI ÄÄÆ÷³ÍÆ®°¡ ¾ø½À´Ï´Ù!");
+                Debug.LogWarning($"{other.name}ì— EnemyAI ì»´í¬ë„ŒíŠ¸ê°€ ì—†ìŠµë‹ˆë‹¤!");
             }
 
-            // ¹ß»çÃ¼ ÆÄ±«
+            // ë°œì‚¬ì²´ íŒŒê´´
             Destroy(gameObject);
         }
     }

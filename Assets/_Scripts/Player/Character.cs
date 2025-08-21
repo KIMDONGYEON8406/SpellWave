@@ -1,17 +1,16 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class Character : MonoBehaviour
 {
-    [Header("ÇÃ·¹ÀÌ¾î ½ºÅÈ")]
+    [Header("í”Œë ˆì´ì–´ ìŠ¤íƒ¯")]
     public PlayerStats playerStats;
 
-    [Header("ÇöÀç »óÅÂ")]
+    [Header("í˜„ì¬ ìƒíƒœ")]
     public float currentXP = 0f;
     public int level = 1;
 
     private SkillManager skillManager;
 
-    // ½ºÅÈ Á¢±Ù ÇÁ·ÎÆÛÆ¼µé (PlayerStats¿¡¼­ Á÷Á¢ °¡Á®¿À±â)
     public float Health => playerStats.currentHP;
     public float MaxHealth => playerStats.maxHP;
     public float AttackPower => playerStats.attackDamage;
@@ -36,7 +35,6 @@ public class Character : MonoBehaviour
     {
         if (playerStats != null)
         {
-            // °ÔÀÓ ½ÃÀÛ ½Ã ½ºÅÈ ¸®¼Â
             playerStats.ResetToDefault();
         }
     }
@@ -44,7 +42,6 @@ public class Character : MonoBehaviour
     public void AddExperience(float xp)
     {
         currentXP += xp;
-        // ·¹º§¾÷ Ã¼Å©´Â GameManager¿¡¼­ Ã³¸®
     }
 
     public void Heal(float amount)
@@ -53,34 +50,33 @@ public class Character : MonoBehaviour
     }
 
 
-    // Ä«µå ½Ã½ºÅÛ¿¡¼­ È£ÃâÇÒ ½ºÅÈ Áõ°¡ ¸Ş¼­µåµé
     public void IncreaseAttackPower(float percentage)
     {
         playerStats.IncreaseAttackDamage(percentage);
-        Debug.Log($"°ø°İ·Â {percentage}% Áõ°¡! ÇöÀç: {playerStats.attackDamage:F1}");
+        Debug.Log($"ê³µê²©ë ¥ {percentage}% ì¦ê°€! í˜„ì¬: {playerStats.attackDamage:F1}");
     }
 
     public void IncreaseMoveSpeed(float percentage)
     {
         playerStats.IncreaseMoveSpeed(percentage);
-        Debug.Log($"ÀÌµ¿¼Óµµ {percentage}% Áõ°¡! ÇöÀç: {playerStats.moveSpeed:F1}");
+        Debug.Log($"ì´ë™ì†ë„ {percentage}% ì¦ê°€! í˜„ì¬: {playerStats.moveSpeed:F1}");
     }
 
     public void IncreaseHealth(float percentage)
     {
         playerStats.IncreaseMaxHP(percentage);
-        Debug.Log($"Ã¼·Â {percentage}% Áõ°¡! ÇöÀç: {playerStats.maxHP:F1}");
+        Debug.Log($"ì²´ë ¥ {percentage}% ì¦ê°€! í˜„ì¬: {playerStats.maxHP:F1}");
     }
 
     public void IncreaseAttackSpeed(float percentage)
     {
         playerStats.IncreaseAttackSpeed(percentage);
-        Debug.Log($"°ø°İ¼Óµµ {percentage}% Áõ°¡! ÇöÀç: {playerStats.attackSpeed:F1}");
+        Debug.Log($"ê³µê²©ì†ë„ {percentage}% ì¦ê°€! í˜„ì¬: {playerStats.attackSpeed:F1}");
     }
 
     public void IncreaseAttackRange(float percentage)
     {
         playerStats.attackRange *= (1f + percentage / 100f);
-        Debug.Log($"°ø°İ¹üÀ§ {percentage}% Áõ°¡! ÇöÀç: {playerStats.attackRange:F1}");
+        Debug.Log($"ê³µê²©ë²”ìœ„ {percentage}% ì¦ê°€! í˜„ì¬: {playerStats.attackRange:F1}");
     }
 }

@@ -1,14 +1,14 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class EnemyAI : MonoBehaviour
 {
-    [Header("Àû µ¥ÀÌÅÍ")]
-    [SerializeField] private EnemyStats enemyStats; // ScriptableObject ÂüÁ¶
+    [Header("ì  ë°ì´í„°")]
+    [SerializeField] private EnemyStats enemyStats; // ScriptableObject ì°¸ì¡°
 
-    // ·±Å¸ÀÓ ½ºÅÈ (ScriptableObject¿¡¼­ º¹»çÇØ¼­ »ç¿ë)
+    // ëŸ°íƒ€ì„ ìŠ¤íƒ¯ (ScriptableObjectì—ì„œ ë³µì‚¬í•´ì„œ ì‚¬ìš©)
     private EnemyRuntimeStats runtimeStats;
 
-    // ±âÁ¸ º¯¼öµé
+    // ê¸°ì¡´ ë³€ìˆ˜ë“¤
     private Transform player;
     private Rigidbody rb;
     private bool isInAttackRange = false;
@@ -18,31 +18,31 @@ public class EnemyAI : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         player = GameObject.FindGameObjectWithTag("Player").transform;
 
-        // ScriptableObject¿¡¼­ ·±Å¸ÀÓ ½ºÅÈ »ı¼º
+        // ScriptableObjectì—ì„œ ëŸ°íƒ€ì„ ìŠ¤íƒ¯ ìƒì„±
         InitializeStats();
 
-        // EnemyManager¿¡ ÀÚ½ÅÀ» µî·Ï
+        // EnemyManagerì— ìì‹ ì„ ë“±ë¡
         if (EnemyManager.instance != null)
         {
             EnemyManager.instance.RegisterEnemy(this);
         }
 
-        Debug.Log($"Àû »ı¼º: {name} - HP: {runtimeStats.maxHP}");
+        Debug.Log($"ì  ìƒì„±: {name} - HP: {runtimeStats.maxHP}");
     }
 
     void InitializeStats()
     {
         if (enemyStats != null)
         {
-            // ÇöÀç ¿şÀÌºê Á¤º¸´Â ³ªÁß¿¡ WaveManager¿¡¼­ ¹Ş¾Æ¿Ã ¿¹Á¤
-            // ÀÏ´Ü ¿şÀÌºê 1·Î ¼³Á¤
+            // í˜„ì¬ ì›¨ì´ë¸Œ ì •ë³´ëŠ” ë‚˜ì¤‘ì— WaveManagerì—ì„œ ë°›ì•„ì˜¬ ì˜ˆì •
+            // ì¼ë‹¨ ì›¨ì´ë¸Œ 1ë¡œ ì„¤ì •
             int currentWave = 1;
             runtimeStats = enemyStats.CreateRuntimeStats(currentWave);
         }
         else
         {
-            Debug.LogError("EnemyStats°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
-            // ±âº»°ªÀ¸·Î ¼³Á¤
+            Debug.LogError("EnemyStatsê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
+            // ê¸°ë³¸ê°’ìœ¼ë¡œ ì„¤ì •
             runtimeStats = new EnemyRuntimeStats
             {
                 maxHP = 100,
@@ -71,7 +71,7 @@ public class EnemyAI : MonoBehaviour
         if (distanceToPlayer <= runtimeStats.followRange)
         {
             Vector3 direction = (player.position - transform.position).normalized;
-            direction.y = 0; // YÃà ÀÌµ¿ Á¦°Å
+            direction.y = 0; // Yì¶• ì´ë™ ì œê±°
 
             rb.velocity = new Vector3(
                 direction.x * runtimeStats.moveSpeed,
@@ -79,7 +79,7 @@ public class EnemyAI : MonoBehaviour
                 direction.z * runtimeStats.moveSpeed
             );
 
-            // ÇÃ·¹ÀÌ¾î ¹æÇâ ¹Ù¶óº¸±â
+            // í”Œë ˆì´ì–´ ë°©í–¥ ë°”ë¼ë³´ê¸°
             if (direction.magnitude > 0.1f)
             {
                 transform.LookAt(player.position);
@@ -97,13 +97,13 @@ public class EnemyAI : MonoBehaviour
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-        // °ø°İ ¹üÀ§¿¡ µé¾î°¨
+        // ê³µê²© ë²”ìœ„ì— ë“¤ì–´ê°
         if (!isInAttackRange && distanceToPlayer <= runtimeStats.attackRange)
         {
             isInAttackRange = true;
             EnemyManager.instance.AddToAttackRange(this);
         }
-        // °ø°İ ¹üÀ§¿¡¼­ ³ª°¨
+        // ê³µê²© ë²”ìœ„ì—ì„œ ë‚˜ê°
         else if (isInAttackRange && distanceToPlayer > runtimeStats.attackRange)
         {
             isInAttackRange = false;
@@ -111,11 +111,11 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    // µ¥¹ÌÁö ¹Ş±â (EnemyHealth ±â´ÉÀ» ÅëÇÕ)
+    // ë°ë¯¸ì§€ ë°›ê¸° (EnemyHealth ê¸°ëŠ¥ì„ í†µí•©)
     public void TakeDamage(float damage)
     {
         runtimeStats.TakeDamage(damage);
-        Debug.Log($"{name} µ¥¹ÌÁö {damage} ¹ŞÀ½! ³²Àº Ã¼·Â: {runtimeStats.currentHP}");
+        Debug.Log($"{name} ë°ë¯¸ì§€ {damage} ë°›ìŒ! ë‚¨ì€ ì²´ë ¥: {runtimeStats.currentHP}");
 
         if (runtimeStats.IsDead())
         {
@@ -125,18 +125,18 @@ public class EnemyAI : MonoBehaviour
 
     void Die()
     {
-        Debug.Log($"{name} »ç¸Á!");
+        Debug.Log($"{name} ì‚¬ë§!");
 
-        // [Ãß°¡] °æÇèÄ¡ Áö±Ş
+        // [ì¶”ê°€] ê²½í—˜ì¹˜ ì§€ê¸‰
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.AddExperience(25); // ¸ó½ºÅÍ´ç 25 °æÇèÄ¡
+            GameManager.Instance.AddExperience(25); // ëª¬ìŠ¤í„°ë‹¹ 25 ê²½í—˜ì¹˜
         }
 
         Destroy(gameObject);
     }
 
-    // ÀûÀÌ ÆÄ±«µÉ ¶§ EnemyManager¿¡¼­ Á¦°Å
+    // ì ì´ íŒŒê´´ë  ë•Œ EnemyManagerì—ì„œ ì œê±°
     void OnDestroy()
     {
         if (EnemyManager.instance != null)
@@ -145,19 +145,19 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    // ¿ÜºÎ¿¡¼­ ·±Å¸ÀÓ ½ºÅÈ¿¡ Á¢±ÙÇÒ ¼ö ÀÖ´Â ÇÔ¼ö
+    // ì™¸ë¶€ì—ì„œ ëŸ°íƒ€ì„ ìŠ¤íƒ¯ì— ì ‘ê·¼í•  ìˆ˜ ìˆëŠ” í•¨ìˆ˜
     public EnemyRuntimeStats GetRuntimeStats()
     {
         return runtimeStats;
     }
 
-    // ¿şÀÌºê ¸Å´ÏÀú¿¡¼­ ¿şÀÌºê¿¡ ¸Â´Â ½ºÅÈÀ¸·Î ¾÷µ¥ÀÌÆ®
+    // ì›¨ì´ë¸Œ ë§¤ë‹ˆì €ì—ì„œ ì›¨ì´ë¸Œì— ë§ëŠ” ìŠ¤íƒ¯ìœ¼ë¡œ ì—…ë°ì´íŠ¸
     public void UpdateStatsForWave(int waveIndex)
     {
         if (enemyStats != null)
         {
             runtimeStats = enemyStats.CreateRuntimeStats(waveIndex);
-            Debug.Log($"{name} ¿şÀÌºê {waveIndex} ½ºÅÈ Àû¿ë - HP: {runtimeStats.maxHP}");
+            Debug.Log($"{name} ì›¨ì´ë¸Œ {waveIndex} ìŠ¤íƒ¯ ì ìš© - HP: {runtimeStats.maxHP}");
         }
     }
 }

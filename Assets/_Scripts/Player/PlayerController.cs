@@ -1,11 +1,11 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [Header("ÇÃ·¹ÀÌ¾î µ¥ÀÌÅÍ")]
-    [SerializeField] private PlayerStats playerStats; // ScriptableObject ÂüÁ¶
+    [Header("í”Œë ˆì´ì–´ ë°ì´í„°")]
+    [SerializeField] private PlayerStats playerStats; // ScriptableObject ì°¸ì¡°
 
-    // ·±Å¸ÀÓ º¯¼öµé (ScriptableObject °ªÀ» º¹»çÇØ¼­ »ç¿ë)
+    // ëŸ°íƒ€ì„ ë³€ìˆ˜ë“¤ (ScriptableObject ê°’ì„ ë³µì‚¬í•´ì„œ ì‚¬ìš©)
     private float currentMoveSpeed;
     private float currentRotationSpeed;
 
@@ -18,13 +18,13 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
 
-        // ScriptableObject¿¡¼­ °ªµéÀ» º¹»ç
+        // ScriptableObjectì—ì„œ ê°’ë“¤ì„ ë³µì‚¬
         InitializeStats();
 
-        // ÇÁ·¹ÀÓ Á¦ÇÑ Ãß°¡ (¸ğ¹ÙÀÏ ÃÖÀûÈ­)
+        // í”„ë ˆì„ ì œí•œ ì¶”ê°€ (ëª¨ë°”ì¼ ìµœì í™”)
         Application.targetFrameRate = 60;
         QualitySettings.vSyncCount = 1;
-        Debug.Log("¸¶¹ı»ç ÁØºñ ¿Ï·á!");
+        Debug.Log("ë§ˆë²•ì‚¬ ì¤€ë¹„ ì™„ë£Œ!");
     }
 
     void InitializeStats()
@@ -33,11 +33,11 @@ public class PlayerController : MonoBehaviour
         {
             currentMoveSpeed = playerStats.moveSpeed;
             currentRotationSpeed = playerStats.rotationSpeed;
-            playerStats.ResetToDefault(); // °ÔÀÓ ½ÃÀÛ ½Ã Ã¼·Â ¸®¼Â
+            playerStats.ResetToDefault(); // ê²Œì„ ì‹œì‘ ì‹œ ì²´ë ¥ ë¦¬ì…‹
         }
         else
         {
-            Debug.LogError("PlayerStats°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            Debug.LogError("PlayerStatsê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
         }
     }
 
@@ -46,7 +46,7 @@ public class PlayerController : MonoBehaviour
         HandleInput();
         UpdateAnimation();
 
-        // ·±Å¸ÀÓ¿¡ ½ºÅÈÀÌ º¯°æµÉ ¼ö ÀÖÀ¸¹Ç·Î ¾÷µ¥ÀÌÆ®
+        // ëŸ°íƒ€ì„ì— ìŠ¤íƒ¯ì´ ë³€ê²½ë  ìˆ˜ ìˆìœ¼ë¯€ë¡œ ì—…ë°ì´íŠ¸
         UpdateStatsFromSO();
     }
 
@@ -100,13 +100,13 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("IsMoving", isMoving);
     }
 
-    // ¿ÜºÎ¿¡¼­ PlayerStats¿¡ Á¢±ÙÇÒ ¼ö ÀÖ´Â ÇÔ¼ö
+    // ì™¸ë¶€ì—ì„œ PlayerStatsì— ì ‘ê·¼í•  ìˆ˜ ìˆëŠ” í•¨ìˆ˜
     public PlayerStats GetPlayerStats()
     {
         return playerStats;
     }
 
-    // Ã¼·Â °ü·Ã ÇÔ¼öµé
+    // ì²´ë ¥ ê´€ë ¨ í•¨ìˆ˜ë“¤
     public void TakeDamage(float damage)
     {
         if (playerStats != null)
@@ -121,8 +121,8 @@ public class PlayerController : MonoBehaviour
 
     private void Die()
     {
-        Debug.Log("ÇÃ·¹ÀÌ¾î »ç¸Á!");
-        // °ÔÀÓ ¿À¹ö Ã³¸®
+        Debug.Log("í”Œë ˆì´ì–´ ì‚¬ë§!");
+        // ê²Œì„ ì˜¤ë²„ ì²˜ë¦¬
     }
    
 }

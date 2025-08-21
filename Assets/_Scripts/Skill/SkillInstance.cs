@@ -1,23 +1,23 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class SkillInstance : MonoBehaviour
 {
-    [Header("½ºÅ³ Á¤º¸")]
+    [Header("ìŠ¤í‚¬ ì •ë³´")]
     public SkillData skillData;
     public int currentLevel = 1;
 
     private float lastUseTime;
     private Character owner;
 
-    // ·¹º§¿¡ µû¸¥ ½ºÅÈ °è»ê (PlayerStats °í·Á)
+    // ë ˆë²¨ì— ë”°ë¥¸ ìŠ¤íƒ¯ ê³„ì‚° (PlayerStats ê³ ë ¤)
     public float CurrentDamage
     {
         get
         {
             float baseDamage = skillData.GetDamageAtLevel(currentLevel);
-            // PlayerStatsÀÇ °ø°İ·Â º¸³Ê½º Àû¿ë
+            // PlayerStatsì˜ ê³µê²©ë ¥ ë³´ë„ˆìŠ¤ ì ìš©
             float playerAttackBonus = owner != null ? owner.AttackPower : 0f;
-            return baseDamage + (playerAttackBonus * 0.5f); // ÇÃ·¹ÀÌ¾î °ø°İ·ÂÀÇ 50% Ãß°¡
+            return baseDamage + (playerAttackBonus * 0.5f); // í”Œë ˆì´ì–´ ê³µê²©ë ¥ì˜ 50% ì¶”ê°€
         }
     }
 
@@ -28,9 +28,9 @@ public class SkillInstance : MonoBehaviour
         get
         {
             float baseRange = skillData.GetRangeAtLevel(currentLevel);
-            // PlayerStatsÀÇ °ø°İ ¹üÀ§ º¸³Ê½º Àû¿ë
+            // PlayerStatsì˜ ê³µê²© ë²”ìœ„ ë³´ë„ˆìŠ¤ ì ìš©
             float playerRangeBonus = owner != null ? owner.AttackRange : 0f;
-            return baseRange + (playerRangeBonus * 0.3f); // ÇÃ·¹ÀÌ¾î ¹üÀ§ÀÇ 30% Ãß°¡
+            return baseRange + (playerRangeBonus * 0.3f); // í”Œë ˆì´ì–´ ë²”ìœ„ì˜ 30% ì¶”ê°€
         }
     }
 
@@ -45,15 +45,15 @@ public class SkillInstance : MonoBehaviour
 
         if (owner == null)
         {
-            Debug.LogError("Character owner°¡ nullÀÔ´Ï´Ù!");
+            Debug.LogError("Character ownerê°€ nullì…ë‹ˆë‹¤!");
         }
 
         if (skillData == null)
         {
-            Debug.LogError("SkillData°¡ nullÀÔ´Ï´Ù!");
+            Debug.LogError("SkillDataê°€ nullì…ë‹ˆë‹¤!");
         }
 
-        Debug.Log($"½ºÅ³ ÃÊ±âÈ­: {skillData?.skillName} Lv.{currentLevel}");
+        Debug.Log($"ìŠ¤í‚¬ ì´ˆê¸°í™”: {skillData?.skillName} Lv.{currentLevel}");
     }
 
     public void LevelUp()
@@ -61,18 +61,18 @@ public class SkillInstance : MonoBehaviour
         if (CanLevelUp)
         {
             currentLevel++;
-            Debug.Log($"{skillData.skillName} ·¹º§¾÷! Lv.{currentLevel} " +
-                     $"(µ¥¹ÌÁö: {CurrentDamage:F1}, ÄğÅ¸ÀÓ: {CurrentCooldown:F1}ÃÊ)");
+            Debug.Log($"{skillData.skillName} ë ˆë²¨ì—…! Lv.{currentLevel} " +
+                     $"(ë°ë¯¸ì§€: {CurrentDamage:F1}, ì¿¨íƒ€ì„: {CurrentCooldown:F1}ì´ˆ)");
         }
         else
         {
-            Debug.LogWarning($"{skillData.skillName}Àº ÀÌ¹Ì ÃÖ´ë ·¹º§ÀÔ´Ï´Ù! (Lv.{MaxLevel})");
+            Debug.LogWarning($"{skillData.skillName}ì€ ì´ë¯¸ ìµœëŒ€ ë ˆë²¨ì…ë‹ˆë‹¤! (Lv.{MaxLevel})");
         }
     }
 
     void Update()
     {
-        // ÆĞ½Ãºê ½ºÅ³Àº ÀÚµ¿ ¹ßµ¿ÇÏÁö ¾ÊÀ½
+        // íŒ¨ì‹œë¸Œ ìŠ¤í‚¬ì€ ìë™ ë°œë™í•˜ì§€ ì•ŠìŒ
         if (!skillData.isPassive && CanUseSkill())
         {
             if (HasTargetsInRange())
@@ -92,7 +92,7 @@ public class SkillInstance : MonoBehaviour
     {
         if (owner == null) return false;
 
-        // ÁÖº¯¿¡ ÀûÀÌ ÀÖ´ÂÁö Ã¼Å©
+        // ì£¼ë³€ì— ì ì´ ìˆëŠ”ì§€ ì²´í¬
         Collider[] enemies = Physics.OverlapSphere(owner.transform.position, CurrentRange, LayerMask.GetMask("Enemy"));
         return enemies.Length > 0;
     }
@@ -101,7 +101,7 @@ public class SkillInstance : MonoBehaviour
     {
         if (skillData == null || owner == null) return;
 
-        // ½ºÅ³ Å¸ÀÔ¿¡ µû¶ó ´Ù¸£°Ô Ã³¸®
+        // ìŠ¤í‚¬ íƒ€ì…ì— ë”°ë¼ ë‹¤ë¥´ê²Œ ì²˜ë¦¬
         switch (skillData.skillType)
         {
             case SkillType.Projectile:
@@ -120,14 +120,14 @@ public class SkillInstance : MonoBehaviour
                 UseSummonSkill();
                 break;
             case SkillType.Passive:
-                // ÆĞ½Ãºê´Â ¿©±â¼­ Ã³¸®ÇÏÁö ¾ÊÀ½
+                // íŒ¨ì‹œë¸ŒëŠ” ì—¬ê¸°ì„œ ì²˜ë¦¬í•˜ì§€ ì•ŠìŒ
                 break;
         }
     }
 
     void UseProjectileSkill()
     {
-        // °¡Àå °¡±î¿î Àû Ã£±â
+        // ê°€ì¥ ê°€ê¹Œìš´ ì  ì°¾ê¸°
         Collider[] enemies = Physics.OverlapSphere(owner.transform.position, CurrentRange, LayerMask.GetMask("Enemy"));
 
         if (enemies.Length > 0)
@@ -136,36 +136,36 @@ public class SkillInstance : MonoBehaviour
 
             if (target != null)
             {
-                // Å¸°Ù ¹æÇâÀ¸·Î ¹ß»ç
+                // íƒ€ê²Ÿ ë°©í–¥ìœ¼ë¡œ ë°œì‚¬
                 Vector3 direction = (target.position - owner.transform.position).normalized;
 
-                // ÀÌÆåÆ®°¡ ÀÖÀ¸¸é »ı¼º
+                // ì´í™íŠ¸ê°€ ìˆìœ¼ë©´ ìƒì„±
                 if (skillData.castEffectPrefab != null)
                 {
                     Instantiate(skillData.castEffectPrefab, owner.transform.position,
                                Quaternion.LookRotation(direction));
                 }
 
-                Debug.Log($"{skillData.skillName} ¹ß»ç! Å¸°Ù: {target.name}, µ¥¹ÌÁö: {CurrentDamage:F1}");
+                Debug.Log($"{skillData.skillName} ë°œì‚¬! íƒ€ê²Ÿ: {target.name}, ë°ë¯¸ì§€: {CurrentDamage:F1}");
 
-                // ½ÇÁ¦ ¹ß»çÃ¼ »ı¼ºÀº ¿©±â¼­ ±¸Çö (ÇÁ¸®ÆÕÀÌ ÀÖ´Â °æ¿ì)
-                // TODO: ¹ß»çÃ¼ »ı¼º ·ÎÁ÷
+                // ì‹¤ì œ ë°œì‚¬ì²´ ìƒì„±ì€ ì—¬ê¸°ì„œ êµ¬í˜„ (í”„ë¦¬íŒ¹ì´ ìˆëŠ” ê²½ìš°)
+                // TODO: ë°œì‚¬ì²´ ìƒì„± ë¡œì§
             }
         }
     }
 
     void UseAreaAttackSkill()
     {
-        // ¹üÀ§ ³» ¸ğµç Àû¿¡°Ô µ¥¹ÌÁö
+        // ë²”ìœ„ ë‚´ ëª¨ë“  ì ì—ê²Œ ë°ë¯¸ì§€
         Collider[] enemies = Physics.OverlapSphere(owner.transform.position, CurrentRange, LayerMask.GetMask("Enemy"));
 
         foreach (Collider enemy in enemies)
         {
-            // TODO: Àû¿¡°Ô µ¥¹ÌÁö Àû¿ë ·ÎÁ÷
-            Debug.Log($"{skillData.skillName} ¹üÀ§ °ø°İ! {enemy.name}¿¡°Ô {CurrentDamage:F1} µ¥¹ÌÁö");
+            // TODO: ì ì—ê²Œ ë°ë¯¸ì§€ ì ìš© ë¡œì§
+            Debug.Log($"{skillData.skillName} ë²”ìœ„ ê³µê²©! {enemy.name}ì—ê²Œ {CurrentDamage:F1} ë°ë¯¸ì§€");
         }
 
-        // ÀÌÆåÆ® »ı¼º
+        // ì´í™íŠ¸ ìƒì„±
         if (skillData.hitEffectPrefab != null)
         {
             Instantiate(skillData.hitEffectPrefab, owner.transform.position, Quaternion.identity);
@@ -174,26 +174,26 @@ public class SkillInstance : MonoBehaviour
 
     void UseAreaDOTSkill()
     {
-        // Áö¼Ó µ¥¹ÌÁö ±¸¿ª »ı¼º
-        Debug.Log($"{skillData.skillName} Áö¼Ó µ¥¹ÌÁö ±¸¿ª »ı¼º! µ¥¹ÌÁö: {CurrentDamage:F1}/ÃÊ");
+        // ì§€ì† ë°ë¯¸ì§€ êµ¬ì—­ ìƒì„±
+        Debug.Log($"{skillData.skillName} ì§€ì† ë°ë¯¸ì§€ êµ¬ì—­ ìƒì„±! ë°ë¯¸ì§€: {CurrentDamage:F1}/ì´ˆ");
 
-        // TODO: Áö¼Ó µ¥¹ÌÁö ±¸¿ª »ı¼º ·ÎÁ÷
+        // TODO: ì§€ì† ë°ë¯¸ì§€ êµ¬ì—­ ìƒì„± ë¡œì§
     }
 
     void UseBuffSkill()
     {
-        // ÇÃ·¹ÀÌ¾î ½ºÅÈ ÀÓ½Ã Áõ°¡
-        Debug.Log($"{skillData.skillName} ¹öÇÁ Àû¿ë!");
+        // í”Œë ˆì´ì–´ ìŠ¤íƒ¯ ì„ì‹œ ì¦ê°€
+        Debug.Log($"{skillData.skillName} ë²„í”„ ì ìš©!");
 
-        // TODO: ÀÓ½Ã ¹öÇÁ È¿°ú Àû¿ë
+        // TODO: ì„ì‹œ ë²„í”„ íš¨ê³¼ ì ìš©
     }
 
     void UseSummonSkill()
     {
-        // ¹Ì´Ï¾ğ ¼ÒÈ¯
-        Debug.Log($"{skillData.skillName} ¼ÒÈ¯!");
+        // ë¯¸ë‹ˆì–¸ ì†Œí™˜
+        Debug.Log($"{skillData.skillName} ì†Œí™˜!");
 
-        // TODO: ¹Ì´Ï¾ğ ¼ÒÈ¯ ·ÎÁ÷
+        // TODO: ë¯¸ë‹ˆì–¸ ì†Œí™˜ ë¡œì§
     }
 
     Transform GetNearestEnemy(Collider[] enemies)
@@ -214,12 +214,12 @@ public class SkillInstance : MonoBehaviour
         return nearest;
     }
 
-    // ½ºÅ³ Á¤º¸ ¹®ÀÚ¿­ ¹İÈ¯ (UI¿ë)
+    // ìŠ¤í‚¬ ì •ë³´ ë¬¸ìì—´ ë°˜í™˜ (UIìš©)
     public string GetSkillInfo()
     {
         return $"{skillData.skillName} Lv.{currentLevel}\n" +
-               $"µ¥¹ÌÁö: {CurrentDamage:F1}\n" +
-               $"ÄğÅ¸ÀÓ: {CurrentCooldown:F1}ÃÊ\n" +
-               $"¹üÀ§: {CurrentRange:F1}";
+               $"ë°ë¯¸ì§€: {CurrentDamage:F1}\n" +
+               $"ì¿¨íƒ€ì„: {CurrentCooldown:F1}ì´ˆ\n" +
+               $"ë²”ìœ„: {CurrentRange:F1}";
     }
 }
