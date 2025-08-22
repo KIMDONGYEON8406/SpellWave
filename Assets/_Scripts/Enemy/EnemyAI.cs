@@ -1,163 +1,129 @@
 ﻿using UnityEngine;
 
+/*
+[����]
+- ���� ��� ������ �÷��̾ ����(���� ����/���� ���� ����/��Ż ���� ����).
+- Ǯ��(��Ȱ������Ȱ��)�� EnemyManager ���/���� Ÿ�ֿ̹� ����.
+- HP/������ EnemyStats(SO)�� EnemyRuntimeStats�� ���.
+
+[����]
+- EnemyStats ScriptableObject�� �ְ� CreateRuntimeStats(...)�� ��Ÿ�� ���� ����.
+- Player�� Tag = "Player".
+- �� �����տ� Rigidbody + Collider ����(����: isKinematic=true, useGravity=false, Interpolate).
+
+[�ν�����]
+- enemyStats           : �� ���� SO (�ʼ�)
+- experienceOnDeath    : óġ �� �� ����ġ
+- alwaysRotateToTarget : �̵� �������� ��� ������(�뷮�̸� false ����)
+- rotationLerp         : ȸ�� ���� �ӵ�(�ʴ�)
+*/
 public class EnemyAI : MonoBehaviour
 {
-    [Header("적 데이터")]
-    [SerializeField] private EnemyStats enemyStats; // ScriptableObject 참조
+    [Header("�� ������(SO)")]
+    [SerializeField] private EnemyStats enemyStats;   // ScriptableObject (�ʼ�)
 
-    // 런타임 스탯 (ScriptableObject에서 복사해서 사용)
-    private EnemyRuntimeStats runtimeStats;
+    [Header("����/����ġ")]
+    [SerializeField] private int experienceOnDeath = 25;
 
-    // 기존 변수들
+    [Header("���� �ɼ�(�뷮�� �� ȸ�� OFF ����)")]
+    public bool alwaysRotateToTarget = false;
+    public float rotationLerp = 12f;
+
+    // ��Ÿ�� ����(�� ��ü ���� ������)
+    private EnemyRuntimeStats stats;
+
+    // ĳ��
     private Transform player;
     private Rigidbody rb;
-    private bool isInAttackRange = false;
 
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody>();
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-
-        // ScriptableObject에서 런타임 스탯 생성
-        InitializeStats();
-
-        // EnemyManager에 자신을 등록
-        if (EnemyManager.instance != null)
-        {
-            EnemyManager.instance.RegisterEnemy(this);
-        }
-
-        Debug.Log($"적 생성: {name} - HP: {runtimeStats.maxHP}");
+        var p = GameObject.FindGameObjectWithTag("Player");
+        if (p != null) player = p.transform;
     }
 
-    void InitializeStats()
+    void OnEnable()
     {
-        if (enemyStats != null)
+        // EnemyManager ���(Ǯ ��Ȱ�� ����)
+        if (EnemyManager.instance != null)
+            EnemyManager.instance.RegisterEnemy(this);
+
+        // ��Ÿ�� ���� ����/����
+        if (stats == null)
         {
-            // 현재 웨이브 정보는 나중에 WaveManager에서 받아올 예정
-            // 일단 웨이브 1로 설정
-            int currentWave = 1;
-            runtimeStats = enemyStats.CreateRuntimeStats(currentWave);
+            // ���̺� ������ ���� �� �Ѵٸ� 1�� ����
+            stats = (enemyStats != null)
+                ? enemyStats.CreateRuntimeStats(1)
+                : new EnemyRuntimeStats { maxHP = 60f, currentHP = 60f, moveSpeed = 2.5f, followRange = 9999f, attackRange = 2.5f, attackInterval = 1f, contactDamage = 10f };
         }
         else
         {
-            Debug.LogError("EnemyStats가 할당되지 않았습니다!");
-            // 기본값으로 설정
-            runtimeStats = new EnemyRuntimeStats
-            {
-                maxHP = 100,
-                currentHP = 100,
-                moveSpeed = 2f,
-                followRange = 10f,
-                attackRange = 5f,
-                attackInterval = 1f,
-                contactDamage = 10f
-            };
+            stats.currentHP = stats.maxHP; // Ǯ ���� �� HP ����
         }
     }
 
-    void Update()
+    void OnDisable()
     {
-        FollowPlayer();
-        CheckAttackRange();
+        // EnemyManager ����(Ǯ ��Ȱ�� ����)
+        if (EnemyManager.instance != null)
+            EnemyManager.instance.UnregisterEnemy(this);
     }
 
-    void FollowPlayer()
+    void FixedUpdate()
     {
         if (player == null) return;
 
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+        // �׻� ����(����/���� üũ ����)
+        Vector3 to = player.position - transform.position;
+        to.y = 0f;
 
-        if (distanceToPlayer <= runtimeStats.followRange)
+        Vector3 step = to.sqrMagnitude > 0.0001f
+            ? to.normalized * stats.moveSpeed * Time.fixedDeltaTime
+            : Vector3.zero;
+
+        // ���� �ϰ��� ���� kinematic Rigidbody�� MovePosition ����
+        if (rb != null) rb.MovePosition(rb.position + step);
+        else transform.position += step;
+
+        if (alwaysRotateToTarget && step.sqrMagnitude > 0f)
         {
-            Vector3 direction = (player.position - transform.position).normalized;
-            direction.y = 0; // Y축 이동 제거
-
-            rb.velocity = new Vector3(
-                direction.x * runtimeStats.moveSpeed,
-                rb.velocity.y,
-                direction.z * runtimeStats.moveSpeed
-            );
-
-            // 플레이어 방향 바라보기
-            if (direction.magnitude > 0.1f)
-            {
-                transform.LookAt(player.position);
-            }
-        }
-        else
-        {
-            rb.velocity = new Vector3(0, rb.velocity.y, 0);
+            Quaternion look = Quaternion.LookRotation(step.normalized);
+            transform.rotation = Quaternion.Slerp(transform.rotation, look, rotationLerp * Time.fixedDeltaTime);
         }
     }
 
-    void CheckAttackRange()
-    {
-        if (player == null || EnemyManager.instance == null) return;
-
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-        // 공격 범위에 들어감
-        if (!isInAttackRange && distanceToPlayer <= runtimeStats.attackRange)
-        {
-            isInAttackRange = true;
-            EnemyManager.instance.AddToAttackRange(this);
-        }
-        // 공격 범위에서 나감
-        else if (isInAttackRange && distanceToPlayer > runtimeStats.attackRange)
-        {
-            isInAttackRange = false;
-            EnemyManager.instance.RemoveFromAttackRange(this);
-        }
-    }
-
-    // 데미지 받기 (EnemyHealth 기능을 통합)
+    // ===== ����/��� =====
     public void TakeDamage(float damage)
     {
-        runtimeStats.TakeDamage(damage);
-        Debug.Log($"{name} 데미지 {damage} 받음! 남은 체력: {runtimeStats.currentHP}");
-
-        if (runtimeStats.IsDead())
-        {
+        stats.TakeDamage(damage);
+        if (stats.IsDead())
             Die();
-        }
     }
 
     void Die()
     {
-        Debug.Log($"{name} 사망!");
-
-        // [추가] 경험치 지급
         if (GameManager.Instance != null)
-        {
-            GameManager.Instance.AddExperience(25); // 몬스터당 25 경험치
-        }
+            GameManager.Instance.AddExperience(experienceOnDeath);
 
-        Destroy(gameObject);
+        var pooled = GetComponent<PooledEnemy>();
+        if (pooled != null) pooled.Despawn();
+        else gameObject.SetActive(false);
     }
 
-    // 적이 파괴될 때 EnemyManager에서 제거
-    void OnDestroy()
-    {
-        if (EnemyManager.instance != null)
-        {
-            EnemyManager.instance.UnregisterEnemy(this);
-        }
-    }
-
-    // 외부에서 런타임 스탯에 접근할 수 있는 함수
-    public EnemyRuntimeStats GetRuntimeStats()
-    {
-        return runtimeStats;
-    }
-
-    // 웨이브 매니저에서 웨이브에 맞는 스탯으로 업데이트
-    public void UpdateStatsForWave(int waveIndex)
+    // �������� ���̺� �ݿ��ϰ� ���� �� ȣ��
+    public void InitializeForWave(int waveIndex)
     {
         if (enemyStats != null)
+            stats = enemyStats.CreateRuntimeStats(waveIndex);
+        else
         {
-            runtimeStats = enemyStats.CreateRuntimeStats(waveIndex);
-            Debug.Log($"{name} 웨이브 {waveIndex} 스탯 적용 - HP: {runtimeStats.maxHP}");
+            if (stats == null)
+                stats = new EnemyRuntimeStats { maxHP = 60f, currentHP = 60f, moveSpeed = 2.5f, followRange = 9999f, attackRange = 2.5f, attackInterval = 1f, contactDamage = 10f };
+            else
+                stats.currentHP = stats.maxHP;
         }
     }
+
+    public EnemyRuntimeStats GetRuntimeStats() => stats;
 }

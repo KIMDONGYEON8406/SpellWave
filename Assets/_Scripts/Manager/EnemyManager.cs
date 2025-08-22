@@ -88,4 +88,13 @@ public class EnemyManager : MonoBehaviour
     {
         Debug.Log($"Ï†ÑÏ≤¥ Ï†Å: {allEnemies.Count}ÎßàÎ¶¨, Í≥µÍ≤© Î≤îÏúÑ ÎÇ¥: {enemiesInRange.Count}ÎßàÎ¶¨");
     }
+
+    // EnemyManager.cs ≥ª∫Œ æÓµÚ∞°ø° ¿Ø∆ø∏Æ∆º √ﬂ∞°(º±≈√)
+    public int GetAllEnemiesCountSafe()
+    {
+        int c = 0;
+        foreach (var e in allEnemies)
+            if (e != null && e.gameObject.activeInHierarchy) c++;
+        return c;
+    }
 }

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1f67f9087916c3488faf11235ed7818, type: 3}
   m_Name: DefaultEnemyStats
   m_EditorClassIdentifier: 
-  baseHP: 100
+  baseHP: 25
   baseATK: 25
   baseMoveSpeed: 2
   followRange: 10
