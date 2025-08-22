@@ -24,7 +24,7 @@ public class ElementalProjectile : MonoBehaviour
         UpdateVisualByElement();
         Destroy(gameObject, lifetime);
 
-        Debug.Log($"발사체 초기화: 데미지={damage}, 방향={direction}, 속도={speed}");
+        //Debug.Log($"발사체 초기화: 데미지={damage}, 방향={direction}, 속도={speed}");
 
         // Rigidbody 즉시 설정
         SetupRigidbody();
@@ -44,7 +44,7 @@ public class ElementalProjectile : MonoBehaviour
         if (speed > 0 && direction != Vector3.zero)
         {
             rb.velocity = direction * speed;
-            Debug.Log($"초기 속도 설정: {rb.velocity}");
+            //Debug.Log($"초기 속도 설정: {rb.velocity}");
         }
     }
 

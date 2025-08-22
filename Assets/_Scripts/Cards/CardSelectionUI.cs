@@ -118,7 +118,7 @@ public class CardSelectionUI : MonoBehaviour
         // cardContainer를 정확히 지정
         GameObject cardObj = Instantiate(cardPrefab, cardContainer);
 
-        Debug.Log($"카드 생성 위치: {cardContainer.name}"); // 디버그 추가
+        //Debug.Log($"카드 생성 위치: {cardContainer.name}"); // 디버그 추가
 
         CardUI cardUI = cardObj.GetComponent<CardUI>();
 

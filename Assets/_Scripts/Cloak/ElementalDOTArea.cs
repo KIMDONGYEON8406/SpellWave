@@ -20,11 +20,20 @@ public class ElementalDOTArea : MonoBehaviour
         passiveEffect = passive;
         radius = areaRadius;
 
-        // 시각 효과 설정
-        transform.localScale = Vector3.one * radius * 2;
-        UpdateVisualByElement();
+        // Collider만 크기 조정
+        SphereCollider collider = GetComponent<SphereCollider>();
+        if (collider != null)
+        {
+            collider.radius = areaRadius;
+        }
 
-        // 일정 시간 후 제거
+        // 시각 효과 크기 조정
+        Transform visual = transform.GetChild(0);
+        if (visual != null)
+        {
+            visual.localScale = new Vector3(areaRadius * 2, 0.2f, areaRadius * 2);
+        }
+
         Destroy(gameObject, duration);
     }
 

@@ -220,7 +220,7 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void OnPointerEnter(PointerEventData eventData)
     {
         isHovered = true;
-        Debug.Log($"카드 호버: {GetCardTitle()}");
+        //Debug.Log($"카드 호버: {GetCardTitle()}");
     }
 
     public void OnPointerExit(PointerEventData eventData)

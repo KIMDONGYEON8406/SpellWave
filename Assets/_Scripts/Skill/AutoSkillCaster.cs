@@ -103,7 +103,7 @@ public class AutoSkillCaster : MonoBehaviour
             if (slot.IsReady)
             {
                 float distance = Vector3.Distance(transform.position, currentTarget.position);
-                Debug.Log($"{slot.skill.skillData.baseSkillType} - 거리: {distance:F1} / 범위: {slot.skill.CurrentRange:F1}");
+                //Debug.Log($"{slot.skill.skillData.baseSkillType} - 거리: {distance:F1} / 범위: {slot.skill.CurrentRange:F1}");
 
                 if (distance <= slot.skill.CurrentRange)
                 {

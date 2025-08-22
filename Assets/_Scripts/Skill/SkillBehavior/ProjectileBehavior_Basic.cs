@@ -82,6 +82,6 @@ public class ProjectileBehavior_Basic : ProjectileBehavior
         // 속도 즉시 적용
         rb.velocity = direction * defaultSpeed;
 
-        Debug.Log($"발사! Parent={projectile.transform.parent}, Pos={projectile.transform.position}");
+       // Debug.Log($"발사! Parent={projectile.transform.parent}, Pos={projectile.transform.position}");
     }
 }
