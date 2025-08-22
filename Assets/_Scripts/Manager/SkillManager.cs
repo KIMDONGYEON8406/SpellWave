@@ -28,14 +28,6 @@ public class SkillManager : MonoBehaviour
             return false;
         }
 
-        // 이미 가진 스킬이면 레벨업
-        if (equippedSkills.ContainsKey(skillData.skillName))
-        {
-            equippedSkills[skillData.skillName].LevelUp();
-            Debug.Log($"스킬 레벨업: {skillData.skillName}");
-            return true;
-        }
-
         // 새로운 스킬 추가
         if (equippedSkills.Count < maxSkills)
         {
@@ -49,7 +41,7 @@ public class SkillManager : MonoBehaviour
             else
             {
                 // 프리팹이 없는 경우 빈 GameObject 생성
-                skillObj = new GameObject($"Skill_{skillData.skillName}");
+                skillObj = new GameObject($"Skill_{skillData.baseSkillType}");
                 skillObj.transform.SetParent(transform);
             }
 
@@ -60,9 +52,9 @@ public class SkillManager : MonoBehaviour
             }
 
             skill.Initialize(owner, skillData);
-            equippedSkills[skillData.skillName] = skill;
+            equippedSkills[skillData.baseSkillType] = skill;
 
-            Debug.Log($"새 스킬 추가: {skillData.skillName} (총 {equippedSkills.Count}개)");
+            Debug.Log($"새 스킬 추가: {skillData.baseSkillType} (총 {equippedSkills.Count}개)");
             return true;
         }
         else
@@ -129,7 +121,7 @@ public class SkillManager : MonoBehaviour
         foreach (var kvp in equippedSkills)
         {
             SkillInstance skill = kvp.Value;
-            Debug.Log($"- {skill.skillData.skillName} Lv.{skill.currentLevel} " +
+            Debug.Log($"- {skill.skillData.baseSkillType} Lv.{skill.currentLevel} " +
                      $"(데미지: {skill.CurrentDamage:F1}, 쿨타임: {skill.CurrentCooldown:F1}초)");
         }
     }

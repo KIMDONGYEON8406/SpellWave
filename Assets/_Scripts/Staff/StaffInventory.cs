@@ -47,7 +47,7 @@ public class StaffInventory
         }
 
         ownedSkills.Add(newSkill);
-        Debug.Log($"{staffData.staffName}에 {newSkill.skillName} 추가!");
+        Debug.Log($"{staffData.staffName}에 {newSkill.baseSkillType} 추가!");
         return true;
     }
 

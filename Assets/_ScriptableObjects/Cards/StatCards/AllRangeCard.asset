@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 097c995529bb6714cbae2271c6aacabc, type: 3}
-  m_Name: FireballCard
+  m_Name: AllRangeCard
   m_EditorClassIdentifier: 
-  cardName: "\uD30C\uC774\uC5B4\uBCFC \uC2A4\uD0AC \uC2B5\uB4DD"
-  description: "\uD30C\uC774\uC5B4\uBCFC \uC2A4\uD0AC \uD68D\uB4DD"
+  cardName: "\uBC94\uC704 \uD655\uC7A5"
+  description: "\uBAA8\uB4E0 \uC2A4\uD0AC\uC758 \uBC94\uC704\uAC00 \uC99D\uAC00\uD569\uB2C8\uB2E4"
   cardIcon: {fileID: 0}
   cardBackground: {fileID: 0}
-  cardType: 1
-  statType: 0
-  increasePercentage: 10
-  skillToAdd: {fileID: 11400000, guid: 369c8514b1da93841b0e7695cb02e724, type: 2}
-  rarity: 0
+  cardType: 0
+  statType: 2
+  increasePercentage: 25
+  skillToAdd: {fileID: 0}
+  rarity: 1
   rarityColor: {r: 1, g: 1, b: 1, a: 1}

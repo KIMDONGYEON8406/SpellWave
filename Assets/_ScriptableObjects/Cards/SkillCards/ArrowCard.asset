@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 097c995529bb6714cbae2271c6aacabc, type: 3}
+  m_Name: ArrowCard
+  m_EditorClassIdentifier: 
+  cardName: "\uB9C8\uBC95 \uAD6C\uCCB4"
+  description: "\uC801\uC5D0\uAC8C \uB9C8\uBC95 \uAD6C\uCCB4\uB97C \uBC1C\uC0AC\uD569\uB2C8\uB2E4"
+  cardIcon: {fileID: 0}
+  cardBackground: {fileID: 0}
+  cardType: 1
+  statType: 0
+  increasePercentage: 10
+  skillToAdd: {fileID: 11400000, guid: 369c8514b1da93841b0e7695cb02e724, type: 2}
+  rarity: 0
+  rarityColor: {r: 1, g: 1, b: 1, a: 1}

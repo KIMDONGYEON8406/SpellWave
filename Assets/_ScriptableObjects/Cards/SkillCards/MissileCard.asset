@@ -10,15 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 097c995529bb6714cbae2271c6aacabc, type: 3}
-  m_Name: MoveSpeedCard
+  m_Name: MissileCard
   m_EditorClassIdentifier: 
-  cardName: "\uC774\uB3D9\uC18D\uB3C4 \uC99D\uAC00"
-  description: "\uC774\uB3D9\uC18D\uB3C4 \uC99D\uAC00"
+  cardName: "\uC720\uB3C4 \uBBF8\uC0AC\uC77C"
+  description: "\uC801\uC744 \uCD94\uC801\uD558\uB294 \uB9C8\uBC95 \uBBF8\uC0AC\uC77C\uC744
+    \uBC1C\uC0AC\uD569\uB2C8\uB2E4"
   cardIcon: {fileID: 0}
   cardBackground: {fileID: 0}
-  cardType: 0
-  statType: 1
+  cardType: 1
+  statType: 0
   increasePercentage: 10
-  skillToAdd: {fileID: 0}
+  skillToAdd: {fileID: 11400000, guid: 88c1692e682dbaa4096cb284d487e73c, type: 2}
   rarity: 0
   rarityColor: {r: 1, g: 1, b: 1, a: 1}

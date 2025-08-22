@@ -49,34 +49,4 @@ public class Character : MonoBehaviour
         playerStats.currentHP = Mathf.Min(playerStats.currentHP + amount, playerStats.maxHP);
     }
 
-
-    public void IncreaseAttackPower(float percentage)
-    {
-        playerStats.IncreaseAttackDamage(percentage);
-        Debug.Log($"공격력 {percentage}% 증가! 현재: {playerStats.attackDamage:F1}");
-    }
-
-    public void IncreaseMoveSpeed(float percentage)
-    {
-        playerStats.IncreaseMoveSpeed(percentage);
-        Debug.Log($"이동속도 {percentage}% 증가! 현재: {playerStats.moveSpeed:F1}");
-    }
-
-    public void IncreaseHealth(float percentage)
-    {
-        playerStats.IncreaseMaxHP(percentage);
-        Debug.Log($"체력 {percentage}% 증가! 현재: {playerStats.maxHP:F1}");
-    }
-
-    public void IncreaseAttackSpeed(float percentage)
-    {
-        playerStats.IncreaseAttackSpeed(percentage);
-        Debug.Log($"공격속도 {percentage}% 증가! 현재: {playerStats.attackSpeed:F1}");
-    }
-
-    public void IncreaseAttackRange(float percentage)
-    {
-        playerStats.attackRange *= (1f + percentage / 100f);
-        Debug.Log($"공격범위 {percentage}% 증가! 현재: {playerStats.attackRange:F1}");
-    }
 }

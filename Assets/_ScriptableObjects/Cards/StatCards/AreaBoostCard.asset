@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 097c995529bb6714cbae2271c6aacabc, type: 3}
+  m_Name: AreaBoostCard
+  m_EditorClassIdentifier: 
+  cardName: "\uD3ED\uBC1C \uAC15\uD654"
+  description: "\uBC94\uC704 \uC2A4\uD0AC\uC758 \uB370\uBBF8\uC9C0\uAC00 \uC99D\uAC00\uD569\uB2C8\uB2E4"
+  cardIcon: {fileID: 0}
+  cardBackground: {fileID: 0}
+  cardType: 0
+  statType: 5
+  increasePercentage: 30
+  skillToAdd: {fileID: 0}
+  rarity: 0
+  rarityColor: {r: 1, g: 1, b: 1, a: 1}

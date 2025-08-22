@@ -148,27 +148,131 @@ public class CardManager : MonoBehaviour
             return;
         }
 
-        // PlayerStats 방식으로 스탯 증가 적용
-        switch (card.statType)
+        SkillManager skillManager = player.GetComponent<SkillManager>();
+        if (skillManager == null)
         {
-            case StatType.AttackPower:
-                player.IncreaseAttackPower(card.increasePercentage);
-                break;
-            case StatType.MoveSpeed:
-                player.IncreaseMoveSpeed(card.increasePercentage);
-                break;
-            case StatType.AttackRange:
-                player.IncreaseAttackRange(card.increasePercentage);
-                break;
-            case StatType.Health:
-                player.IncreaseHealth(card.increasePercentage);
-                break;
-            case StatType.AttackSpeed:
-                player.IncreaseAttackSpeed(card.increasePercentage);
-                break;
+            Debug.LogError("SkillManager를 찾을 수 없습니다!");
+            return;
         }
 
-        Debug.Log($"{card.statType} {card.increasePercentage}% 증가 적용!");
+        // 모든 스킬에 스탯 보너스 적용
+        var allSkills = skillManager.GetAllSkills();
+
+        foreach (var skill in allSkills)
+        {
+            ApplyStatToSkill(skill, card.statType, card.increasePercentage);
+        }
+
+        Debug.Log($"{GetStatName(card.statType)} {card.increasePercentage}% 증가 적용!");
+    }
+
+    private void ApplyStatToSkill(SkillInstance skill, StatType statType, float percentage)
+    {
+        if (skill == null || skill.skillData == null) return;
+
+        switch (statType)
+        {
+            // 전체 스킬 강화
+            case StatType.AllSkillDamage:
+                skill.damageMultiplier += (percentage / 100f);
+                break;
+
+            case StatType.AllSkillCooldown:
+                skill.cooldownMultiplier *= (1f - percentage / 100f);
+                break;
+
+            case StatType.AllSkillRange:
+                skill.rangeMultiplier += (percentage / 100f);
+                break;
+
+            // 단일 타겟 강화
+            case StatType.SingleTargetDamage:
+                if (skill.skillData.HasTag(SkillTag.SingleTarget))
+                {
+                    skill.damageMultiplier += (percentage / 100f);
+                    Debug.Log($"{skill.skillData.baseSkillType} - 단일 타겟 강화 적용!");
+                }
+                break;
+
+            // 다중 타겟 강화
+            case StatType.MultiTargetDamage:
+                if (skill.skillData.HasTag(SkillTag.MultiTarget))
+                {
+                    skill.damageMultiplier += (percentage / 100f);
+                    Debug.Log($"{skill.skillData.baseSkillType} - 다중 타겟 강화 적용!");
+                }
+                break;
+
+            // 발사체 강화
+            case StatType.ProjectileDamage:
+                if (skill.skillData.HasTag(SkillTag.Projectile))
+                {
+                    skill.damageMultiplier += (percentage / 100f);
+                    Debug.Log($"{skill.skillData.baseSkillType} - 발사체 강화 적용!");
+                }
+                break;
+
+            case StatType.ProjectileSpeed:
+                if (skill.skillData.HasTag(SkillTag.Projectile))
+                {
+                    skill.projectileSpeedMultiplier += (percentage / 100f);
+                    Debug.Log($"{skill.skillData.baseSkillType} - 발사체 속도 증가!");
+                }
+                break;
+
+            // 범위 강화
+            case StatType.AreaDamage:
+                if (skill.skillData.HasTag(SkillTag.Area))
+                {
+                    skill.damageMultiplier += (percentage / 100f);
+                    Debug.Log($"{skill.skillData.baseSkillType} - 범위 강화 적용!");
+                }
+                break;
+
+            case StatType.AreaRange:
+                if (skill.skillData.HasTag(SkillTag.Area))
+                {
+                    skill.rangeMultiplier += (percentage / 100f);
+                    Debug.Log($"{skill.skillData.baseSkillType} - 범위 크기 증가!");
+                }
+                break;
+
+            // 지속 강화
+            case StatType.DOTDamage:
+                if (skill.skillData.HasTag(SkillTag.DOT))
+                {
+                    skill.damageMultiplier += (percentage / 100f);
+                    Debug.Log($"{skill.skillData.baseSkillType} - 지속 데미지 강화!");
+                }
+                break;
+
+            case StatType.DOTDuration:
+                if (skill.skillData.HasTag(SkillTag.DOT))
+                {
+                    skill.durationMultiplier += (percentage / 100f);
+                    Debug.Log($"{skill.skillData.baseSkillType} - 지속 시간 증가!");
+                }
+                break;
+        }
+    }
+
+    private string GetStatName(StatType type)
+    {
+        switch (type)
+        {
+            case StatType.AllSkillDamage: return "모든 스킬 데미지";
+            case StatType.AllSkillCooldown: return "모든 스킬 쿨타임";
+            case StatType.AllSkillRange: return "모든 스킬 범위";
+            case StatType.SingleTargetDamage: return "단일 타겟 데미지";
+            case StatType.MultiTargetDamage: return "다중 타겟 데미지";
+            case StatType.ProjectileDamage: return "발사체 데미지";
+            case StatType.ProjectileSpeed: return "발사체 속도";
+            case StatType.AreaDamage: return "범위 공격 데미지";
+            case StatType.AreaRange: return "범위 크기";
+            case StatType.DOTDamage: return "지속 데미지";
+            case StatType.DOTDuration: return "지속 시간";
+            default: return type.ToString();
+        }
     }
 
     private void ApplySkillCard(CardData card)
@@ -192,11 +296,11 @@ public class CardManager : MonoBehaviour
         if (success)
         {
             playerSkills.Add(card.skillToAdd);
-            Debug.Log($"스킬 획득: {card.skillToAdd.skillName}");
+            Debug.Log($"스킬 획득: {card.skillToAdd.baseSkillType}");
         }
         else
         {
-            Debug.LogWarning($"스킬 추가 실패: {card.skillToAdd.skillName}");
+            Debug.LogWarning($"스킬 추가 실패: {card.skillToAdd.baseSkillType}");
         }
     }
 
