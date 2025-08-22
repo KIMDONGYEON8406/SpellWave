@@ -14,34 +14,53 @@ public class ProjectileBehavior : SkillBehavior
 
         Vector3 direction = (context.Target.position - context.Caster.transform.position).normalized;
 
+        GameObject projectile = null;
+
         if (context.SkillPrefab != null)
         {
-            GameObject projectile = Object.Instantiate(
+            // 프리팹이 있으면 사용
+            projectile = Object.Instantiate(
                 context.SkillPrefab,
                 context.Caster.transform.position + Vector3.up,
                 Quaternion.LookRotation(direction)
             );
+        }
+        else
+        {
+            // 프리팹이 없으면 기본 생성
+            projectile = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            projectile.transform.position = context.Caster.transform.position + Vector3.up;
+            projectile.transform.localScale = Vector3.one * 0.3f;
 
-            var projScript = projectile.GetComponent<ElementalProjectile>();
-            if (projScript == null)
-            {
-                projScript = projectile.AddComponent<ElementalProjectile>();
-            }
+            var collider = projectile.GetComponent<Collider>();
+            if (collider != null) collider.isTrigger = true;
 
-            projScript.Initialize(context.Damage, context.Element, context.Passive, direction);
-            projScript.speed = projectileSpeed;
+            var rb = projectile.AddComponent<Rigidbody>();
+            rb.useGravity = false;
+        }
 
-            if (isHoming)
-            {
-                var homing = projectile.AddComponent<HomingComponent>();
-                homing.target = context.Target;
-            }
+        // ElementalProjectile 설정 (망토 효과용)
+        var projScript = projectile.GetComponent<ElementalProjectile>();
+        if (projScript == null)
+        {
+            projScript = projectile.AddComponent<ElementalProjectile>();
+        }
 
-            if (pierceCount > 0)
-            {
-                var pierce = projectile.AddComponent<PierceComponent>();
-                pierce.maxPierceCount = pierceCount;
-            }
+        // 중요: speed를 먼저 설정
+        projScript.speed = projectileSpeed;
+        projScript.Initialize(context.Damage, context.Element, context.Passive, direction);
+
+        // 추가 컴포넌트
+        if (isHoming)
+        {
+            var homing = projectile.AddComponent<HomingComponent>();
+            homing.target = context.Target;
+        }
+
+        if (pierceCount > 0)
+        {
+            var pierce = projectile.AddComponent<PierceComponent>();
+            pierce.maxPierceCount = pierceCount;
         }
     }
 }

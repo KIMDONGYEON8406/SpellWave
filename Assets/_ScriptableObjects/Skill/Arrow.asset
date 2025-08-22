@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3b8147d169b0de4abca5a905607a4e6, type: 3}
   m_Name: Arrow
   m_EditorClassIdentifier: 
-  skillBehavior: {fileID: 0}
+  skillBehavior: {fileID: 11400000, guid: be11345f048716048b7fe8175a6e109c, type: 2}
   baseSkillType: Arrow
   skillTags: 46040000
   description: "\uBE60\uB978 \uC18D\uB3C4\uC758 \uB9C8\uBC95 \uD654\uC0B4\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4"

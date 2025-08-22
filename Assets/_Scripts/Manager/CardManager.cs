@@ -92,19 +92,32 @@ public class CardManager : MonoBehaviour
 
         if (ShouldShowSkillCards())
         {
-            foreach (CardData skillCard in allSkillCards)
+            // 스킬 카드 - 아직 장착 안 한 스킬만
+            var inventory = StaffManager.Instance.GetCurrentInventory();
+
+            if (inventory != null)
             {
-                if (skillCard.skillToAdd != null && !playerSkills.Contains(skillCard.skillToAdd))
+                // 장착 안 한 스킬들 가져오기
+                var unequipped = inventory.GetUnequippedSkills();
+
+                foreach (var skill in unequipped)
                 {
-                    availableCards.Add(skillCard);
+                    // 해당 스킬의 카드 찾기
+                    var skillCard = allSkillCards.Find(c => c.skillToAdd == skill);
+                    if (skillCard != null)
+                    {
+                        availableCards.Add(skillCard);
+                    }
                 }
+
+                Debug.Log($"선택 가능한 스킬 카드: {availableCards.Count}개");
             }
-            Debug.Log($"스킬 카드 풀: {availableCards.Count}장");
         }
         else
         {
+            // 스탯 카드
             availableCards.AddRange(allStatCards);
-            Debug.Log($"스탯 카드 풀: {availableCards.Count}장");
+            Debug.Log($"스탯 카드 풀: {availableCards.Count}개");
         }
 
         return availableCards;
@@ -112,9 +125,8 @@ public class CardManager : MonoBehaviour
 
     private bool ShouldShowSkillCards()
     {
-        //return GameManager.Instance.currentWave % 3 == 0;
-        // [수정] Timeline 시스템용
-        return true; // 임시로 항상 스킬카드 표시
+        // 4레벨마다 스킬 카드
+        return GameManager.Instance.currentLevel % 4 == 0;
     }
 
     public void SelectCard(CardData selectedCard)
@@ -164,6 +176,33 @@ public class CardManager : MonoBehaviour
         }
 
         Debug.Log($"{GetStatName(card.statType)} {card.increasePercentage}% 증가 적용!");
+    }
+
+    private void ApplySkillCard(CardData card)
+    {
+        if (card.skillToAdd == null)
+        {
+            Debug.LogError("스킬 카드에 skillToAdd가 없습니다!");
+            return;
+        }
+
+        var inventory = StaffManager.Instance.GetCurrentInventory();
+
+        if (inventory != null)
+        {
+            // 스킬 장착
+            if (inventory.EquipNextSkill(card.skillToAdd))
+            {
+                // 스킬매니저 업데이트
+                StaffManager.Instance.UpdateEquippedSkills(inventory.equippedSkills);
+                playerSkills.Add(card.skillToAdd);
+                Debug.Log($"스킬 장착 성공: {card.skillToAdd.baseSkillType}");
+            }
+            else
+            {
+                Debug.LogWarning($"스킬 장착 실패: {card.skillToAdd.baseSkillType}");
+            }
+        }
     }
 
     private void ApplyStatToSkill(SkillInstance skill, StatType statType, float percentage)
@@ -272,35 +311,6 @@ public class CardManager : MonoBehaviour
             case StatType.DOTDamage: return "지속 데미지";
             case StatType.DOTDuration: return "지속 시간";
             default: return type.ToString();
-        }
-    }
-
-    private void ApplySkillCard(CardData card)
-    {
-        Character player = GameManager.Instance.player;
-        if (player == null)
-        {
-            Debug.LogError("플레이어를 찾을 수 없습니다!");
-            return;
-        }
-
-        SkillManager skillManager = player.GetComponent<SkillManager>();
-        if (skillManager == null)
-        {
-            Debug.LogError("SkillManager를 찾을 수 없습니다!");
-            return;
-        }
-
-        bool success = skillManager.AddSkillFromData(card.skillToAdd);
-
-        if (success)
-        {
-            playerSkills.Add(card.skillToAdd);
-            Debug.Log($"스킬 획득: {card.skillToAdd.baseSkillType}");
-        }
-        else
-        {
-            Debug.LogWarning($"스킬 추가 실패: {card.skillToAdd.baseSkillType}");
         }
     }
 

@@ -32,10 +32,14 @@ public class StaffManager : MonoBehaviour
 
     void Start()
     {
+        // SkillManager 찾기
+        skillManager = FindObjectOfType<SkillManager>();
+
         // 초기 지팡이 설정
-        if (currentStaff != null && !unlockedStaffs.Contains(currentStaff))
+        if (currentStaff != null)
         {
             UnlockStaff(currentStaff);
+            EquipStaff(currentStaff);  // 5개 스킬 자동 적용
         }
     }
 
@@ -86,10 +90,9 @@ public class StaffManager : MonoBehaviour
         var inventory = GetCurrentInventory();
         if (inventory != null)
         {
-            // 기존 스킬 제거
             skillManager.ClearAllSkills();
 
-            // 장착된 스킬 추가
+            // equippedSkills만 스킬매니저에 추가 (현재는 볼 1개만)
             foreach (var skill in inventory.equippedSkills)
             {
                 if (skill != null)
@@ -97,6 +100,8 @@ public class StaffManager : MonoBehaviour
                     skillManager.AddSkillFromData(skill);
                 }
             }
+
+            Debug.Log($"장착된 스킬: {inventory.equippedSkills.Count}개");
         }
     }
 

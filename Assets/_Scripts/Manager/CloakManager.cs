@@ -28,14 +28,13 @@ public class CloakManager : MonoBehaviour
 
     void Start()
     {
-        // 초기 망토 설정
+        // 초기 망토 설정 (에너지 망토)
         if (currentCloak != null && !unlockedCloaks.Contains(currentCloak))
         {
             UnlockCloak(currentCloak);
         }
     }
 
-    // 망토 해금
     public void UnlockCloak(CloakData cloak)
     {
         if (!unlockedCloaks.Contains(cloak))
@@ -45,7 +44,6 @@ public class CloakManager : MonoBehaviour
         }
     }
 
-    // 망토 장착
     public void EquipCloak(CloakData newCloak)
     {
         if (newCloak == null || !unlockedCloaks.Contains(newCloak))
@@ -57,10 +55,9 @@ public class CloakManager : MonoBehaviour
         currentCloak = newCloak;
         ApplyCloakStats();
 
-        Debug.Log($"망토 장착: {newCloak.cloakName}");
+        Debug.Log($"망토 장착: {newCloak.cloakName} (속성: {newCloak.elementType})");
     }
 
-    // 망토 스탯 적용
     private void ApplyCloakStats()
     {
         if (player == null)
@@ -70,18 +67,15 @@ public class CloakManager : MonoBehaviour
 
         if (player == null || currentCloak == null) return;
 
-        // 스탯 보너스 적용 (PlayerStats에 반영)
-        // 기존 보너스 제거하고 새로 적용하는 로직 필요
-        Debug.Log($"망토 스탯 적용: 체력+{currentCloak.healthBonus}%, 공격력+{currentCloak.attackBonus}%");
+        // 스탯 보너스는 나중에 구현
+        Debug.Log($"망토 효과 적용: {currentCloak.elementType} 속성");
     }
 
-    // 현재 망토의 속성 가져오기
     public ElementType GetCurrentElement()
     {
         return currentCloak != null ? currentCloak.elementType : ElementType.Energy;
     }
 
-    // 현재 망토의 패시브 효과 가져오기
     public PassiveEffect GetCurrentPassive()
     {
         return currentCloak != null ? currentCloak.passiveEffect : new PassiveEffect();

@@ -32,6 +32,12 @@ public class AutoSkillCaster : MonoBehaviour
     {
         skillManager = GetComponent<SkillManager>();
         cloakManager = CloakManager.Instance;
+
+        // 디버그 추가
+        if (skillManager == null)
+        {
+            Debug.LogError("SkillManager 컴포넌트를 찾을 수 없습니다!");
+        }
     }
 
     void Update()
@@ -72,18 +78,36 @@ public class AutoSkillCaster : MonoBehaviour
 
     void AutoCastSkills()
     {
-        if (skillManager == null) return;
+        if (skillManager == null)
+        {
+            Debug.LogError("SkillManager가 없습니다!");
+            return;
+        }
 
         var skills = skillManager.GetAllSkills();
+
+        if (skills.Count == 0)
+        {
+            Debug.LogWarning("스킬이 하나도 없습니다! StaffManager 확인 필요");
+            return;
+        }
+
+        Debug.Log($"보유 스킬: {skills.Count}개, 타겟: {currentTarget?.name}");
+
         UpdateSkillSlots(skills);
 
         foreach (var slot in skillSlots)
         {
-            if (slot.IsReady && slot.skill != null)
+            if (slot.skill == null) continue;
+
+            if (slot.IsReady)
             {
                 float distance = Vector3.Distance(transform.position, currentTarget.position);
+                Debug.Log($"{slot.skill.skillData.baseSkillType} - 거리: {distance:F1} / 범위: {slot.skill.CurrentRange:F1}");
+
                 if (distance <= slot.skill.CurrentRange)
                 {
+                    Debug.Log($"발동: {slot.skill.skillData.baseSkillType}");
                     CastSkill(slot);
                 }
             }

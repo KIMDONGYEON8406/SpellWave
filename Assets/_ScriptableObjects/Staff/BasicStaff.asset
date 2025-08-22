@@ -17,5 +17,10 @@ MonoBehaviour:
   staffModelPrefab: {fileID: 0}
   description: "\uAE30\uBCF8 \uC9C0\uD321\uC774\uC785\uB2C8\uB2E4."
   rarity: 0
-  defaultSkills: []
+  defaultSkills:
+  - {fileID: 11400000, guid: 369c8514b1da93841b0e7695cb02e724, type: 2}
+  - {fileID: 11400000, guid: bca3e0bedf8d4514f98813bd3f020309, type: 2}
+  - {fileID: 11400000, guid: fd8bf5a79b98f86469e4cbf470692707, type: 2}
+  - {fileID: 11400000, guid: 440245f409fa3c844aabcc46bccb05cd, type: 2}
+  - {fileID: 11400000, guid: 88c1692e682dbaa4096cb284d487e73c, type: 2}
   availableSkillPool: []

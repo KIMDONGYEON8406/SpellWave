@@ -6,30 +6,31 @@ public class ElementalProjectile : MonoBehaviour
     public float speed = 10f;
     public float lifetime = 3f;
 
-    // 발사체 정보
     private float damage;
     private ElementType elementType;
     private PassiveEffect passiveEffect;
     private Vector3 direction;
-
     private Rigidbody rb;
+    private bool initialized = false;  // 초기화 체크
 
-    // 초기화
     public void Initialize(float dmg, ElementType element, PassiveEffect passive, Vector3 dir)
     {
         damage = dmg;
         elementType = element;
         passiveEffect = passive;
         direction = dir.normalized;
+        initialized = true;  // 초기화 완료
 
-        // 속성에 따른 이펙트 색상 변경
         UpdateVisualByElement();
-
-        // 일정 시간 후 자동 파괴
         Destroy(gameObject, lifetime);
+
+        Debug.Log($"발사체 초기화: 데미지={damage}, 방향={direction}, 속도={speed}");
+
+        // Rigidbody 즉시 설정
+        SetupRigidbody();
     }
 
-    void Start()
+    void SetupRigidbody()
     {
         rb = GetComponent<Rigidbody>();
         if (rb == null)
@@ -37,12 +38,35 @@ public class ElementalProjectile : MonoBehaviour
             rb = gameObject.AddComponent<Rigidbody>();
         }
         rb.useGravity = false;
+        rb.isKinematic = false;  // 물리 엔진 활성화
+
+        // 즉시 속도 설정
+        if (speed > 0 && direction != Vector3.zero)
+        {
+            rb.velocity = direction * speed;
+            Debug.Log($"초기 속도 설정: {rb.velocity}");
+        }
+    }
+
+    void Start()
+    {
+        // Start에서도 한 번 더 체크
+        if (!initialized)
+        {
+            Debug.LogWarning("ElementalProjectile이 Initialize 없이 시작됨!");
+            return;
+        }
+
+        if (rb == null)
+        {
+            SetupRigidbody();
+        }
     }
 
     void FixedUpdate()
     {
-        // 발사체 이동
-        if (rb != null)
+        // 계속 속도 유지
+        if (rb != null && initialized && speed > 0)
         {
             rb.velocity = direction * speed;
         }
@@ -50,56 +74,56 @@ public class ElementalProjectile : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        // 적과 충돌
+        Debug.Log($"충돌: {other.name}, Tag: {other.tag}, Layer: {other.gameObject.layer}");
+
         if (other.CompareTag("Enemy"))
         {
             EnemyAI enemy = other.GetComponent<EnemyAI>();
             if (enemy != null)
             {
-                // 데미지 적용
                 enemy.TakeDamage(damage);
-
-                // 패시브 효과 적용
                 ApplyPassiveToEnemy(enemy);
 
-                Debug.Log($"{elementType} 발사체가 {other.name}에게 {damage} 데미지!");
+                Debug.Log($"적 타격! {other.name}에게 {damage} 데미지!");
+            }
+            else
+            {
+                Debug.LogError($"{other.name}에 EnemyAI 없음!");
             }
 
-            // 발사체 파괴 (관통이 아닌 경우)
+            // 관통 체크
             var pierce = GetComponent<PierceComponent>();
             if (pierce == null || !pierce.CanPierce())
             {
+                Debug.Log("발사체 파괴");
                 Destroy(gameObject);
             }
         }
     }
 
-    // 패시브 효과 적용
     void ApplyPassiveToEnemy(EnemyAI enemy)
     {
-        // 간단한 패시브 적용 (나중에 UnifiedPassiveEffect로 교체)
-        switch (passiveEffect.type)
+        if (passiveEffect == null || passiveEffect.type == PassiveType.None) return;
+
+        var effectSystem = enemy.GetComponent<UnifiedPassiveEffect>();
+        if (effectSystem == null)
         {
-            case PassiveType.Burn:
-                Debug.Log($"화상 효과 적용: {passiveEffect.effectValue}/초");
-                break;
+            effectSystem = enemy.gameObject.AddComponent<UnifiedPassiveEffect>();
+        }
 
-            case PassiveType.Slow:
-                Debug.Log($"둔화 효과 적용: {passiveEffect.effectValue}%");
-                break;
+        effectSystem.ApplyEffect(passiveEffect.type, passiveEffect, damage);
 
-            case PassiveType.Chain:
-                ChainAttack(enemy.transform.position);
-                break;
+        if (passiveEffect.type == PassiveType.Chain)
+        {
+            ChainAttack(enemy.transform.position);
         }
     }
 
-    // 연쇄 공격
     void ChainAttack(Vector3 origin)
     {
         if (passiveEffect.chainCount <= 0) return;
 
-        Collider[] nearbyEnemies = Physics.OverlapSphere(origin, 5f, LayerMask.GetMask("Enemy"));
+        Collider[] nearbyEnemies = Physics.OverlapSphere(origin, passiveEffect.chainRange, LayerMask.GetMask("Enemy"));
         int chainedCount = 0;
 
         foreach (Collider col in nearbyEnemies)
@@ -118,36 +142,13 @@ public class ElementalProjectile : MonoBehaviour
         }
     }
 
-    // 속성별 시각 효과
     void UpdateVisualByElement()
     {
         Renderer renderer = GetComponent<Renderer>();
         if (renderer != null)
         {
-            switch (elementType)
-            {
-                case ElementType.Fire:
-                    renderer.material.color = Color.red;
-                    break;
-                case ElementType.Ice:
-                    renderer.material.color = Color.cyan;
-                    break;
-                case ElementType.Lightning:
-                    renderer.material.color = Color.yellow;
-                    break;
-                case ElementType.Poison:
-                    renderer.material.color = Color.green;
-                    break;
-                case ElementType.Dark:
-                    renderer.material.color = Color.black;
-                    break;
-                case ElementType.Light:
-                    renderer.material.color = Color.white;
-                    break;
-                default:
-                    renderer.material.color = new Color(0.5f, 0f, 1f); // 보라색 (에너지)
-                    break;
-            }
+            Color elementColor = SkillNameGenerator.GetElementColor(elementType);
+            renderer.material.color = elementColor;
         }
     }
 }

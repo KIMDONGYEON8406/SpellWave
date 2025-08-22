@@ -12,7 +12,8 @@ public class StaffInventory
     public StaffInventory(StaffData staff)
     {
         staffData = staff;
-        // 초기 스킬 추가
+
+        // 모든 스킬을 인벤토리에 추가
         if (staff.defaultSkills != null)
         {
             foreach (var skill in staff.defaultSkills)
@@ -22,16 +23,17 @@ public class StaffInventory
                     ownedSkills.Add(skill);
                 }
             }
+        }
 
-            // 처음 5개는 자동 장착
-            for (int i = 0; i < Mathf.Min(5, ownedSkills.Count); i++)
-            {
-                equippedSkills.Add(ownedSkills[i]);
-            }
+        // 첫 번째 스킬만 자동 장착 (볼만)
+        if (ownedSkills.Count > 0)
+        {
+            equippedSkills.Add(ownedSkills[0]);
+            Debug.Log($"초기 스킬 장착: {ownedSkills[0].baseSkillType}");
         }
     }
 
-    // 스킬 추가
+    // 스킬 추가 (새로운 스킬 획득 시)
     public bool AddSkill(SkillData newSkill)
     {
         if (ownedSkills.Count >= 20)
@@ -51,7 +53,36 @@ public class StaffInventory
         return true;
     }
 
-    // 스킬 장착 (5개 슬롯)
+    // 스킬 장착 (카드로 선택 시)
+    public bool EquipNextSkill(SkillData skill)
+    {
+        // 이미 장착된 스킬인지 체크
+        if (equippedSkills.Contains(skill))
+        {
+            Debug.LogWarning($"{skill.baseSkillType}은 이미 장착되어 있습니다!");
+            return false;
+        }
+
+        // 보유한 스킬인지 체크
+        if (!ownedSkills.Contains(skill))
+        {
+            Debug.LogError($"{skill.baseSkillType}은 보유하지 않은 스킬입니다!");
+            return false;
+        }
+
+        // 최대 5개까지만 장착
+        if (equippedSkills.Count >= 5)
+        {
+            Debug.LogWarning("스킬 슬롯이 가득 찼습니다! (5/5)");
+            return false;
+        }
+
+        equippedSkills.Add(skill);
+        Debug.Log($"스킬 장착: {skill.baseSkillType} (현재 {equippedSkills.Count}/5)");
+        return true;
+    }
+
+    // 특정 슬롯에 스킬 장착
     public bool EquipSkill(SkillData skill, int slotIndex)
     {
         if (!ownedSkills.Contains(skill))
@@ -83,5 +114,21 @@ public class StaffInventory
         {
             equippedSkills[slotIndex] = null;
         }
+    }
+
+    // 장착 가능한 스킬 목록 가져오기
+    public List<SkillData> GetUnequippedSkills()
+    {
+        List<SkillData> unequipped = new List<SkillData>();
+
+        foreach (var skill in ownedSkills)
+        {
+            if (!equippedSkills.Contains(skill))
+            {
+                unequipped.Add(skill);
+            }
+        }
+
+        return unequipped;
     }
 }

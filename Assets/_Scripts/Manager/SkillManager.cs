@@ -17,6 +17,9 @@ public class SkillManager : MonoBehaviour
         if (owner == null)
         {
             Debug.LogError("Character 컴포넌트를 찾을 수 없습니다!");
+            // Character가 없으면 추가
+            owner = gameObject.AddComponent<Character>();
+            Debug.Log("Character 컴포넌트 자동 생성");
         }
     }
 
@@ -28,6 +31,16 @@ public class SkillManager : MonoBehaviour
             return false;
         }
 
+        // owner 재확인
+        if (owner == null)
+        {
+            owner = GetComponent<Character>();
+            if (owner == null)
+            {
+                owner = gameObject.AddComponent<Character>();
+            }
+        }
+
         // 새로운 스킬 추가
         if (equippedSkills.Count < maxSkills)
         {
@@ -36,7 +49,10 @@ public class SkillManager : MonoBehaviour
 
             if (skillData.skillPrefab != null)
             {
-                skillObj = Instantiate(skillData.skillPrefab, transform);
+                // 명확하게 수정
+                skillObj = Instantiate(skillData.skillPrefab);
+                skillObj.transform.SetParent(transform);
+                skillObj.name = $"SkillObject_{skillData.baseSkillType}";
             }
             else
             {

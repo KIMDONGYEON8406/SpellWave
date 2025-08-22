@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3b8147d169b0de4abca5a905607a4e6, type: 3}
   m_Name: Bolt
   m_EditorClassIdentifier: 
-  skillBehavior: {fileID: 0}
+  skillBehavior: {fileID: 11400000, guid: bd0f904ef5dcf0741b3fa736d604daac, type: 2}
   baseSkillType: Bolt
   skillTags: 05040000
   description: "\uC801\uC5D0\uAC8C \uB9C8\uBC95\uAD6C\uCCB4\uBC1C\uC0AC"
@@ -24,7 +24,7 @@ MonoBehaviour:
   damagePerLevel: 10
   cooldownReductionPerLevel: 0.1
   rangeIncreasePerLevel: 0.5
-  skillPrefab: {fileID: 0}
+  skillPrefab: {fileID: 8909891656948955754, guid: 1f38a0929bcda9d45a9ed194b924e40f, type: 3}
   hitEffectPrefab: {fileID: 0}
   castEffectPrefab: {fileID: 0}
   canLevelUp: 1
