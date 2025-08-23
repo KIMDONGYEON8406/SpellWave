@@ -72,9 +72,6 @@ PrefabInstance:
       addedObject: {fileID: 4522478032807967862}
     - targetCorrespondingSourceObject: {fileID: 3418758978636226698, guid: 8a69b31b2c481f54e8492e52e047329d, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8409252483686479705}
-    - targetCorrespondingSourceObject: {fileID: 3418758978636226698, guid: 8a69b31b2c481f54e8492e52e047329d, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 5359035520964226648}
     - targetCorrespondingSourceObject: {fileID: 3418758978636226698, guid: 8a69b31b2c481f54e8492e52e047329d, type: 3}
       insertIndex: -1
@@ -148,21 +145,6 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8409252483686479705
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2457712277339817024}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cdf836f9da8f00741b0012986339a02b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerStats: {fileID: 11400000, guid: 7206cf7252a7d7347bd5d53aac836447, type: 2}
-  magicProjectilePrefab: {fileID: 7677694619646138299, guid: 0adf575e33d2e9c46bf965d0e8df9569, type: 3}
-  firePoint: {fileID: 0}
 --- !u!95 &5359035520964226648
 Animator:
   serializedVersion: 5

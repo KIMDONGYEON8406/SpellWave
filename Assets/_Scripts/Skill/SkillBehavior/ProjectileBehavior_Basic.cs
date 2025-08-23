@@ -9,49 +9,34 @@ public class ProjectileBehavior_Basic : ProjectileBehavior
 
     public override void Execute(SkillExecutionContext context)
     {
-        if (context.Target == null)
-        {
-            Debug.LogWarning("타겟이 없습니다!");
-            return;
-        }
+        // 플레이어 정면 방향
+        Vector3 direction = context.Caster.transform.forward;
 
-        Vector3 direction = (context.Target.position - context.Caster.transform.position).normalized;
-        Vector3 spawnPos = context.Caster.transform.position + Vector3.up;
+        // 스폰 위치 (플레이어 중앙 + 약간 앞)
+        Vector3 spawnPos = context.Caster.transform.position +
+                          context.Caster.transform.forward * 0.5f +
+                          Vector3.up * 1f;
+
         GameObject projectile = null;
 
         if (context.SkillPrefab != null)
         {
-            // ✅ 올바른 Instantiate 사용
             projectile = Object.Instantiate(
                 context.SkillPrefab,
-                spawnPos,  // 위치
-                Quaternion.LookRotation(direction),  // 회전
-                null  // 부모 없음 (월드 공간)
+                spawnPos,
+                Quaternion.LookRotation(direction),
+                null
             );
-
-            projectile.name = "Bolt_Projectile";
-
-            // 혹시 모를 부모 체크
-            if (projectile.transform.parent != null)
-            {
-                Debug.LogError($"발사체가 {projectile.transform.parent.name}의 자식!");
-                projectile.transform.SetParent(null);
-            }
         }
         else
         {
-            Debug.LogWarning("SkillPrefab이 null! 기본 구체 생성");
-
+            Debug.LogWarning($"Skill Prefab이 없어서 자동 생성!");
             projectile = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             projectile.transform.position = spawnPos;
             projectile.transform.localScale = Vector3.one * 0.3f;
-            projectile.name = "Bolt_Default";
 
             var collider = projectile.GetComponent<Collider>();
-            if (collider != null)
-            {
-                collider.isTrigger = true;
-            }
+            if (collider != null) collider.isTrigger = true;
         }
 
         // ElementalProjectile 설정
@@ -61,7 +46,6 @@ public class ProjectileBehavior_Basic : ProjectileBehavior
             projScript = projectile.AddComponent<ElementalProjectile>();
         }
 
-        // Rigidbody 확인
         var rb = projectile.GetComponent<Rigidbody>();
         if (rb == null)
         {
@@ -70,18 +54,18 @@ public class ProjectileBehavior_Basic : ProjectileBehavior
         rb.useGravity = false;
         rb.isKinematic = false;
 
-        // 초기화
+        // 초기화 - Forward 방향으로!
         projScript.speed = defaultSpeed;
         projScript.Initialize(
             context.Damage,
             context.Element,
             context.Passive,
-            direction
+            direction  // Forward 방향
         );
 
         // 속도 즉시 적용
         rb.velocity = direction * defaultSpeed;
 
-       // Debug.Log($"발사! Parent={projectile.transform.parent}, Pos={projectile.transform.position}");
+        //Debug.Log($"발사! 방향={direction}, 위치={projectile.transform.position}");
     }
 }

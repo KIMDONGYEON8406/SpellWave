@@ -16,7 +16,7 @@ public class ProjectileBehavior_Homing : ProjectileBehavior
 
         if (context.Target == null) return;
 
-        Vector3 direction = (context.Target.position - context.Caster.transform.position).normalized;
+        Vector3 direction = context.Caster.transform.forward;
         GameObject projectile = null;
 
         if (context.SkillPrefab != null)

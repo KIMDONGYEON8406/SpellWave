@@ -17,7 +17,6 @@ public class SkillManager : MonoBehaviour
         if (owner == null)
         {
             Debug.LogError("Character 컴포넌트를 찾을 수 없습니다!");
-            // Character가 없으면 추가
             owner = gameObject.AddComponent<Character>();
             Debug.Log("Character 컴포넌트 자동 생성");
         }
@@ -25,13 +24,8 @@ public class SkillManager : MonoBehaviour
 
     public bool AddSkillFromData(SkillData skillData)
     {
-        if (skillData == null)
-        {
-            Debug.LogError("SkillData가 null입니다!");
-            return false;
-        }
+        if (skillData == null) return false;
 
-        // owner 재확인
         if (owner == null)
         {
             owner = GetComponent<Character>();
@@ -41,43 +35,28 @@ public class SkillManager : MonoBehaviour
             }
         }
 
-        // 새로운 스킬 추가
         if (equippedSkills.Count < maxSkills)
         {
-            // 프리팹이 있으면 프리팹 사용, 없으면 빈 GameObject에 SkillInstance 추가
-            GameObject skillObj;
+            GameObject skillObj = new GameObject($"Skill_{skillData.baseSkillType}");
+            skillObj.transform.SetParent(transform, false);
+            skillObj.transform.localPosition = Vector3.zero;
 
-            if (skillData.skillPrefab != null)
-            {
-                // 명확하게 수정
-                skillObj = Instantiate(skillData.skillPrefab);
-                skillObj.transform.SetParent(transform);
-                skillObj.name = $"SkillObject_{skillData.baseSkillType}";
-            }
-            else
-            {
-                // 프리팹이 없는 경우 빈 GameObject 생성
-                skillObj = new GameObject($"Skill_{skillData.baseSkillType}");
-                skillObj.transform.SetParent(transform);
-            }
-
-            SkillInstance skill = skillObj.GetComponent<SkillInstance>();
-            if (skill == null)
-            {
-                skill = skillObj.AddComponent<SkillInstance>();
-            }
-
+            SkillInstance skill = skillObj.AddComponent<SkillInstance>();
             skill.Initialize(owner, skillData);
             equippedSkills[skillData.baseSkillType] = skill;
 
-            Debug.Log($"새 스킬 추가: {skillData.baseSkillType} (총 {equippedSkills.Count}개)");
+            Debug.Log($"새 스킬 추가: {skillData.baseSkillType}");
+
+            // 오라면 즉시 생성!
+            if (skillData.baseSkillType == "Aura")
+            {
+                CreateAuraImmediately(skill);
+            }
+
             return true;
         }
-        else
-        {
-            Debug.LogWarning($"스킬 슬롯이 가득참! 최대 {maxSkills}개");
-            return false;
-        }
+
+        return false;
     }
 
     public SkillInstance GetSkill(string skillName)
@@ -95,7 +74,6 @@ public class SkillManager : MonoBehaviour
         return equippedSkills.Count;
     }
 
-    // 특정 스킬 제거 (필요한 경우)
     public bool RemoveSkill(string skillName)
     {
         if (equippedSkills.ContainsKey(skillName))
@@ -115,7 +93,6 @@ public class SkillManager : MonoBehaviour
         return false;
     }
 
-    // 모든 스킬 제거 (게임 재시작 시)
     public void ClearAllSkills()
     {
         foreach (var skill in equippedSkills.Values)
@@ -130,7 +107,6 @@ public class SkillManager : MonoBehaviour
         Debug.Log("모든 스킬 제거");
     }
 
-    // 스킬 정보 출력 (디버그용)
     public void PrintSkillInfo()
     {
         Debug.Log($"=== 보유 스킬 ({equippedSkills.Count}/{maxSkills}) ===");
@@ -141,8 +117,44 @@ public class SkillManager : MonoBehaviour
                      $"(데미지: {skill.CurrentDamage:F1}, 쿨타임: {skill.CurrentCooldown:F1}초)");
         }
     }
+    
+    private void CreateAuraImmediately(SkillInstance auraSkill)
+    {
+        Debug.Log("[SkillManager] 오라 스킬 획득! 즉시 생성합니다.");
 
-    // PlayerStats에서 공격 관련 스탯 가져오기
+        // 이미 오라가 있는지 확인
+        Transform existingAura = transform.Find("PermanentAura");
+        if (existingAura != null)
+        {
+            Debug.Log("오라가 이미 존재합니다.");
+            return;
+        }
+
+        var element = CloakManager.Instance?.GetCurrentElement() ?? ElementType.Energy;
+        var passive = CloakManager.Instance?.GetCurrentPassive() ?? new PassiveEffect();
+
+        if (auraSkill.skillData.skillBehavior != null)
+        {
+            SkillExecutionContext context = new SkillExecutionContext
+            {
+                Caster = gameObject,
+                Target = null,
+                Damage = auraSkill.CurrentDamage,
+                Range = auraSkill.CurrentRange,
+                Element = element,
+                Passive = passive,
+                SkillPrefab = auraSkill.skillData.skillPrefab,
+                HitEffectPrefab = auraSkill.skillData.hitEffectPrefab
+            };
+
+            // 오라 실행
+            auraSkill.skillData.skillBehavior.Execute(context);
+            auraSkill.RecordSkillUse();
+
+            Debug.Log($"[오라 생성 완료] 범위: {auraSkill.CurrentRange}");
+        }
+    }
+
     public float GetPlayerAttackDamage()
     {
         return owner != null ? owner.AttackPower : 0f;

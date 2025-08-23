@@ -136,14 +136,25 @@ public class AutoSkillCaster : MonoBehaviour
             }
         }
     }
-
     void CastSkill(SkillSlot slot)
     {
         var skill = slot.skill;
         var element = cloakManager?.GetCurrentElement() ?? ElementType.Energy;
         var passive = cloakManager?.GetCurrentPassive() ?? new PassiveEffect();
 
-        // ⭐ SkillBehavior로 모든 스킬 처리
+        // 오라는 이미 있으면 스킵
+        if (skill.skillData.baseSkillType == "Aura")
+        {
+            Transform existingAura = transform.Find("PermanentAura");
+            if (existingAura != null)
+            {
+                return;  // 이미 있으면 재시전 안 함
+            }
+
+            // 처음 한 번만 생성
+            Debug.Log("[AutoSkillCaster] 오라 첫 생성");
+        }
+
         if (skill.skillData.skillBehavior != null)
         {
             SkillExecutionContext context = new SkillExecutionContext
@@ -162,7 +173,7 @@ public class AutoSkillCaster : MonoBehaviour
             {
                 skill.skillData.skillBehavior.Execute(context);
                 slot.Cast();
-                skill.RecordSkillUse();  // SkillInstance에 사용 기록
+                skill.RecordSkillUse();
             }
         }
     }

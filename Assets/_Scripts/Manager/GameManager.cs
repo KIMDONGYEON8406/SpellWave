@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 public enum GameState
 {
@@ -35,6 +36,9 @@ public class GameManager : MonoBehaviour
 
     [Header("게임 타이머")]
     public float totalGameTime = 0f;
+
+    [Header("디버그용 스킬 목록")]
+    [SerializeField] private List<SkillData> debugSkills = new List<SkillData>();
 
     // 이벤트들
     public static event Action<float> OnProgressChanged;
@@ -75,8 +79,298 @@ public class GameManager : MonoBehaviour
 
         InitializeStaff();
         StartStage();
+
+        // 디버그 스킬 자동 수집
+        CollectAllSkills();
     }
 
+    void CollectAllSkills()
+    {
+        // Resources 폴더에서 모든 SkillData 찾기
+        debugSkills.Clear();
+        debugSkills.AddRange(Resources.LoadAll<SkillData>("Skills"));
+
+        // 또는 특정 경로에서 찾기
+        var skills = Resources.LoadAll<SkillData>("");
+        debugSkills.AddRange(skills);
+
+        Debug.Log($"디버그용 스킬 {debugSkills.Count}개 로드");
+    }
+
+    // ===== 디버그 스킬 획득 메서드들 =====
+
+    [ContextMenu("디버그/스킬 획득/오라 (Aura)")]
+    public void DebugAddAuraSkill()
+    {
+        AddSkillByName("Aura");
+    }
+
+    [ContextMenu("디버그/스킬 획득/볼 (Bolt)")]
+    public void DebugAddBoltSkill()
+    {
+        AddSkillByName("Bolt");
+    }
+
+    [ContextMenu("디버그/스킬 획득/애로우 (Arrow)")]
+    public void DebugAddArrowSkill()
+    {
+        AddSkillByName("Arrow");
+    }
+
+    [ContextMenu("디버그/스킬 획득/익스플로전 (Explosion)")]
+    public void DebugAddExplosionSkill()
+    {
+        AddSkillByName("Explosion");
+    }
+
+    [ContextMenu("디버그/스킬 획득/미사일 (Missile)")]
+    public void DebugAddMissileSkill()
+    {
+        AddSkillByName("Missile");
+    }
+
+    [ContextMenu("디버그/모든 기본 스킬 획득")]
+    public void DebugAddAllBasicSkills()
+    {
+        string[] basicSkills = { "Aura", "Bolt", "Arrow", "Explosion", "Missile" };
+        foreach (string skillName in basicSkills)
+        {
+            AddSkillByName(skillName);
+        }
+    }
+
+    // 스킬 이름으로 찾아서 추가
+    void AddSkillByName(string skillName)
+    {
+        // debugSkills에서 찾기
+        SkillData skillToAdd = debugSkills.Find(s => s != null && s.baseSkillType == skillName);
+
+        if (skillToAdd == null)
+        {
+            // StaffData에서 찾기
+            if (StaffManager.Instance != null && StaffManager.Instance.currentStaff != null)
+            {
+                var staff = StaffManager.Instance.currentStaff;
+                skillToAdd = staff.defaultSkills.Find(s => s != null && s.baseSkillType == skillName);
+
+                if (skillToAdd == null)
+                {
+                    skillToAdd = staff.availableSkillPool.Find(s => s != null && s.baseSkillType == skillName);
+                }
+            }
+        }
+
+        if (skillToAdd != null)
+        {
+            AddDebugSkill(skillToAdd);
+        }
+        else
+        {
+            Debug.LogWarning($"스킬을 찾을 수 없음: {skillName}");
+        }
+    }
+
+    // 실제 스킬 추가 로직
+    void AddDebugSkill(SkillData skillData)
+    {
+        if (skillData == null) return;
+
+        // StaffManager를 통해 인벤토리에 추가
+        var inventory = StaffManager.Instance?.GetCurrentInventory();
+        if (inventory != null)
+        {
+            // 인벤토리에 추가
+            if (!inventory.ownedSkills.Contains(skillData))
+            {
+                inventory.ownedSkills.Add(skillData);
+                Debug.Log($"[디버그] 인벤토리에 {skillData.baseSkillType} 추가");
+            }
+
+            // 바로 장착
+            if (!inventory.equippedSkills.Contains(skillData))
+            {
+                if (inventory.equippedSkills.Count < 5)
+                {
+                    inventory.equippedSkills.Add(skillData);
+
+                    // SkillManager 업데이트
+                    StaffManager.Instance.UpdateEquippedSkills(inventory.equippedSkills);
+
+                    Debug.Log($"[디버그] {skillData.baseSkillType} 스킬 장착 완료! (슬롯 {inventory.equippedSkills.Count}/5)");
+                }
+                else
+                {
+                    Debug.LogWarning("스킬 슬롯이 가득 참 (5/5)");
+                }
+            }
+            else
+            {
+                Debug.Log($"{skillData.baseSkillType}은 이미 장착됨");
+            }
+        }
+        else
+        {
+            Debug.LogError("StaffInventory를 찾을 수 없음!");
+        }
+    }
+
+    // ===== 카드 효과 즉시 적용 =====
+
+    [ContextMenu("디버그/카드 효과/범위 +25%")]
+    public void DebugApplyRangeCard()
+    {
+        ApplyStatBoost(StatType.AllSkillRange, 25f);
+    }
+
+    [ContextMenu("디버그/카드 효과/범위 +50%")]
+    public void DebugApplyRangeCard50()
+    {
+        ApplyStatBoost(StatType.AllSkillRange, 50f);
+    }
+
+    [ContextMenu("디버그/카드 효과/데미지 +25%")]
+    public void DebugApplyDamageCard()
+    {
+        ApplyStatBoost(StatType.AllSkillDamage, 25f);
+    }
+
+    [ContextMenu("디버그/카드 효과/쿨타임 -25%")]
+    public void DebugApplyCooldownCard()
+    {
+        ApplyStatBoost(StatType.AllSkillCooldown, 25f);
+    }
+
+    [ContextMenu("디버그/카드 효과/영역 스킬 범위 +50%")]
+    public void DebugApplyAreaRangeCard()
+    {
+        ApplyStatBoost(StatType.AreaRange, 50f);
+    }
+
+    void ApplyStatBoost(StatType statType, float percentage)
+    {
+        if (player == null)
+        {
+            player = FindObjectOfType<Character>();
+        }
+
+        SkillManager skillManager = player?.GetComponent<SkillManager>();
+        if (skillManager == null)
+        {
+            Debug.LogError("SkillManager를 찾을 수 없습니다!");
+            return;
+        }
+
+        var allSkills = skillManager.GetAllSkills();
+        int affectedCount = 0;
+
+        foreach (var skill in allSkills)
+        {
+            bool affected = false;
+
+            switch (statType)
+            {
+                case StatType.AllSkillDamage:
+                    skill.damageMultiplier += (percentage / 100f);
+                    affected = true;
+                    break;
+
+                case StatType.AllSkillCooldown:
+                    skill.cooldownMultiplier *= (1f - percentage / 100f);
+                    affected = true;
+                    break;
+
+                case StatType.AllSkillRange:
+                    skill.rangeMultiplier += (percentage / 100f);
+                    affected = true;
+                    break;
+
+                case StatType.AreaRange:
+                    if (skill.skillData.HasTag(SkillTag.Area) || skill.skillData.baseSkillType == "Aura")
+                    {
+                        skill.rangeMultiplier += (percentage / 100f);
+                        affected = true;
+                    }
+                    break;
+            }
+
+            if (affected)
+            {
+                affectedCount++;
+                Debug.Log($"[디버그] {skill.skillData.baseSkillType}: {statType} +{percentage}% 적용");
+                Debug.Log($"  → 현재 배율 - DMG: {skill.damageMultiplier:F2}, CD: {skill.cooldownMultiplier:F2}, Range: {skill.rangeMultiplier:F2}");
+            }
+        }
+
+        Debug.Log($"[디버그 카드 효과] {affectedCount}개 스킬에 {statType} +{percentage}% 적용 완료!");
+    }
+
+    // ===== 스킬 정보 출력 =====
+
+    [ContextMenu("디버그/현재 스킬 정보 출력")]
+    public void DebugPrintSkillInfo()
+    {
+        if (player == null)
+        {
+            player = FindObjectOfType<Character>();
+        }
+
+        SkillManager skillManager = player?.GetComponent<SkillManager>();
+        if (skillManager != null)
+        {
+            skillManager.PrintSkillInfo();
+
+            // 추가 정보
+            var skills = skillManager.GetAllSkills();
+            foreach (var skill in skills)
+            {
+                Debug.Log($"[상세] {skill.skillData.baseSkillType}:");
+                Debug.Log($"  - Damage Multiplier: {skill.damageMultiplier:F2}");
+                Debug.Log($"  - Cooldown Multiplier: {skill.cooldownMultiplier:F2}");
+                Debug.Log($"  - Range Multiplier: {skill.rangeMultiplier:F2}");
+            }
+        }
+    }
+
+    [ContextMenu("디버그/오라 상태 확인")]
+    public void DebugCheckAuraStatus()
+    {
+        if (player == null)
+        {
+            player = FindObjectOfType<Character>();
+        }
+
+        Transform aura = player.transform.Find("PermanentAura");
+        if (aura != null)
+        {
+            var dotArea = aura.GetComponent<ElementalDOTArea>();
+            if (dotArea != null)
+            {
+                Debug.Log($"[오라 상태]");
+                Debug.Log($"  - Radius: {dotArea.radius}");
+                Debug.Log($"  - DPS: {dotArea.damagePerSecond}");
+
+                var collider = aura.GetComponent<SphereCollider>();
+                if (collider != null)
+                {
+                    Debug.Log($"  - Collider Radius: {collider.radius}");
+                }
+
+                var particle = aura.Find("Freeze circle")?.GetComponent<ParticleSystem>();
+                if (particle != null)
+                {
+                    var main = particle.main;
+                    Debug.Log($"  - Particle Size: X={main.startSizeXMultiplier}, Y={main.startSizeYMultiplier}");
+                    Debug.Log($"  - Particle Scale: {particle.transform.localScale}");
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("오라가 없습니다!");
+        }
+    }
+
+    // 기존 메서드들...
     void Update()
     {
         if (currentState == GameState.Playing && isStageActive)
@@ -135,7 +429,7 @@ public class GameManager : MonoBehaviour
     public void AddExperience(int expAmount)
     {
         currentExp += expAmount;
-        Debug.Log($"경험치 +{expAmount} (총: {currentExp}/{expToNextLevel})");
+        //Debug.Log($"경험치 +{expAmount} (총: {currentExp}/{expToNextLevel})");
 
         while (currentExp >= expToNextLevel && currentLevel < timelineConfig.maxLevel)
         {

@@ -24,7 +24,7 @@ MonoBehaviour:
   damagePerLevel: 10
   cooldownReductionPerLevel: 0.1
   rangeIncreasePerLevel: 0.5
-  skillPrefab: {fileID: 8909891656948955754, guid: 1f38a0929bcda9d45a9ed194b924e40f, type: 3}
+  skillPrefab: {fileID: 1133349686823325353, guid: 112d04e7d6e40964cbf5abc939667582, type: 3}
   hitEffectPrefab: {fileID: 0}
   castEffectPrefab: {fileID: 0}
   canLevelUp: 1

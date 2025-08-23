@@ -18,13 +18,13 @@ MonoBehaviour:
   description: "\uC9C0\uC18D \uD53C\uD574\uB97C \uC8FC\uB294 \uC601\uC5ED\uC744 \uC0DD\uC131\uD569\uB2C8\uB2E4"
   skillIcon: {fileID: 0}
   baseDamage: 30
-  baseCooldown: 5
-  baseRange: 5
+  baseCooldown: 2
+  baseRange: 2
   maxLevel: 5
   damagePerLevel: 10
   cooldownReductionPerLevel: 0.1
   rangeIncreasePerLevel: 0.5
-  skillPrefab: {fileID: 0}
+  skillPrefab: {fileID: 4014949198211104017, guid: 672460b44f995484e9a1b9ed098fda78, type: 3}
   hitEffectPrefab: {fileID: 0}
   castEffectPrefab: {fileID: 0}
   canLevelUp: 1
