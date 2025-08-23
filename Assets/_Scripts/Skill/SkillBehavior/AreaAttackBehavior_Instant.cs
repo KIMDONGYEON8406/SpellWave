@@ -1,50 +1,114 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 [CreateAssetMenu(fileName = "Area Instant", menuName = "SpellWave/Skills/Behaviors/Area/Instant")]
-public class AreaAttackBehavior_Instant : AreaAttackBehavior
+public class AreaAttackBehavior_Instant : SkillBehavior
 {
-    [Header("즉시 폭발 설정")] //익스플로전타입 
-    public float explosionVisualScale = 1.5f;
-    public float knockbackForce = 5f;
-    public bool showShockwave = true;
+    [Header("익스플로전 설정")]
+    public float explosionDelay = 0.5f;
 
     public override void Execute(SkillExecutionContext context)
     {
-        // 익스플로전 특성: 플레이어 중심, 즉시 폭발
-        centerOnCaster = true;
-        explosionDelay = 0f;
+        Character character = context.Caster.GetComponent<Character>();
+        float searchRange = character.AttackRange;
 
-        // 기본 폭발 처리
-        base.Execute(context);
+        Collider[] nearbyEnemies = Physics.OverlapSphere(
+            context.Caster.transform.position,
+            searchRange,
+            LayerMask.GetMask("Enemy")
+        );
 
-        // 폭발 시각 효과
-        if (context.HitEffectPrefab != null)
+        if (nearbyEnemies.Length == 0)
         {
-            GameObject explosion = Object.Instantiate(
-                context.HitEffectPrefab,
-                context.Caster.transform.position,
-                Quaternion.identity
-            );
-
-            explosion.transform.localScale = Vector3.one * context.Range * explosionVisualScale;
-            Object.Destroy(explosion, 2f);
+            Debug.Log("[Explosion] 범위 내 적 없음");
+            return;
         }
 
-        // 충격파 효과 (선택)
-        if (showShockwave)
+        int randomIndex = Random.Range(0, nearbyEnemies.Length);
+        Vector3 explosionCenter = nearbyEnemies[randomIndex].transform.position;
+
+        if (explosionDelay > 0)
         {
-            CreateShockwave(context);
+            context.Caster.GetComponent<MonoBehaviour>().StartCoroutine(
+                DelayedExplosion(context, explosionCenter)
+            );
+        }
+        else
+        {
+            PerformExplosion(context, explosionCenter);
         }
     }
 
-    void CreateShockwave(SkillExecutionContext context)
+    IEnumerator DelayedExplosion(SkillExecutionContext context, Vector3 explosionCenter)
     {
-        // 충격파 이펙트 생성 (나중에 구현)
-        Debug.Log("폭발 충격파 발생!");
+        CreateWarningEffect(explosionCenter, context.Range);
+        yield return new WaitForSeconds(explosionDelay); 
+        PerformExplosion(context, explosionCenter);
+    }
+
+    void PerformExplosion(SkillExecutionContext context, Vector3 explosionCenter)
+    {
+        float explosionRadius = context.Range;
+
+        Collider[] victims = Physics.OverlapSphere(explosionCenter, explosionRadius, LayerMask.GetMask("Enemy"));
+
+        foreach (Collider enemy in victims)
+        {
+            var enemyAI = enemy.GetComponent<EnemyAI>();
+            if (enemyAI != null)
+            {
+                enemyAI.TakeDamage(context.Damage);
+
+                var effectApplier = enemy.GetComponent<UnifiedPassiveEffect>();
+                if (effectApplier == null)
+                {
+                    effectApplier = enemy.gameObject.AddComponent<UnifiedPassiveEffect>();
+                }
+                effectApplier.ApplyEffect(context.Passive.type, context.Passive, context.Damage);
+            }
+        }
+
+        if (context.SkillPrefab != null)
+        {
+            GameObject explosion = Object.Instantiate(
+                context.SkillPrefab,
+                explosionCenter,
+                Quaternion.identity
+            );
+
+            // 프리팹 콜라이더가 0.5라면, 2배로 스케일
+            float prefabRadius = 0.5f;  // 프리팹의 콜라이더 반지름
+            float scaleMultiplier = explosionRadius / prefabRadius;
+
+            explosion.transform.localScale = Vector3.one * scaleMultiplier;
+            // Base Range 2 → 스케일 4
+            // Base Range 3 → 스케일 6
+
+            Object.Destroy(explosion, 2f);
+        }
+
+        Debug.Log($"[Explosion] 폭발! 위치: {explosionCenter}, 피해자: {victims.Length}명");
+    }
+
+    void CreateWarningEffect(Vector3 position, float radius)
+    {
+        GameObject warning = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        warning.transform.position = position + Vector3.up * 0.01f;
+        warning.transform.localScale = new Vector3(radius * 2, 0.01f, radius * 2);
+
+        Object.Destroy(warning.GetComponent<Collider>());
+
+        var renderer = warning.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            renderer.material.color = new Color(1f, 0f, 0f, 0.3f);
+        }
+
+        Object.Destroy(warning, explosionDelay);
     }
 
     public override bool RequiresTarget()
     {
-        return false; // 익스플로전은 타겟 불필요
+        return false;
     }
 }

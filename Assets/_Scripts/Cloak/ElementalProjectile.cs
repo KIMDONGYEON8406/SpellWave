@@ -5,6 +5,7 @@ public class ElementalProjectile : MonoBehaviour
     [Header("발사체 설정")]
     public float speed = 10f;
     public float lifetime = 3f;
+    public bool isHoming = false;  // 유도 여부 추가
 
     private float damage;
     private ElementType elementType;
@@ -19,14 +20,14 @@ public class ElementalProjectile : MonoBehaviour
         elementType = element;
         passiveEffect = passive;
         direction = dir.normalized;
-        initialized = true;  // 초기화 완료
+        initialized = true;
+
+        // HomingComponent 체크
+        isHoming = GetComponent<HomingComponent>() != null;
 
         UpdateVisualByElement();
         Destroy(gameObject, lifetime);
 
-        //Debug.Log($"발사체 초기화: 데미지={damage}, 방향={direction}, 속도={speed}");
-
-        // Rigidbody 즉시 설정
         SetupRigidbody();
     }
 
@@ -65,10 +66,19 @@ public class ElementalProjectile : MonoBehaviour
 
     void FixedUpdate()
     {
-        // 계속 속도 유지
-        if (rb != null && initialized && speed > 0)
+        // 유도 미사일이 아닌 경우만 속도 제어
+        if (!isHoming && rb != null && initialized && speed > 0)
         {
             rb.velocity = direction * speed;
+
+            // 직진 발사체도 회전 처리 추가!
+            var projectileOrientation = GetComponent<ProjectileOrientation>();
+            if (projectileOrientation != null && projectileOrientation.isVertical)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                targetRotation = targetRotation * Quaternion.Euler(projectileOrientation.rotationOffset);
+                transform.rotation = targetRotation;
+            }
         }
     }
 
@@ -78,26 +88,40 @@ public class ElementalProjectile : MonoBehaviour
 
         if (other.CompareTag("Enemy"))
         {
+            // 관통 컴포넌트 확인
+            var pierce = GetComponent<PierceComponent>();
+
+            // 이미 관통한 적인지 확인
+            if (pierce != null && pierce.HasPierced(other.gameObject))
+            {
+                Debug.Log($"이미 관통한 적: {other.name} - 스킵");
+                return;  // 이미 데미지 준 적은 무시
+            }
+
+            // 데미지 처리
             EnemyAI enemy = other.GetComponent<EnemyAI>();
             if (enemy != null)
             {
                 enemy.TakeDamage(damage);
                 ApplyPassiveToEnemy(enemy);
-
                 Debug.Log($"적 타격! {other.name}에게 {damage} 데미지!");
             }
-            else
+
+            // 관통 처리 부분
+            if (pierce != null)
             {
-                Debug.LogError($"{other.name}에 EnemyAI 없음!");
+                pierce.OnPierce(other.gameObject);
+
+                if (pierce.CanPierce())
+                {
+                    Debug.Log($"관통! 남은 횟수: {pierce.RemainingPierceCount}");  // 프로퍼티 사용
+                    return;
+                }
             }
 
-            // 관통 체크
-            var pierce = GetComponent<PierceComponent>();
-            if (pierce == null || !pierce.CanPierce())
-            {
-                Debug.Log("발사체 파괴");
-                Destroy(gameObject);
-            }
+            // 관통 불가능하면 파괴
+            Debug.Log("발사체 파괴");
+            Destroy(gameObject);
         }
     }
 

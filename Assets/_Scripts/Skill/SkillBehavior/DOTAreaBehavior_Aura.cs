@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "DOT Aura", menuName = "SpellWave/Skills/Behaviors/DOT/Aura")]
-public class DOTAreaBehavior_Aura : DOTAreaBehavior
+public class DOTAreaBehavior_Aura : SkillBehavior
 {
     [Header("오라 설정")]
     public bool followCaster = true;

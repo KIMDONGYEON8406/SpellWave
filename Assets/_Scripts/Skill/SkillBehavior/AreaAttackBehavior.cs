@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "Area Attack Behavior", menuName = "SpellWave/Skills/Behaviors/AreaAttack")]
+[CreateAssetMenu(fileName = "Area Attack", menuName = "SpellWave/Skills/Behaviors/Area/Base")]
 public class AreaAttackBehavior : SkillBehavior
 {
     [Header("영역 공격 설정")]

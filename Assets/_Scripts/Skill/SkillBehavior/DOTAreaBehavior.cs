@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "DOT Area Behavior", menuName = "SpellWave/Skills/Behaviors/DOTArea")]
+[CreateAssetMenu(fileName = "DOT Area", menuName = "SpellWave/Skills/Behaviors/DOT/Base")]
 public class DOTAreaBehavior : SkillBehavior
 {
     [Header("지속 영역 설정")]

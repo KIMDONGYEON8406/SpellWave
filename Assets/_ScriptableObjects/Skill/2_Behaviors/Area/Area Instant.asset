@@ -15,7 +15,4 @@ MonoBehaviour:
   behaviorName: "\uAE30\uBCF8 \uB3D9\uC791"
   description: "\uC2A4\uD0AC \uB3D9\uC791 \uC124\uBA85"
   centerOnCaster: 1
-  explosionDelay: 0
-  explosionVisualScale: 1.5
-  knockbackForce: 5
-  showShockwave: 1
+  explosionDelay: 1
