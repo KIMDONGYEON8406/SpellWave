@@ -17,8 +17,8 @@ MonoBehaviour:
   skillTags: 00000000
   description: "\uBE60\uB978 \uC18D\uB3C4\uC758 \uB9C8\uBC95 \uD654\uC0B4\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4"
   skillIcon: {fileID: 0}
-  baseDamage: 30
-  baseCooldown: 1
+  baseDamage: 10
+  baseCooldown: 5
   baseRange: 10
   maxLevel: 5
   damagePerLevel: 7

@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
 
     [Header("게임 상태")]
     public GameState currentState = GameState.Playing;
-    public Character player;
+    public Player player;
 
     [Header("초기 장비")]
     public StaffData defaultStaff;
@@ -70,7 +70,7 @@ public class GameManager : MonoBehaviour
 
         if (player == null)
         {
-            player = GameObject.FindObjectOfType<Character>();
+            player = GameObject.FindObjectOfType<Player>();
             if (player != null && player.tag != "Player")
             {
                 player.tag = "Player";
@@ -250,7 +250,7 @@ public class GameManager : MonoBehaviour
     {
         if (player == null)
         {
-            player = FindObjectOfType<Character>();
+            player = FindObjectOfType<Player>();
         }
 
         SkillManager skillManager = player?.GetComponent<SkillManager>();
@@ -311,7 +311,7 @@ public class GameManager : MonoBehaviour
     {
         if (player == null)
         {
-            player = FindObjectOfType<Character>();
+            player = FindObjectOfType<Player>();
         }
 
         SkillManager skillManager = player?.GetComponent<SkillManager>();
@@ -336,7 +336,7 @@ public class GameManager : MonoBehaviour
     {
         if (player == null)
         {
-            player = FindObjectOfType<Character>();
+            player = FindObjectOfType<Player>();
         }
 
         Transform aura = player.transform.Find("PermanentAura");

@@ -8,17 +8,17 @@ public class SkillManager : MonoBehaviour
     public int maxSkills = 3;
 
     private Dictionary<string, SkillInstance> equippedSkills = new Dictionary<string, SkillInstance>();
-    private Character owner;
+    private Player owner;
 
     void Start()
     {
-        owner = GetComponent<Character>();
+        owner = GetComponent<Player>();
 
         if (owner == null)
         {
-            Debug.LogError("Character 컴포넌트를 찾을 수 없습니다!");
-            owner = gameObject.AddComponent<Character>();
-            Debug.Log("Character 컴포넌트 자동 생성");
+            Debug.LogError("Player 컴포넌트를 찾을 수 없습니다!");
+            owner = gameObject.AddComponent<Player>();
+            Debug.Log("Player 컴포넌트 자동 생성");
         }
     }
 
@@ -28,10 +28,10 @@ public class SkillManager : MonoBehaviour
 
         if (owner == null)
         {
-            owner = GetComponent<Character>();
+            owner = GetComponent<Player>();
             if (owner == null)
             {
-                owner = gameObject.AddComponent<Character>();
+                owner = gameObject.AddComponent<Player>();
             }
         }
 
@@ -117,7 +117,7 @@ public class SkillManager : MonoBehaviour
                      $"(데미지: {skill.CurrentDamage:F1}, 쿨타임: {skill.CurrentCooldown:F1}초)");
         }
     }
-    
+
     private void CreateAuraImmediately(SkillInstance auraSkill)
     {
         Debug.Log("[SkillManager] 오라 스킬 획득! 즉시 생성합니다.");
@@ -167,6 +167,6 @@ public class SkillManager : MonoBehaviour
 
     public float GetPlayerAttackSpeed()
     {
-        return owner != null ? owner.AttackSpeed : 0f;
+        return 1f;  // 고정값 (사용 안 함)
     }
 }

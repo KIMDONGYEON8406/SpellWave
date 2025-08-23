@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   behaviorName: "\uAE30\uBCF8 \uB3D9\uC791"
   description: "\uC2A4\uD0AC \uB3D9\uC791 \uC124\uBA85"
-  projectileSpeed: 10
+  projectileSpeed: 15
   isHoming: 0
   pierceCount: 0
   arrowSpeed: 15
@@ -23,5 +23,4 @@ MonoBehaviour:
   spreadAngle: 15
   fanPattern: 1
   enablePierce: 1
-  pierceCount: 2
   damageReduction: 0.8

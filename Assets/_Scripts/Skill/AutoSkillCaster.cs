@@ -52,6 +52,9 @@ public class AutoSkillCaster : MonoBehaviour
 
     void FindNearestTarget()
     {
+        Player player = GetComponent<Player>();
+        float searchRange = player != null ? player.AttackRange : 10f;
+
         Collider[] enemies = Physics.OverlapSphere(transform.position, targetSearchRadius, enemyLayer);
 
         if (enemies.Length == 0)

@@ -39,7 +39,7 @@ public class HomingComponent : MonoBehaviour
         if (player != null)
         {
             originalCaster = player.transform;
-            Character character = player.GetComponent<Character>();
+            Player character = player.GetComponent<Player>();
             if (character != null)
             {
                 searchRadius = character.AttackRange;

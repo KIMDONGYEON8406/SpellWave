@@ -34,20 +34,23 @@ public enum CardType
 
 public enum StatType
 {
-    // 전체 스킬
-    AllSkillDamage,        // 모든 스킬 데미지
-    AllSkillCooldown,      // 모든 스킬 쿨타임
-    AllSkillRange,         // 모든 스킬 범위
+    // 플레이어 스탯 (새로 추가)
+    PlayerHealth,        // 최대 체력 증가
+    PlayerMoveSpeed,     // 이동속도 증가
+    PlayerAttackPower,   // 공격력 증가
 
-    // 태그별 강화
-    SingleTargetDamage,    // 단일 타겟 강화
-    MultiTargetDamage,     // 다중 타겟 강화
-    ProjectileDamage,      // 발사체 강화
-    ProjectileSpeed,       // 발사체 속도
-    AreaDamage,            // 범위 강화
-    AreaRange,             // 범위 크기
-    DOTDamage,             // 지속 데미지 강화
-    DOTDuration,           // 지속 시간
+    // 전체 스킬 스탯
+    AllSkillDamage,      // 모든 스킬 데미지
+    AllSkillCooldown,    // 모든 스킬 쿨타임
+    AllSkillRange,       // 모든 스킬 범위
+
+    // 태그별 스킬 스탯
+    ProjectileDamage,    // 발사체 데미지
+    ProjectileSpeed,     // 발사체 속도
+    AreaDamage,          // 범위 데미지
+    AreaRange,           // 범위 크기
+    DOTDamage,           // 지속 데미지
+    DOTDuration,         // 지속 시간
 }
 
 public enum CardRarity

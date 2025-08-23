@@ -146,14 +146,30 @@ public class CardManager : MonoBehaviour
                 ApplyStatCard(card);
                 break;
             case CardType.SkillCard:
-                ApplySkillCard(card);
+                ApplySkillStatCard(card);
                 break;
         }
     }
 
     private void ApplyStatCard(CardData card)
     {
-        Character player = GameManager.Instance.player;
+        // 플레이어 스탯인지 체크
+        switch (card.statType)
+        {
+            case StatType.PlayerHealth:
+            case StatType.PlayerMoveSpeed:
+            case StatType.PlayerAttackPower:
+                ApplyPlayerStatCard(card);
+                break;
+            default:
+                ApplySkillStatCard(card);
+                break;
+        }
+    }
+
+    private void ApplySkillStatCard(CardData card)
+    {
+        Player player = GameManager.Instance.player;
         if (player == null)
         {
             Debug.LogError("플레이어를 찾을 수 없습니다!");
@@ -177,31 +193,43 @@ public class CardManager : MonoBehaviour
 
         Debug.Log($"{GetStatName(card.statType)} {card.increasePercentage}% 증가 적용!");
     }
-
-    private void ApplySkillCard(CardData card)
+    // 플레이어 스탯 적용 (새 메서드)
+    private void ApplyPlayerStatCard(CardData card)
     {
-        if (card.skillToAdd == null)
+        Player player = GameManager.Instance.player;
+        if (player == null)
         {
-            Debug.LogError("스킬 카드에 skillToAdd가 없습니다!");
+            Debug.LogError("플레이어를 찾을 수 없습니다!");
             return;
         }
 
-        var inventory = StaffManager.Instance.GetCurrentInventory();
-
-        if (inventory != null)
+        PlayerStats stats = player.GetPlayerStats();
+        if (stats == null)
         {
-            // 스킬 장착
-            if (inventory.EquipNextSkill(card.skillToAdd))
-            {
-                // 스킬매니저 업데이트
-                StaffManager.Instance.UpdateEquippedSkills(inventory.equippedSkills);
-                playerSkills.Add(card.skillToAdd);
-                Debug.Log($"스킬 장착 성공: {card.skillToAdd.baseSkillType}");
-            }
-            else
-            {
-                Debug.LogWarning($"스킬 장착 실패: {card.skillToAdd.baseSkillType}");
-            }
+            Debug.LogError("PlayerStats를 찾을 수 없습니다!");
+            return;
+        }
+
+        switch (card.statType)
+        {
+            case StatType.PlayerHealth:
+                float oldMax = stats.maxHP;
+                stats.maxHP *= (1f + card.increasePercentage / 100f);
+                stats.currentHP += (stats.maxHP - oldMax); // 증가분만큼 현재 체력도 증가
+                Debug.Log($"최대 체력 {card.increasePercentage}% 증가! ({oldMax} → {stats.maxHP})");
+                break;
+
+            case StatType.PlayerMoveSpeed:
+                float oldSpeed = stats.moveSpeed;
+                stats.moveSpeed *= (1f + card.increasePercentage / 100f);
+                Debug.Log($"이동속도 {card.increasePercentage}% 증가! ({oldSpeed} → {stats.moveSpeed})");
+                break;
+
+            case StatType.PlayerAttackPower:
+                float oldPower = stats.attackPower;
+                stats.attackPower *= (1f + card.increasePercentage / 100f);
+                Debug.Log($"공격력 {card.increasePercentage}% 증가! ({oldPower} → {stats.attackPower})");
+                break;
         }
     }
 
@@ -225,22 +253,22 @@ public class CardManager : MonoBehaviour
                 break;
 
             // 단일 타겟 강화
-            case StatType.SingleTargetDamage:
-                if (skill.skillData.HasTag(SkillTag.SingleTarget))
-                {
-                    skill.damageMultiplier += (percentage / 100f);
-                    Debug.Log($"{skill.skillData.baseSkillType} - 단일 타겟 강화 적용!");
-                }
-                break;
+            //case StatType.SingleTargetDamage:
+            //    if (skill.skillData.HasTag(SkillTag.SingleTarget))
+            //    {
+            //        skill.damageMultiplier += (percentage / 100f);
+            //        Debug.Log($"{skill.skillData.baseSkillType} - 단일 타겟 강화 적용!");
+            //    }
+            //    break;
 
             // 다중 타겟 강화
-            case StatType.MultiTargetDamage:
-                if (skill.skillData.HasTag(SkillTag.MultiTarget))
-                {
-                    skill.damageMultiplier += (percentage / 100f);
-                    Debug.Log($"{skill.skillData.baseSkillType} - 다중 타겟 강화 적용!");
-                }
-                break;
+            //case StatType.MultiTargetDamage:
+            //    if (skill.skillData.HasTag(SkillTag.MultiTarget))
+            //    {
+            //        skill.damageMultiplier += (percentage / 100f);
+            //        Debug.Log($"{skill.skillData.baseSkillType} - 다중 타겟 강화 적용!");
+            //    }
+            //    break;
 
             // 발사체 강화
             case StatType.ProjectileDamage:
@@ -299,11 +327,17 @@ public class CardManager : MonoBehaviour
     {
         switch (type)
         {
+            // 플레이어 스탯 추가
+            case StatType.PlayerHealth: return "최대 체력";
+            case StatType.PlayerMoveSpeed: return "이동 속도";
+            case StatType.PlayerAttackPower: return "공격력";
+
+            // 기존 스킬 스탯
             case StatType.AllSkillDamage: return "모든 스킬 데미지";
             case StatType.AllSkillCooldown: return "모든 스킬 쿨타임";
             case StatType.AllSkillRange: return "모든 스킬 범위";
-            case StatType.SingleTargetDamage: return "단일 타겟 데미지";
-            case StatType.MultiTargetDamage: return "다중 타겟 데미지";
+            //case StatType.SingleTargetDamage: return "단일 타겟 데미지";
+            //case StatType.MultiTargetDamage: return "다중 타겟 데미지";
             case StatType.ProjectileDamage: return "발사체 데미지";
             case StatType.ProjectileSpeed: return "발사체 속도";
             case StatType.AreaDamage: return "범위 공격 데미지";

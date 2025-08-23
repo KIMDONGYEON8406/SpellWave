@@ -18,7 +18,7 @@ public class ProjectileBehavior_Homing : ProjectileBehavior
 
     public override void Execute(SkillExecutionContext context)
     {
-        Character character = context.Caster.GetComponent<Character>();
+        Player character = context.Caster.GetComponent<Player>();
         float searchRange = character != null ? character.AttackRange : 10f;
 
         Collider[] nearbyEnemies = Physics.OverlapSphere(

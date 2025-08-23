@@ -9,7 +9,7 @@ public class AreaAttackBehavior_Instant : SkillBehavior
 
     public override void Execute(SkillExecutionContext context)
     {
-        Character character = context.Caster.GetComponent<Character>();
+        Player character = context.Caster.GetComponent<Player>();
         float searchRange = character.AttackRange;
 
         Collider[] nearbyEnemies = Physics.OverlapSphere(

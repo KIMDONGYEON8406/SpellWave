@@ -11,7 +11,7 @@ public class CloakManager : MonoBehaviour
     [Header("보유 망토 목록")]
     public List<CloakData> unlockedCloaks = new List<CloakData>();
 
-    private Character player;
+    private Player player;
 
     void Awake()
     {

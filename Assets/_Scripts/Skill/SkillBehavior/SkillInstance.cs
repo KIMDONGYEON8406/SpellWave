@@ -13,16 +13,24 @@ public class SkillInstance : MonoBehaviour
     [HideInInspector] public float durationMultiplier = 1f;
 
     private float lastUseTime;
-    private Character owner;
+    private Player owner;
 
     public float CurrentDamage
+{
+    get
     {
-        get
+        // Player로 변경
+        float playerAttackPower = 10f;
+        Player player = GetComponentInParent<Player>();
+        if (player != null)
         {
-            float baseDamage = skillData.GetDamageAtLevel(currentLevel);
-            return baseDamage * damageMultiplier;
+            playerAttackPower = player.AttackPower;
         }
+        
+        float baseDamage = skillData.GetDamageAtLevel(currentLevel);
+        return (playerAttackPower + baseDamage) * damageMultiplier;
     }
+}
 
     public float CurrentCooldown
     {
@@ -58,15 +66,15 @@ public class SkillInstance : MonoBehaviour
         }
     }
 
-    public void Initialize(Character character, SkillData data)
+    public void Initialize(Player player, SkillData data)
     {
-        owner = character;
+        owner = player;
         skillData = data;
         currentLevel = 1;
 
         if (owner == null)
         {
-            Debug.LogError("Character owner가 null입니다!");
+            Debug.LogError("Player owner가 null입니다!");
         }
 
         if (skillData == null)
