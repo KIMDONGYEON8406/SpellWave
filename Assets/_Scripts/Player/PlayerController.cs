@@ -5,7 +5,15 @@ public class PlayerController : MonoBehaviour
     [Header("플레이어 데이터")]
     [SerializeField] private PlayerStats playerStats; // ScriptableObject 참조
 
-    // 런타임 변수들 (ScriptableObject 값을 복사해서 사용)
+    [Header("입력 소스")]
+    [Tooltip("캔버스에 배치한 조이스틱(예: UJoystick/Content/Prefab/Joystick) 컴포넌트를 연결하세요.")]
+    [SerializeField] private bl_Joystick joystick;
+
+
+    [Header("이동 설정")]
+    [SerializeField] private float keyboardScale = 1f; // 키보드 감도 스케일
+    [SerializeField] private float joystickScale = 1f; // 조이스틱 감도 스케일
+
     private float currentMoveSpeed;
     private float currentRotationSpeed;
 
@@ -18,13 +26,10 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
 
-        // ScriptableObject에서 값들을 복사
         InitializeStats();
 
-        // 프레임 제한 추가 (모바일 최적화)
         Application.targetFrameRate = 60;
         QualitySettings.vSyncCount = 1;
-        Debug.Log("마법사 준비 완료!");
     }
 
     void InitializeStats()
@@ -33,7 +38,7 @@ public class PlayerController : MonoBehaviour
         {
             currentMoveSpeed = playerStats.moveSpeed;
             currentRotationSpeed = playerStats.rotationSpeed;
-            playerStats.ResetToDefault(); // 게임 시작 시 체력 리셋
+            playerStats.ResetToDefault();
         }
         else
         {
@@ -45,18 +50,7 @@ public class PlayerController : MonoBehaviour
     {
         HandleInput();
         UpdateAnimation();
-
-        // 런타임에 스탯이 변경될 수 있으므로 업데이트
         UpdateStatsFromSO();
-    }
-
-    void UpdateStatsFromSO()
-    {
-        if (playerStats != null)
-        {
-            currentMoveSpeed = playerStats.moveSpeed;
-            currentRotationSpeed = playerStats.rotationSpeed;
-        }
     }
 
     void FixedUpdate()
@@ -64,49 +58,73 @@ public class PlayerController : MonoBehaviour
         HandleMovement();
     }
 
+    void UpdateStatsFromSO()
+    {
+        if (playerStats == null) return;
+        currentMoveSpeed = playerStats.moveSpeed;
+        currentRotationSpeed = playerStats.rotationSpeed;
+    }
+
+    // ───────────────────────────────────────────────────────────
+    // 입력 처리: 키보드 + 조이스틱을 합산 (우선순위/데드존 없음)
+    // ───────────────────────────────────────────────────────────
     void HandleInput()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-        moveDirection = new Vector3(horizontal, 0, vertical).normalized;
+        // 1) 키보드 입력(WASD)
+        Vector2 kb = new Vector2(
+            Input.GetAxisRaw("Horizontal"),
+            Input.GetAxisRaw("Vertical")
+        ) * keyboardScale;
+
+        // 2) 조이스틱 입력(없으면 0)
+        Vector2 js = Vector2.zero;
+        if (joystick != null)
+        {
+            js = new Vector2(joystick.Horizontal, joystick.Vertical) * joystickScale;
+        }
+
+        // 3) 합산 후 클램프 (대각선/동시 입력 과도 속도 방지)
+        Vector2 sum = kb + js;
+        if (sum.sqrMagnitude > 1f) sum.Normalize();
+
+        moveDirection = new Vector3(sum.x, 0f, sum.y);
     }
 
     void HandleMovement()
     {
-        if (moveDirection.magnitude > 0.1f)
+        if (moveDirection.sqrMagnitude > 0.0001f)
         {
-            rb.velocity = new Vector3(
+            // 이동
+            Vector3 vel = new Vector3(
                 moveDirection.x * currentMoveSpeed,
                 rb.velocity.y,
                 moveDirection.z * currentMoveSpeed
             );
+            rb.velocity = vel;
 
-            Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
+            // 회전
+            Quaternion targetRot = Quaternion.LookRotation(moveDirection);
             transform.rotation = Quaternion.Slerp(
                 transform.rotation,
-                targetRotation,
+                targetRot,
                 currentRotationSpeed * Time.deltaTime
             );
         }
         else
         {
-            rb.velocity = new Vector3(0, rb.velocity.y, 0);
+            // 정지 시 수평 속도 0
+            rb.velocity = new Vector3(0f, rb.velocity.y, 0f);
         }
     }
 
     void UpdateAnimation()
     {
-        bool isMoving = moveDirection.magnitude > 0.1f;
+        if (animator == null) return;
+        bool isMoving = moveDirection.sqrMagnitude > 0.0001f;
         animator.SetBool("IsMoving", isMoving);
     }
 
-    // 외부에서 PlayerStats에 접근할 수 있는 함수
-    public PlayerStats GetPlayerStats()
-    {
-        return playerStats;
-    }
-
-    // 체력 관련 함수들
+    // ───────────── 체력/사망 처리 (기존 테스트 로직 유지) ─────────────
     public void TakeDamage(float damage)
     {
         if (playerStats != null)
@@ -122,7 +140,8 @@ public class PlayerController : MonoBehaviour
     private void Die()
     {
         Debug.Log("플레이어 사망!");
-        // 게임 오버 처리
+        // TODO: 게임 오버 처리
     }
-   
+
+    public PlayerStats GetPlayerStats() => playerStats;
 }
