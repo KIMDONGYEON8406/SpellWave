@@ -82,6 +82,7 @@ public class ElementalProjectile : MonoBehaviour
         }
     }
 
+
     void OnTriggerEnter(Collider other)
     {
         Debug.Log($"충돌: {other.name}, Tag: {other.tag}, Layer: {other.gameObject.layer}");

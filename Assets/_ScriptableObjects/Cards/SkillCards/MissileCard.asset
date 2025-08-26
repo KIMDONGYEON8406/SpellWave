@@ -18,8 +18,8 @@ MonoBehaviour:
   cardIcon: {fileID: 0}
   cardBackground: {fileID: 0}
   cardType: 1
-  statType: 0
-  increasePercentage: 10
-  skillToAdd: {fileID: 11400000, guid: 88c1692e682dbaa4096cb284d487e73c, type: 2}
+  cardEffects:
+  - effect: {fileID: 11400000, guid: 9e4e04f6630756946b93bd8f936f5101, type: 2}
+    value: 1
   rarity: 0
   rarityColor: {r: 1, g: 1, b: 1, a: 1}

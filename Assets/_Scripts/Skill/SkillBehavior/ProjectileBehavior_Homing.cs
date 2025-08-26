@@ -5,15 +5,15 @@ using System.Collections.Generic;
 [CreateAssetMenu(fileName = "Projectile Homing", menuName = "SpellWave/Skills/Behaviors/Projectile/Homing")]
 public class ProjectileBehavior_Homing : ProjectileBehavior
 {
-     [Header("유도 발사체 설정")]
+    [Header("유도 발사체 설정")]
     public float defaultSpeed = 8f;
     public float homingRotationSpeed = 5f;
     public float homingMaxAngle = 45f;
 
     [Header("발사 모드")]
-    public bool singleShot = false;  // true: 1발, false: 다연장
-    public int missileCount = 5;  // 다연장일 때 개수
-    public float launchDelay = 0.1f;  // 다연장일 때 간격
+    public bool singleShot = false;
+    public int missileCount = 5;
+    public float launchDelay = 0.1f;
     public float launchHeight = 1.5f;
 
     public override void Execute(SkillExecutionContext context)
@@ -33,9 +33,24 @@ public class ProjectileBehavior_Homing : ProjectileBehavior
             return;
         }
 
+        // 발사체 개수 체크 추가
+        var countModifier = context.Caster.GetComponent<ProjectileCountModifier>();
+        if (countModifier != null)
+        {
+            string skillName = "Missile"; // 또는 context에서 가져오기
+            int totalProjectiles = countModifier.GetTotalCount(skillName);
+
+            if (totalProjectiles > 1)
+            {
+                // 다중 발사체 처리
+                LaunchMultipleProjectiles(context, nearbyEnemies, totalProjectiles);
+                return;
+            }
+        }
+
+        // 기존 로직
         if (singleShot)
         {
-            // 단일 발사 - 가장 가까운 적 1명에게 1발
             Transform closestTarget = GetClosestEnemy(nearbyEnemies, context.Caster.transform);
             if (closestTarget != null)
             {
@@ -44,13 +59,90 @@ public class ProjectileBehavior_Homing : ProjectileBehavior
         }
         else
         {
-            // 다연장 발사 - 여러 발
             List<Transform> targets = AssignTargets(nearbyEnemies, missileCount);
             context.Caster.GetComponent<MonoBehaviour>().StartCoroutine(
                 LaunchMissiles(context, targets)
             );
         }
     }
+
+    void LaunchMultipleProjectiles(SkillExecutionContext context, Collider[] enemies, int count)
+    {
+        var countModifier = context.Caster.GetComponent<ProjectileCountModifier>();
+        Transform mainTarget = GetClosestEnemy(enemies, context.Caster.transform);
+
+        if (mainTarget == null) return;
+
+        Vector3 baseDirection = (mainTarget.position - context.Caster.transform.position).normalized;
+        Vector3[] directions = countModifier.GetProjectileDirections("Missile", baseDirection);
+
+        for (int i = 0; i < directions.Length; i++)
+        {
+            // 각 방향으로 미사일 발사
+            LaunchDirectionalMissile(context, mainTarget, directions[i], i);
+        }
+    }
+
+    void LaunchDirectionalMissile(SkillExecutionContext context, Transform target, Vector3 direction, int index)
+    {
+        Vector3 launchPos = context.Caster.transform.position +
+                           Vector3.up * launchHeight +
+                           direction * 0.5f;
+
+        GameObject projectile = null;
+
+        if (context.SkillPrefab != null)
+        {
+            projectile = Object.Instantiate(
+                context.SkillPrefab,
+                launchPos,
+                Quaternion.LookRotation(direction)
+            );
+        }
+        else
+        {
+            projectile = CreateDefaultMissile();
+            projectile.transform.position = launchPos;
+            projectile.transform.rotation = Quaternion.LookRotation(direction);
+        }
+
+        var rb = projectile.GetComponent<Rigidbody>();
+        if (rb == null)
+        {
+            rb = projectile.AddComponent<Rigidbody>();
+        }
+        rb.useGravity = false;
+        rb.isKinematic = false;
+        rb.velocity = direction * defaultSpeed;
+
+        var projScript = projectile.GetComponent<ElementalProjectile>();
+        if (projScript == null)
+        {
+            projScript = projectile.AddComponent<ElementalProjectile>();
+        }
+
+        projScript.speed = defaultSpeed;
+        projScript.Initialize(
+            context.Damage,
+            context.Element,
+            context.Passive,
+            direction
+        );
+
+        var homing = projectile.GetComponent<HomingComponent>();
+        if (homing == null)
+        {
+            homing = projectile.AddComponent<HomingComponent>();
+        }
+
+        homing.target = target;
+        homing.rotationSpeed = homingRotationSpeed * 2f;
+        homing.maxHomingAngle = homingMaxAngle;
+
+        Debug.Log($"[Missile #{index + 1}] 발사 (다중 발사체)");
+    }
+
+    // 나머지 메서드들은 기존과 동일...
     Transform GetClosestEnemy(Collider[] enemies, Transform caster)
     {
         Transform closest = null;
@@ -68,6 +160,7 @@ public class ProjectileBehavior_Homing : ProjectileBehavior
 
         return closest;
     }
+
     List<Transform> AssignTargets(Collider[] enemies, int missileNum)
     {
         List<Transform> targets = new List<Transform>();
@@ -108,7 +201,6 @@ public class ProjectileBehavior_Homing : ProjectileBehavior
 
     void LaunchSingleMissile(SkillExecutionContext context, Transform target, int index)
     {
-        // 기존 코드 동일...
         Vector3 spreadOffset = new Vector3(
             Random.Range(-0.5f, 0.5f),
             0,
@@ -135,7 +227,6 @@ public class ProjectileBehavior_Homing : ProjectileBehavior
             projectile.transform.position = launchPos;
         }
 
-        // Rigidbody 먼저 확인
         var rb = projectile.GetComponent<Rigidbody>();
         if (rb == null)
         {
@@ -144,26 +235,16 @@ public class ProjectileBehavior_Homing : ProjectileBehavior
         rb.useGravity = false;
         rb.isKinematic = false;
 
-        // 타겟 방향 계산
         Vector3 targetDirection = (target.position - launchPos).normalized;
+        projectile.transform.rotation = Quaternion.LookRotation(targetDirection);
 
-        // 미사일이 타겟을 바라보도록 회전
-        if (projectile != null)
-        {
-            projectile.transform.rotation = Quaternion.LookRotation(targetDirection);
-        }
-
-        // ElementalProjectile 설정
         var projScript = projectile.GetComponent<ElementalProjectile>();
         if (projScript == null)
         {
             projScript = projectile.AddComponent<ElementalProjectile>();
         }
 
-        // speed 먼저 설정!
         projScript.speed = defaultSpeed;
-
-        // Initialize 호출
         projScript.Initialize(
             context.Damage,
             context.Element,
@@ -171,10 +252,8 @@ public class ProjectileBehavior_Homing : ProjectileBehavior
             targetDirection
         );
 
-        // Initialize 후에 다시 속도 설정 (덮어쓰기 방지)
         rb.velocity = targetDirection * defaultSpeed;
 
-        // HomingComponent 설정
         var homing = projectile.GetComponent<HomingComponent>();
         if (homing == null)
         {
@@ -182,14 +261,10 @@ public class ProjectileBehavior_Homing : ProjectileBehavior
         }
 
         homing.target = target;
-        homing.rotationSpeed = homingRotationSpeed * 2f;  // 회전 속도 증가
+        homing.rotationSpeed = homingRotationSpeed * 2f;
         homing.maxHomingAngle = homingMaxAngle;
 
         Debug.Log($"[Missile #{index + 1}] 발사");
-        Debug.Log($"  타겟: {target.name} at {target.position}");
-        Debug.Log($"  방향: {targetDirection}");
-        Debug.Log($"  속도: {rb.velocity}");
-        Debug.Log($"  회전: {projectile.transform.rotation.eulerAngles}");
     }
 
     GameObject CreateDefaultMissile()
@@ -208,6 +283,6 @@ public class ProjectileBehavior_Homing : ProjectileBehavior
 
     public override bool RequiresTarget()
     {
-        return false;  // 자동 타겟팅
+        return false;
     }
 }

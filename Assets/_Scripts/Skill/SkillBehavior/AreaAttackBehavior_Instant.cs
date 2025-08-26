@@ -12,6 +12,15 @@ public class AreaAttackBehavior_Instant : SkillBehavior
         Player character = context.Caster.GetComponent<Player>();
         float searchRange = character.AttackRange;
 
+        // 발사체/영역 개수 체크
+        var countModifier = context.Caster.GetComponent<ProjectileCountModifier>();
+        int explosionCount = context.BaseProjectileCount > 0 ? context.BaseProjectileCount : 1;
+
+        if (countModifier != null)
+        {
+            explosionCount = countModifier.GetTotalCount("Explosion");
+        }
+
         Collider[] nearbyEnemies = Physics.OverlapSphere(
             context.Caster.transform.position,
             searchRange,
@@ -24,33 +33,60 @@ public class AreaAttackBehavior_Instant : SkillBehavior
             return;
         }
 
-        int randomIndex = Random.Range(0, nearbyEnemies.Length);
-        Vector3 explosionCenter = nearbyEnemies[randomIndex].transform.position;
+        // ⭐ 여러 개의 폭발 생성
+        for (int i = 0; i < explosionCount; i++)
+        {
+            CreateExplosion(context, nearbyEnemies, i, explosionCount);
+        }
+    }
 
-        if (explosionDelay > 0)
+    void CreateExplosion(SkillExecutionContext context, Collider[] enemies, int index, int totalCount)
+    {
+        // 타겟 선택 (각 폭발마다 다른 적 선택 가능)
+        int targetIndex = (index < enemies.Length) ? index : Random.Range(0, enemies.Length);
+        Vector3 explosionCenter = enemies[targetIndex].transform.position;
+
+        // 다중시전 위치 오프셋 적용
+        if (context.IsMultiCastInstance && context.PositionOffset != Vector3.zero)
+        {
+            explosionCenter += context.PositionOffset;
+        }
+        // 일반 다중 폭발 위치 분산
+        else if (totalCount > 1)
+        {
+            Vector2 randomOffset = Random.insideUnitCircle * 2f;
+            explosionCenter += new Vector3(randomOffset.x, 0, randomOffset.y);
+        }
+
+        // 딜레이 적용 (각 폭발마다 약간의 시차)
+        float adjustedDelay = explosionDelay + (index * 0.1f);
+
+        if (adjustedDelay > 0)
         {
             context.Caster.GetComponent<MonoBehaviour>().StartCoroutine(
-                DelayedExplosion(context, explosionCenter)
+                DelayedExplosion(context, explosionCenter, index)
             );
         }
         else
         {
-            PerformExplosion(context, explosionCenter);
+            PerformExplosion(context, explosionCenter, index);
         }
     }
 
-    IEnumerator DelayedExplosion(SkillExecutionContext context, Vector3 explosionCenter)
+    IEnumerator DelayedExplosion(SkillExecutionContext context, Vector3 explosionCenter, int index)
     {
         CreateWarningEffect(explosionCenter, context.Range);
-        yield return new WaitForSeconds(explosionDelay); 
-        PerformExplosion(context, explosionCenter);
+        yield return new WaitForSeconds(explosionDelay);
+        PerformExplosion(context, explosionCenter, index);
     }
 
-    void PerformExplosion(SkillExecutionContext context, Vector3 explosionCenter)
+    void PerformExplosion(SkillExecutionContext context, Vector3 explosionCenter, int index)
     {
         float explosionRadius = context.Range;
 
         Collider[] victims = Physics.OverlapSphere(explosionCenter, explosionRadius, LayerMask.GetMask("Enemy"));
+
+        Debug.Log($"[Explosion #{index + 1}] 위치: {explosionCenter}, 범위: {explosionRadius:F1}, 피해자: {victims.Length}명");
 
         foreach (Collider enemy in victims)
         {
@@ -76,18 +112,35 @@ public class AreaAttackBehavior_Instant : SkillBehavior
                 Quaternion.identity
             );
 
-            // 프리팹 콜라이더가 0.5라면, 2배로 스케일
-            float prefabRadius = 0.5f;  // 프리팹의 콜라이더 반지름
+            // 크기 조정
+            float prefabRadius = 0.5f;
             float scaleMultiplier = explosionRadius / prefabRadius;
-
             explosion.transform.localScale = Vector3.one * scaleMultiplier;
-            // Base Range 2 → 스케일 4
-            // Base Range 3 → 스케일 6
 
             Object.Destroy(explosion, 2f);
         }
+        else
+        {
+            // 기본 폭발 이펙트
+            CreateDefaultExplosion(explosionCenter, explosionRadius);
+        }
+    }
 
-        Debug.Log($"[Explosion] 폭발! 위치: {explosionCenter}, 피해자: {victims.Length}명");
+    void CreateDefaultExplosion(Vector3 position, float radius)
+    {
+        GameObject explosion = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        explosion.transform.position = position;
+        explosion.transform.localScale = Vector3.one * radius * 2;
+
+        Destroy(explosion.GetComponent<Collider>());
+
+        var renderer = explosion.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            renderer.material.color = new Color(1f, 0.5f, 0f, 0.3f);
+        }
+
+        Object.Destroy(explosion, 0.5f);
     }
 
     void CreateWarningEffect(Vector3 position, float radius)

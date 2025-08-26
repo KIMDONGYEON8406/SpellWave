@@ -14,7 +14,8 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public Image rarityBorder;
 
     [Header("스킬 카드 전용")]
-    public GameObject skillStatsPanel;  // 스킬 스탯 표시 패널
+    public GameObject skillStatsPanel;
+    public Text skillTypeText;
     public Text damageText;
     public Text cooldownText;
     public Text rangeText;
@@ -62,143 +63,114 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             cardBackground.sprite = cardData.cardBackground;
         }
 
-        // 등급 테두리 색상
-        if (rarityBorder != null)
-        {
-            rarityBorder.color = cardData.rarityColor;
-        }
-
-        // 카드 타입별 색상 조정
-        if (cardData.cardType == CardType.SkillCard && cardData.skillToAdd != null)
-        {
-            var element = CloakManager.Instance?.GetCurrentElement() ?? ElementType.Energy;
-            Color elementColor = SkillNameGenerator.GetElementColor(element);
-
-            // 배경에 속성 색상 적용 (약하게)
-            if (cardBackground != null)
-            {
-                cardBackground.color = Color.Lerp(Color.white, elementColor, 0.3f);
-            }
-        }
-    }
-
-    private void SetupCardContent()
-    {
         // 아이콘
         if (cardIcon != null && cardData.cardIcon != null)
         {
             cardIcon.sprite = cardData.cardIcon;
         }
 
+        // 등급 테두리 색상
+        if (rarityBorder != null)
+        {
+            rarityBorder.color = cardData.rarityColor;
+        }
+    }
+
+    private void SetupCardContent()
+    {
         // 제목
         if (cardTitle != null)
         {
-            cardTitle.text = GetCardTitle();
+            cardTitle.text = cardData.cardName;
         }
 
-        // 설명
+        // 설명 - 새 시스템 사용
         if (cardDescription != null)
         {
             cardDescription.text = GetFormattedDescription();
         }
 
-        // 스킬 카드면 스탯 표시
-        if (cardData.cardType == CardType.SkillCard)
+        // 스킬 카드인 경우 스킬 정보 표시
+        ShowSkillInfoIfNeeded();
+    }
+
+    private string GetFormattedDescription()
+    {
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendLine(cardData.description);
+
+        // 카드 효과 표시
+        if (cardData.cardEffects != null && cardData.cardEffects.Count > 0)
         {
-            ShowSkillStats();
+            sb.AppendLine();
+            foreach (var entry in cardData.cardEffects)
+            {
+                if (entry.effect != null)
+                {
+                    sb.AppendLine($"<b>{entry.effect.GetPreviewText(entry.value)}</b>");
+                }
+            }
+        }
+
+        // 등급 표시
+        sb.Append(GetRarityText());
+
+        return sb.ToString();
+    }
+
+    private void ShowSkillInfoIfNeeded()
+    {
+        // 스킬 획득 효과가 있는지 확인
+        SkillData targetSkill = null;
+
+        foreach (var entry in cardData.cardEffects)
+        {
+            if (entry.effect is SkillAcquireEffect skillEffect)
+            {
+                targetSkill = skillEffect.skillToAdd;
+                break;
+            }
+        }
+
+        if (targetSkill != null && skillStatsPanel != null)
+        {
+            skillStatsPanel.SetActive(true);
+
+            // 스킬 타입 표시
+            if (skillTypeText != null)
+            {
+                skillTypeText.text = $"타입: {targetSkill.GetTypeDescription()}";
+            }
+
+            // 스킬 스탯 표시
+            if (damageText != null)
+                damageText.text = $"DMG: {targetSkill.baseDamage}";
+
+            if (cooldownText != null)
+                cooldownText.text = $"CD: {targetSkill.baseCooldown}s";
+
+            if (rangeText != null)
+                rangeText.text = $"RNG: {targetSkill.baseRange}m";
+
+            // 이미 보유한 스킬인지 체크
+            var skillManager = GameManager.Instance?.player?.GetComponent<SkillManager>();
+            if (skillManager != null)
+            {
+                var existingSkill = skillManager.GetSkill(targetSkill.baseSkillType);
+                if (existingSkill != null)
+                {
+                    if (cardDescription != null)
+                    {
+                        cardDescription.text += $"\n\n<color=yellow>이미 보유 중 (Lv.{existingSkill.currentLevel})</color>";
+                    }
+                }
+            }
         }
         else if (skillStatsPanel != null)
         {
             skillStatsPanel.SetActive(false);
         }
     }
-
-    private string GetCardTitle()
-    {
-        if (cardData.cardType == CardType.SkillCard && cardData.skillToAdd != null)
-        {
-            var element = CloakManager.Instance?.GetCurrentElement() ?? ElementType.Energy;
-            return cardData.skillToAdd.GetDisplayName(element);
-        }
-        else
-        {
-            return cardData.cardName;
-        }
-    }
-
-    private string GetFormattedDescription()
-    {
-        switch (cardData.cardType)
-        {
-            case CardType.StatCard:
-                return GetStatCardDescription();
-
-            case CardType.SkillCard:
-                return GetSkillCardDescription();
-
-            default:
-                return cardData.description;
-        }
-    }
-
-    private string GetStatCardDescription()
-    {
-        string desc = cardData.description;
-
-        // 스탯 증가량 표시
-       //string statName = GetStatName(cardData.statType);
-       //desc += $"\n\n<b>{statName} +{cardData.increasePercentage}%</b>";
-
-        // 등급 표시
-        desc += GetRarityText();
-
-        return desc;
-    }
-
-    private string GetSkillCardDescription()
-    {
-        if (cardData.skillToAdd == null)
-            return cardData.description;
-
-        var skill = cardData.skillToAdd;
-        var element = CloakManager.Instance?.GetCurrentElement() ?? ElementType.Energy;
-
-        // 스킬 설명 + 속성 효과
-        string desc = skill.GetCardDescription(element);
-
-        // 이미 보유한 스킬인지 체크
-        var skillManager = GameManager.Instance?.player?.GetComponent<SkillManager>();
-        if (skillManager != null)
-        {
-            var existingSkill = skillManager.GetSkill(skill.baseSkillType);
-            if (existingSkill != null)
-            {
-                desc += $"\n\n<color=yellow>⚠️ 이미 보유 중 (Lv.{existingSkill.currentLevel} → Lv.{existingSkill.currentLevel + 1})</color>";
-            }
-        }
-
-        return desc;
-    }
-
-    private void ShowSkillStats()
-    {
-        if (skillStatsPanel == null || cardData.skillToAdd == null)
-            return;
-
-        skillStatsPanel.SetActive(true);
-
-        var skill = cardData.skillToAdd;
-
-        if (damageText != null)
-            damageText.text = $"DMG: {skill.baseDamage}";
-
-        if (cooldownText != null)
-            cooldownText.text = $"CD: {skill.baseCooldown}s";
-
-        if (rangeText != null)
-            rangeText.text = $"RNG: {skill.baseRange}m";
-    }
-
 
     private string GetRarityText()
     {
@@ -220,7 +192,6 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void OnPointerEnter(PointerEventData eventData)
     {
         isHovered = true;
-        //Debug.Log($"카드 호버: {GetCardTitle()}");
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -230,14 +201,13 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     private void OnCardClicked()
     {
-        Debug.Log($"카드 선택: {GetCardTitle()}");
+        Debug.Log($"카드 선택: {cardData.cardName}");
         CardManager.Instance.SelectCard(cardData);
         StartCoroutine(SelectionEffect());
     }
 
     private IEnumerator SelectionEffect()
     {
-        // 선택 애니메이션
         float duration = 0.3f;
         float elapsedTime = 0f;
 

@@ -12,13 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 097c995529bb6714cbae2271c6aacabc, type: 3}
   m_Name: ArrowCard
   m_EditorClassIdentifier: 
-  cardName: "\uB9C8\uBC95 \uAD6C\uCCB4"
-  description: "\uC801\uC5D0\uAC8C \uB9C8\uBC95 \uAD6C\uCCB4\uB97C \uBC1C\uC0AC\uD569\uB2C8\uB2E4"
+  cardName: "\uB9C8\uBC95 \uD654\uC0B4"
+  description: "\uC801\uC5D0\uAC8C \uB9C8\uBC95 \uD654\uC0B4\uB97C \uBC1C\uC0AC\uD569\uB2C8\uB2E4"
   cardIcon: {fileID: 0}
   cardBackground: {fileID: 0}
   cardType: 1
-  statType: 0
-  increasePercentage: 10
-  skillToAdd: {fileID: 11400000, guid: 369c8514b1da93841b0e7695cb02e724, type: 2}
+  cardEffects:
+  - effect: {fileID: 11400000, guid: cdb187dd07aac1a4ebb6af15a2c8e948, type: 2}
+    value: 1
+    note: 
   rarity: 0
   rarityColor: {r: 1, g: 1, b: 1, a: 1}
+  showApplyLogs: 0

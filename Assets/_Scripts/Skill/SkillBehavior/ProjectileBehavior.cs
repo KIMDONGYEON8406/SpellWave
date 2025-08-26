@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "Projectile Behavior", menuName = "SpellWave/Skills/Behaviors/Projectile")]
 public class ProjectileBehavior : SkillBehavior
@@ -61,6 +62,22 @@ public class ProjectileBehavior : SkillBehavior
         {
             var pierce = projectile.AddComponent<PierceComponent>();
             pierce.maxPierceCount = pierceCount;
+        }
+        // 다중시전 체크
+        if (context.MultiCastChance > 0 && !context.IsMultiCastInstance)
+        {
+            List<GameObject> createdProjectiles = new List<GameObject>();
+            // 생성된 발사체들 추가...
+
+            var multiCast = context.Caster.GetComponent<MultiCastSystem>();
+            if (multiCast != null)
+            {
+                var skill = context.Caster.GetComponent<SkillManager>()?.GetSkill("스킬이름");
+                if (skill != null)
+                {
+                    multiCast.ProcessMultiCast(skill, context, createdProjectiles);
+                }
+            }
         }
     }
 }

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillBehavior: {fileID: 11400000, guid: bd0f904ef5dcf0741b3fa736d604daac, type: 2}
   baseSkillType: Bolt
-  skillTags: 00000000
+  skillTags: 25000000
   description: "\uC801\uC5D0\uAC8C \uB9C8\uBC95\uAD6C\uCCB4\uBC1C\uC0AC"
   skillIcon: {fileID: 0}
   baseDamage: 50

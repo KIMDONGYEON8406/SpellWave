@@ -9,63 +9,51 @@ public class ProjectileBehavior_Basic : ProjectileBehavior
 
     public override void Execute(SkillExecutionContext context)
     {
-        // 플레이어 정면 방향
-        Vector3 direction = context.Caster.transform.forward;
+        if (context.SkillPrefab == null || context.Target == null) return;
 
-        // 스폰 위치 (플레이어 중앙 + 약간 앞)
-        Vector3 spawnPos = context.Caster.transform.position +
-                          context.Caster.transform.forward * 0.5f +
-                          Vector3.up * 1f;
-
-        GameObject projectile = null;
-
-        if (context.SkillPrefab != null)
+        // 다중 발사 체크
+        var countModifier = context.Caster.GetComponent<ProjectileCountModifier>();
+        if (countModifier != null)
         {
-            projectile = Object.Instantiate(
-                context.SkillPrefab,
-                spawnPos,
-                Quaternion.LookRotation(direction),
-                null
-            );
-        }
-        else
-        {
-            Debug.LogWarning($"Skill Prefab이 없어서 자동 생성!");
-            projectile = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            projectile.transform.position = spawnPos;
-            projectile.transform.localScale = Vector3.one * 0.3f;
+            string skillName = context.SkillPrefab.name.Replace("Projectile_", "");
+            int count = countModifier.GetTotalCount(skillName);
 
-            var collider = projectile.GetComponent<Collider>();
-            if (collider != null) collider.isTrigger = true;
+            if (count > 1)
+            {
+                // 다중 발사 처리
+                Vector3 baseDir = (context.Target.position - context.Caster.transform.position).normalized;
+                Vector3[] directions = countModifier.GetProjectileDirections(skillName, baseDir);
+
+                foreach (var dir in directions)
+                {
+                    CreateSingleProjectile(context, dir);
+                }
+                return;
+            }
         }
 
-        // ElementalProjectile 설정
-        var projScript = projectile.GetComponent<ElementalProjectile>();
-        if (projScript == null)
-        {
-            projScript = projectile.AddComponent<ElementalProjectile>();
-        }
-
-        var rb = projectile.GetComponent<Rigidbody>();
-        if (rb == null)
-        {
-            rb = projectile.AddComponent<Rigidbody>();
-        }
-        rb.useGravity = false;
-        rb.isKinematic = false;
-
-        // 초기화 - Forward 방향으로!
-        projScript.speed = defaultSpeed;
-        projScript.Initialize(
-            context.Damage,
-            context.Element,
-            context.Passive,
-            direction  // Forward 방향
+        // 단일 발사
+        Vector3 direction = (context.Target.position - context.Caster.transform.position).normalized;
+        CreateSingleProjectile(context, direction);
+    }
+    private void CreateSingleProjectile(SkillExecutionContext context, Vector3 direction)
+    {
+        GameObject projectile = Instantiate(
+            context.SkillPrefab,
+            context.Caster.transform.position + Vector3.up * 0.5f,
+            Quaternion.LookRotation(direction)
         );
 
-        // 속도 즉시 적용
-        rb.velocity = direction * defaultSpeed;
-
-        //Debug.Log($"발사! 방향={direction}, 위치={projectile.transform.position}");
+        var projComponent = projectile.GetComponent<ElementalProjectile>();
+        if (projComponent != null)
+        {
+            projComponent.Initialize(
+                context.Damage,
+                context.Element,
+                context.Passive,
+                direction
+            );
+            projComponent.speed = projectileSpeed;
+        }
     }
 }

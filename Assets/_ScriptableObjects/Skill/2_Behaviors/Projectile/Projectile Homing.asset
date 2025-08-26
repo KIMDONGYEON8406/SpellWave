@@ -12,12 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e99fee78357238a498d478b63f383526, type: 3}
   m_Name: Projectile Homing
   m_EditorClassIdentifier: 
-  behaviorName: "\uAE30\uBCF8 \uB3D9\uC791"
-  description: "\uC2A4\uD0AC \uB3D9\uC791 \uC124\uBA85"
+  behaviorName: "\uC720\uB3C4 \uBBF8\uC0AC\uC77C"
+  description: "- defaultSpeed: 8f (\uB290\uB9B0 \uC18D\uB3C4)\n- homingRotationSpeed:
+    5f (\uD68C\uC804 \uC18D\uB3C4)\n- homingMaxAngle: 45f (\uCD5C\uB300 \uC720\uB3C4
+    \uAC01\uB3C4)\n- singleShot: false\n- missileCount: 5 (\uBBF8\uC0AC\uC77C \uAC1C\uC218)\n-
+    launchDelay: 0.1f (\uBC1C\uC0AC \uAC04\uACA9)\n- launchHeight: 1.5f (\uBC1C\uC0AC
+    \uB192\uC774)"
   projectileSpeed: 10
-  isHoming: 0
+  isHoming: 1
   pierceCount: 0
   defaultSpeed: 8
   homingRotationSpeed: 5
   homingMaxAngle: 45
-  targetSearchRadius: 15
+  singleShot: 0
+  missileCount: 5
+  launchDelay: 0.1
+  launchHeight: 1.5

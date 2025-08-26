@@ -58,12 +58,33 @@ public class SkillData : ScriptableObject
     {
         return SkillNameGenerator.GetSkillName(baseSkillType, element);
     }
+    public string GetTypeDescription()
+    {
+        List<string> types = new List<string>();
+
+        if (HasTag(SkillTag.Projectile)) types.Add("발사체");
+        if (HasTag(SkillTag.Area)) types.Add("영역");
+        if (HasTag(SkillTag.DOT)) types.Add("지속");
+        if (HasTag(SkillTag.Instant)) types.Add("즉시");
+        if (HasTag(SkillTag.Homing)) types.Add("유도");
+
+        if (types.Count == 0) return "기본";
+
+        return string.Join(", ", types);
+    }
 
     public string GetCardDescription(ElementType element)
     {
         string baseDesc = description;
-        string elementDesc = SkillNameGenerator.GetElementDescription(element);
-        return $"{baseDesc}\n<color=yellow>{elementDesc}</color>";
+
+        // 타입 표시 추가
+        string typeInfo = GetTypeDescription();
+        if (!string.IsNullOrEmpty(typeInfo))
+        {
+            baseDesc = $"타입: {typeInfo}\n{baseDesc}";
+        }
+
+        return baseDesc;
     }
 
     public float GetDamageAtLevel(int level)

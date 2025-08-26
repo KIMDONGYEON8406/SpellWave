@@ -132,11 +132,30 @@ public class GameManager : MonoBehaviour
     [ContextMenu("디버그/모든 기본 스킬 획득")]
     public void DebugAddAllBasicSkills()
     {
-        string[] basicSkills = { "Aura", "Bolt", "Arrow", "Explosion", "Missile" };
+        string[] basicSkills = { "Bolt", "Arrow", "Explosion", "Missile" };
         foreach (string skillName in basicSkills)
         {
             AddSkillByName(skillName);
         }
+    }
+    [ContextMenu("디버그/스킬 획득/오라 (Aura) - 단일")]
+    public void DebugAddAuraSingle()
+    {
+        // 이미 오라가 있는지 확인
+        var skillManager = player?.GetComponent<SkillManager>();
+        if (skillManager != null)
+        {
+            var existingAura = skillManager.GetSkill("Aura");
+            if (existingAura != null)
+            {
+                Debug.LogWarning("오라가 이미 존재합니다!");
+                return;
+            }
+        }
+
+        // 오라가 없을 때만 추가
+        AddSkillByName("Aura");
+        Debug.Log("오라 스킬 단일 획득");
     }
 
     // 스킬 이름으로 찾아서 추가
@@ -144,7 +163,7 @@ public class GameManager : MonoBehaviour
     {
         // debugSkills에서 찾기
         SkillData skillToAdd = debugSkills.Find(s => s != null && s.baseSkillType == skillName);
-
+        var skillManager = player?.GetComponent<SkillManager>();
         if (skillToAdd == null)
         {
             // StaffData에서 찾기
@@ -580,4 +599,67 @@ public class GameManager : MonoBehaviour
             StartStage();
         }
     }
+    [ContextMenu("디버그/글로벌 스탯 확인")]
+    public void DebugCheckGlobalStats()
+    {
+        var modifier = SkillStatModifier.Instance;
+        if (modifier != null)
+        {
+            modifier.PrintGlobalStats();
+        }
+    }
+    [ContextMenu("디버그/발사체 개수 +2")]
+    public void DebugAddProjectileCount()
+    {
+        var modifier = player.GetComponent<ProjectileCountModifier>();
+        if (modifier == null)
+        {
+            modifier = player.gameObject.AddComponent<ProjectileCountModifier>();
+        }
+
+        modifier.AddProjectileCountToAll(2);
+        Debug.Log("모든 스킬 발사체 +2개!");
+    }
+
+    [ContextMenu("디버그/다중시전 확률 +30%")]
+    public void DebugAddMultiCast()
+    {
+        var multiCast = player.GetComponent<MultiCastSystem>();
+        if (multiCast == null)
+        {
+            multiCast = player.gameObject.AddComponent<MultiCastSystem>();
+        }
+
+        var skills = player.GetComponent<SkillManager>().GetAllSkills();
+        foreach (var skill in skills)
+        {
+            multiCast.AddMultiCastChance(skill.skillData.baseSkillType, 30f,
+                skill.skillData.HasTag(SkillTag.Projectile) ?
+                StatType.ProjectileMultiCast : StatType.AreaMultiCast);
+        }
+
+        Debug.Log("모든 스킬 다중시전 확률 +30%!");
+    }
+    [ContextMenu("디버그/익스플로전 범위 확인")]
+    public void DebugCheckExplosionRange()
+    {
+        var skillManager = player?.GetComponent<SkillManager>();
+        if (skillManager == null) return;
+
+        var explosion = skillManager.GetSkill("Explosion");
+        if (explosion != null)
+        {
+            Debug.Log($"=== Explosion 범위 상태 ===");
+            Debug.Log($"Base Range: {explosion.skillData.baseRange}");
+            Debug.Log($"Level: {explosion.currentLevel}");
+            Debug.Log($"Range at Level: {explosion.skillData.GetRangeAtLevel(explosion.currentLevel)}");
+            Debug.Log($"Range Multiplier: {explosion.rangeMultiplier:F2}");
+            Debug.Log($"Final Range: {explosion.CurrentRange:F1}");
+        }
+        else
+        {
+            Debug.Log("Explosion 스킬이 없습니다!");
+        }
+    }
+
 }

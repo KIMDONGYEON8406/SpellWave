@@ -5,7 +5,10 @@ using System.Linq;
 public class SkillManager : MonoBehaviour
 {
     [Header("스킬 설정")]
-    public int maxSkills = 3;
+    public int maxSkills = 5;  // 3에서 5로 변경
+
+    [Header("디버그")]
+    [SerializeField] private bool showDebugLogs = false;
 
     private Dictionary<string, SkillInstance> equippedSkills = new Dictionary<string, SkillInstance>();
     private Player owner;
@@ -16,9 +19,9 @@ public class SkillManager : MonoBehaviour
 
         if (owner == null)
         {
-            Debug.LogError("Player 컴포넌트를 찾을 수 없습니다!");
+            DebugManager.LogError(LogCategory.Skill, "Player 컴포넌트를 찾을 수 없습니다!");
             owner = gameObject.AddComponent<Player>();
-            Debug.Log("Player 컴포넌트 자동 생성");
+            DebugManager.Log(LogCategory.Skill, "Player 컴포넌트 자동 생성", LogLevel.Warning);
         }
     }
 
@@ -35,6 +38,13 @@ public class SkillManager : MonoBehaviour
             }
         }
 
+        // 이미 있는 스킬인지 체크
+        if (equippedSkills.ContainsKey(skillData.baseSkillType))
+        {
+            DebugManager.LogSkill($"{skillData.baseSkillType}는 이미 장착됨");
+            return false;
+        }
+
         if (equippedSkills.Count < maxSkills)
         {
             GameObject skillObj = new GameObject($"Skill_{skillData.baseSkillType}");
@@ -45,7 +55,7 @@ public class SkillManager : MonoBehaviour
             skill.Initialize(owner, skillData);
             equippedSkills[skillData.baseSkillType] = skill;
 
-            Debug.Log($"새 스킬 추가: {skillData.baseSkillType}");
+            DebugManager.LogImportant($"새 스킬 추가: {skillData.baseSkillType}");
 
             // 오라면 즉시 생성!
             if (skillData.baseSkillType == "Aura")
@@ -55,7 +65,34 @@ public class SkillManager : MonoBehaviour
 
             return true;
         }
+        if (equippedSkills.Count < maxSkills)
+        {
+            GameObject skillObj = new GameObject($"Skill_{skillData.baseSkillType}");
+            skillObj.transform.SetParent(transform, false);
+            skillObj.transform.localPosition = Vector3.zero;
 
+            SkillInstance skill = skillObj.AddComponent<SkillInstance>();
+            skill.Initialize(owner, skillData);
+            equippedSkills[skillData.baseSkillType] = skill;
+
+            // 글로벌 보너스 적용!
+            var statModifier = SkillStatModifier.Instance;
+            if (statModifier != null)
+            {
+                statModifier.OnSkillAdded(skill);
+            }
+
+            DebugManager.LogImportant($"새 스킬 추가: {skillData.baseSkillType}");
+
+            if (skillData.baseSkillType == "Aura")
+            {
+                CreateAuraImmediately(skill);
+            }
+
+            return true;
+        }
+
+        DebugManager.Log(LogCategory.Skill, $"스킬 슬롯 가득 참 ({equippedSkills.Count}/{maxSkills})", LogLevel.Warning);
         return false;
     }
 
@@ -86,7 +123,7 @@ public class SkillManager : MonoBehaviour
                 Destroy(skillToRemove.gameObject);
             }
 
-            Debug.Log($"스킬 제거: {skillName}");
+            DebugManager.LogSkill($"스킬 제거: {skillName}");
             return true;
         }
 
@@ -104,29 +141,39 @@ public class SkillManager : MonoBehaviour
         }
 
         equippedSkills.Clear();
-        Debug.Log("모든 스킬 제거");
+
+        if (showDebugLogs)
+        {
+            DebugManager.LogSkill("모든 스킬 제거");
+        }
     }
 
     public void PrintSkillInfo()
     {
-        Debug.Log($"=== 보유 스킬 ({equippedSkills.Count}/{maxSkills}) ===");
+        DebugManager.LogSeparator($"보유 스킬 ({equippedSkills.Count}/{maxSkills})");
         foreach (var kvp in equippedSkills)
         {
             SkillInstance skill = kvp.Value;
-            Debug.Log($"- {skill.skillData.baseSkillType} Lv.{skill.currentLevel} " +
-                     $"(데미지: {skill.CurrentDamage:F1}, 쿨타임: {skill.CurrentCooldown:F1}초)");
+            DebugManager.LogSkill($"{skill.skillData.baseSkillType} Lv.{skill.currentLevel}");
+
+            if (showDebugLogs)
+            {
+                DebugManager.LogSkill($"  데미지: {skill.CurrentDamage:F1}");
+                DebugManager.LogSkill($"  쿨타임: {skill.CurrentCooldown:F1}초");
+                DebugManager.LogSkill($"  범위: {skill.CurrentRange:F1}m");
+            }
         }
     }
 
     private void CreateAuraImmediately(SkillInstance auraSkill)
     {
-        Debug.Log("[SkillManager] 오라 스킬 획득! 즉시 생성합니다.");
+        DebugManager.LogImportant("오라 스킬 획득! 즉시 생성합니다.");
 
         // 이미 오라가 있는지 확인
         Transform existingAura = transform.Find("PermanentAura");
         if (existingAura != null)
         {
-            Debug.Log("오라가 이미 존재합니다.");
+            DebugManager.Log(LogCategory.Skill, "오라가 이미 존재합니다.", LogLevel.Warning);
             return;
         }
 
@@ -151,7 +198,7 @@ public class SkillManager : MonoBehaviour
             auraSkill.skillData.skillBehavior.Execute(context);
             auraSkill.RecordSkillUse();
 
-            Debug.Log($"[오라 생성 완료] 범위: {auraSkill.CurrentRange}");
+            DebugManager.LogSkill($"오라 생성 완료! 범위: {auraSkill.CurrentRange}m");
         }
     }
 

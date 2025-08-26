@@ -12,13 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 097c995529bb6714cbae2271c6aacabc, type: 3}
   m_Name: BoltCard
   m_EditorClassIdentifier: 
-  cardName: "\uB9C8\uBC95 \uD654\uC0B4"
-  description: "\uBE60\uB978 \uC18D\uB3C4\uC758 \uB9C8\uBC95 \uD654\uC0B4\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4"
+  cardName: "\uB9C8\uBC95 \uBCFC"
+  description: "\uBE60\uB978 \uC18D\uB3C4\uC758 \uB9C8\uBC95 \uBCFC\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4"
   cardIcon: {fileID: 0}
   cardBackground: {fileID: 0}
   cardType: 1
-  statType: 0
-  increasePercentage: 10
-  skillToAdd: {fileID: 11400000, guid: bca3e0bedf8d4514f98813bd3f020309, type: 2}
+  cardEffects:
+  - effect: {fileID: 11400000, guid: 89243cf25174b8e4d96bf72ca076d97b, type: 2}
+    value: 1
+    note: 
   rarity: 0
   rarityColor: {r: 1, g: 1, b: 1, a: 1}
+  showApplyLogs: 0

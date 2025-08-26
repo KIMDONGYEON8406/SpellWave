@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillBehavior: {fileID: 11400000, guid: b30c276194be57a46b5500fcb4feb145, type: 2}
   baseSkillType: Missile
-  skillTags: 00000000
+  skillTags: 25000000
   description: "\uC720\uB3C4 \uAE30\uB2A5\uC774 \uC788\uB294 \uB9C8\uBC95 \uBBF8\uC0AC\uC77C\uC744
     \uBC1C\uC0AC\uD569\uB2C8\uB2E4"
   skillIcon: {fileID: 0}

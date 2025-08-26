@@ -10,15 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 097c995529bb6714cbae2271c6aacabc, type: 3}
-  m_Name: AllCooldownCard
+  m_Name: Card_InstantHeal
   m_EditorClassIdentifier: 
-  cardName: "\uC2E0\uC18D \uC2DC\uC804"
-  description: "\uBAA8\uB4E0 \uC2A4\uD0AC\uC758 \uCFE8\uD0C0\uC784\uC774 \uAC10\uC18C\uD569\uB2C8\uB2E4"
+  cardName: "\uD68C\uBCF5"
+  description: "\uC989\uC2DC \uCD5C\uB300 \uCCB4\uB825\uC758 50% \uD68C\uBCF5"
   cardIcon: {fileID: 0}
   cardBackground: {fileID: 0}
   cardType: 0
-  statType: 1
-  increasePercentage: 20
-  skillToAdd: {fileID: 0}
-  rarity: 1
+  cardEffects:
+  - effect: {fileID: 11400000, guid: 631a4a4befa570645bbfd191d8273c3d, type: 2}
+    value: 20
+    note: 
+  rarity: 0
   rarityColor: {r: 1, g: 1, b: 1, a: 1}
+  showApplyLogs: 0

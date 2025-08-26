@@ -15,6 +15,9 @@ public class StaffManager : MonoBehaviour
     [Header("지팡이별 인벤토리")]
     private Dictionary<string, StaffInventory> staffInventories = new Dictionary<string, StaffInventory>();
 
+    [Header("디버그")]
+    [SerializeField] private bool verboseLogging = false;
+
     private SkillManager skillManager;
 
     void Awake()
@@ -32,31 +35,29 @@ public class StaffManager : MonoBehaviour
 
     void Start()
     {
-        // SkillManager 찾기
         skillManager = FindObjectOfType<SkillManager>();
 
-        // 초기 지팡이 설정
         if (currentStaff != null)
         {
             UnlockStaff(currentStaff);
-            EquipStaff(currentStaff);  // 5개 스킬 자동 적용
+            EquipStaff(currentStaff);
         }
     }
 
     // 지팡이 해금
+
     public void UnlockStaff(StaffData staff)
     {
         if (!unlockedStaffs.Contains(staff))
         {
             unlockedStaffs.Add(staff);
 
-            // 인벤토리 생성
             if (!staffInventories.ContainsKey(staff.staffName))
             {
                 staffInventories[staff.staffName] = new StaffInventory(staff);
             }
 
-            Debug.Log($"새 지팡이 해금: {staff.staffName}");
+            DebugManager.LogImportant($"새 지팡이 해금: {staff.staffName}");
         }
     }
 
@@ -90,9 +91,7 @@ public class StaffManager : MonoBehaviour
         var inventory = GetCurrentInventory();
         if (inventory != null)
         {
-            skillManager.ClearAllSkills();
 
-            // equippedSkills만 스킬매니저에 추가 (현재는 볼 1개만)
             foreach (var skill in inventory.equippedSkills)
             {
                 if (skill != null)
@@ -101,7 +100,10 @@ public class StaffManager : MonoBehaviour
                 }
             }
 
-            Debug.Log($"장착된 스킬: {inventory.equippedSkills.Count}개");
+            if (verboseLogging)
+            {
+                DebugManager.LogSkill($"장착된 스킬: {inventory.equippedSkills.Count}개");
+            }
         }
     }
 
@@ -130,13 +132,18 @@ public class StaffManager : MonoBehaviour
     }
 
     // 스킬 슬롯 변경
-    public void UpdateEquippedSkills(List<SkillData> newEquippedSkills)
+    public bool UpdateEquippedSkills(List<SkillData> newEquippedSkills)
     {
         var inventory = GetCurrentInventory();
         if (inventory != null)
         {
             inventory.equippedSkills = newEquippedSkills.Take(5).ToList();
             UpdateSkillManager();
+
+            DebugManager.LogSkill($"스킬 슬롯 업데이트: {inventory.equippedSkills.Count}개");
+            return true;
         }
+        return false;
     }
+
 }

@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9a079b3de6817447886c25f430263cd, type: 3}
   m_Name: Projectile Pierce
   m_EditorClassIdentifier: 
-  behaviorName: "\uAE30\uBCF8 \uB3D9\uC791"
-  description: "\uC2A4\uD0AC \uB3D9\uC791 \uC124\uBA85"
+  behaviorName: "\uAD00\uD1B5 \uD2B9\uD654 \uBC1C\uC0AC\uCCB4"
+  description: "- defaultSpeed: 15f (\uBE60\uB978 \uC18D\uB3C4)\n- defaultPierceCount:
+    3 (\uAD00\uD1B5 \uD69F\uC218)\n- damageReductionPerPierce: 0.8f"
   projectileSpeed: 10
   isHoming: 0
   pierceCount: 0

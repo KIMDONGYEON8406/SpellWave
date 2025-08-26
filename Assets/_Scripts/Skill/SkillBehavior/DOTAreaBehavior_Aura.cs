@@ -20,7 +20,7 @@ public class DOTAreaBehavior_Aura : SkillBehavior
         Transform existingAura = player.transform.Find("PermanentAura");
         if (existingAura != null)
         {
-            Debug.Log("오라가 이미 있습니다!");
+            Debug.LogError("오라가 이미 있습니다!");
             return;
         }
 
