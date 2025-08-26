@@ -975,7 +975,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyPrefab: {fileID: 268555393}
-  initialSize: 200
+  initialSize: 50
 --- !u!4 &635023536
 Transform:
   m_ObjectHideFlags: 0
@@ -1197,7 +1197,7 @@ MonoBehaviour:
   avoidFrontOfCamera: 0
   cameraTransform: {fileID: 0}
   maxAngleTries: 8
-  manualRateOverride: 7
+  manualRateOverride: 2
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
