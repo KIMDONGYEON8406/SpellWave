@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 097c995529bb6714cbae2271c6aacabc, type: 3}
   m_Name: Card_ProjectileMultiCast
   m_EditorClassIdentifier: 
-  cardName: "\uB2E4\uC911 \uBC1C\uC0AC"
-  description: "\uBC1C\uC0AC\uCCB4 \uB2E4\uC911\uC2DC\uC804 \uD655\uB960 20%"
+  cardName: "\uBC1C\uC0AC\uCCB4 \uD0C0\uC785 \uB2E4\uC911 \uC2DC\uC804 \uC99D\uAC00"
+  description: "\uBC1C\uC0AC\uCCB4 \uD0C0\uC785 \uB2E4\uC911\uC2DC\uC804 \uD655\uB960
+    20%"
   cardIcon: {fileID: 0}
   cardBackground: {fileID: 0}
   cardType: 0

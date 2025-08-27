@@ -155,6 +155,7 @@ MonoBehaviour:
   allStatCards:
   - {fileID: 11400000, guid: 282ec71c575338e428aab2a1abc0863b, type: 2}
   - {fileID: 11400000, guid: 951eafc8863748740bf87ff005ee7f04, type: 2}
+  - {fileID: 11400000, guid: 77d8eaa45b5f08f4ea346805e0b60932, type: 2}
   - {fileID: 11400000, guid: c49c2eaa6642ea74caae5e04e5e7004f, type: 2}
   - {fileID: 11400000, guid: 8730936e735e70e4abe7e8db99b63604, type: 2}
   - {fileID: 11400000, guid: a8b9af0ebda980b48b7d07b3fecfdbf9, type: 2}
@@ -162,6 +163,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ee7014f8b1e81f04cba8cafd8482801a, type: 2}
   - {fileID: 11400000, guid: 717e6027954c8c94987e8baf78c31000, type: 2}
   - {fileID: 11400000, guid: 2cef1d983ec92754fa9a861c2e129d71, type: 2}
+  - {fileID: 11400000, guid: cc24c4d4dd6095f43a92d34daf357098, type: 2}
   - {fileID: 11400000, guid: ee8598884c5cdca48a065a5984f671c3, type: 2}
   - {fileID: 11400000, guid: a33cec40176a6f2418fc4bbfbaa59835, type: 2}
   - {fileID: 11400000, guid: 7a3dd5995a12a854b8dc5518fad7fb2d, type: 2}
@@ -1222,7 +1224,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 2
-  player: {fileID: 0}
+  player: {fileID: 1999784059}
   defaultStaff: {fileID: 11400000, guid: 337b1b5bc7e6229419814a66d7cc0e9b, type: 2}
   timelineConfig: {fileID: 11400000, guid: 5a9dd0dfeff24f74eb056a9c0be7686f, type: 2}
   currentTime: 0
@@ -1832,14 +1834,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   masterSwitch: 1
   globalLogLevel: 3
+  useColors: 1
+  showTimestamp: 0
+  maxLogsPerSecond: 10
   enableCardSystem: 1
   enableSkillSystem: 1
-  enableCombatSystem: 1
+  enableCombatSystem: 0
   enablePoolSystem: 0
   enableSpawnSystem: 0
   enableUISystem: 0
-  enablePlayerSystem: 1
-  enableGameSystem: 1
+  enablePlayerSystem: 0
+  enableGameSystem: 0
   detailSettings:
     skillExecution: 1
     skillCooldown: 1
@@ -1852,43 +1857,40 @@ MonoBehaviour:
     enemyDamage: 0
     playerDamage: 0
     passiveEffects: 0
-    autoSkillCasting: 1
-    targetingSystem: 1
-    skillCooldowns: 1
-    multiCastSystem: 1
+    autoSkillCasting: 0
+    targetingSystem: 0
+    skillCooldowns: 0
+    multiCastSystem: 0
     cardSelection: 1
     cardEffectApply: 1
     cardDisplay: 1
     cardInventory: 1
     cardReward: 1
-    playerMovement: 1
+    playerMovement: 0
     playerInput: 0
-    playerStats: 1
-    playerHealth: 1
+    playerStats: 0
+    playerHealth: 0
     playerExperience: 0
     playerComponents: 0
-    gameStateChanges: 1
-    experienceSystem: 1
-    levelUpSystem: 1
+    gameStateChanges: 0
+    experienceSystem: 0
+    levelUpSystem: 0
     timelineProgress: 0
-    debugCommands: 1
-    waveSystem: 1
-    scoreSystem: 1
-    saveLoadSystem: 1
-    poolCreation: 1
-    poolExpansion: 1
-    poolReturn: 1
+    debugCommands: 0
+    waveSystem: 0
+    scoreSystem: 0
+    saveLoadSystem: 0
+    poolCreation: 0
+    poolExpansion: 0
+    poolReturn: 0
     poolStatus: 0
-    enemySpawn: 1
-    enemyDeath: 1
+    enemySpawn: 0
+    enemyDeath: 0
     enemyBehavior: 0
-    enemyTargeting: 1
-    spawnRate: 1
+    enemyTargeting: 0
+    spawnRate: 0
     spawnPosition: 0
-    spawnWave: 1
-  useColors: 1
-  showTimestamp: 0
-  maxLogsPerSecond: 10
+    spawnWave: 0
 --- !u!4 &1331638263
 Transform:
   m_ObjectHideFlags: 0

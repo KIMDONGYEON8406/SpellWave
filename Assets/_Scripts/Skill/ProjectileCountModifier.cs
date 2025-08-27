@@ -16,33 +16,106 @@ public class ProjectileCountModifier : MonoBehaviour
 
     void Awake()
     {
-        // Bolt 기본값 설정
-        if (!skillModifiers.ContainsKey("Bolt"))
+        // 모든 기본 스킬의 기본값을 미리 설정
+        InitializeDefaultSkills();
+    }
+
+    void InitializeDefaultSkills()
+    {
+        // StaffManager에서 모든 스킬 SO 가져오기
+        if (StaffManager.Instance != null && StaffManager.Instance.currentStaff != null)
         {
-            skillModifiers["Bolt"] = new ProjectileModifiers { baseCount = 1, additionalCount = 0 };
+            var staff = StaffManager.Instance.currentStaff;
+
+            // 기본 제공 스킬들
+            foreach (var skill in staff.defaultSkills)
+            {
+                if (skill != null)
+                {
+                    int baseCount = GetSkillBaseCount(skill);
+                    SetDefaultIfNotExists(skill.baseSkillType, baseCount);
+                }
+            }
+
+            // 획득 가능한 스킬들
+            foreach (var skill in staff.availableSkillPool)
+            {
+                if (skill != null)
+                {
+                    int baseCount = GetSkillBaseCount(skill);
+                    SetDefaultIfNotExists(skill.baseSkillType, baseCount);
+                }
+            }
+
+            DebugManager.LogSkill("SkillData SO에서 기본 개수 설정 완료");
+        }
+        else
+        {
+            // 폴백: StaffManager가 없을 때만 하드코딩 사용
+            SetDefaultIfNotExists("Bolt", 1);
+            SetDefaultIfNotExists("Arrow", 3);
+            SetDefaultIfNotExists("Missile", 5);
+            DebugManager.LogSkill("폴백: 하드코딩 기본값 사용");
+        }
+    }
+
+    // 다중 주타입 지원으로 개수 계산 수정
+    int GetSkillBaseCount(SkillData skillData)
+    {
+        // 발사체 타입이 있으면 발사체 개수 반환
+        if (skillData.HasPrimaryType(PrimarySkillType.Projectile))
+            return skillData.baseProjectileCount;
+
+        // 영역 타입이 있으면 영역 개수 반환
+        if (skillData.HasPrimaryType(PrimarySkillType.Area))
+            return skillData.baseAreaCount;
+
+        // 기본값
+        return 1;
+    }
+
+    void SetDefaultIfNotExists(string skillName, int baseCount)
+    {
+        if (!skillModifiers.ContainsKey(skillName))
+        {
+            skillModifiers[skillName] = new ProjectileModifiers
+            {
+                baseCount = baseCount,
+                additionalCount = 0,
+                spreadAngle = GetDefaultSpreadAngle(skillName),
+                useCircularPattern = false
+            };
+        }
+    }
+
+    float GetDefaultSpreadAngle(string skillName)
+    {
+        switch (skillName)
+        {
+            case "Bolt": return 20f;
+            case "Arrow": return 15f;
+            case "Missile": return 30f;
+            case "Explosion": return 0f;  // 영역은 각도 없음
+            default: return 15f;
         }
     }
 
     public void AddProjectileCount(string skillName, int count)
     {
+        // 기본값이 없으면 자동으로 생성
         if (!skillModifiers.ContainsKey(skillName))
         {
-            int defaultBase = 1;
-
-            // 스킬별 기본값 설정
-            if (skillName == "Missile") defaultBase = 5;
-            else if (skillName == "Arrow") defaultBase = 3;
-            else if (skillName == "Bolt") defaultBase = 1;
+            int defaultBase = GetDefaultBaseCount(skillName);
 
             skillModifiers[skillName] = new ProjectileModifiers
             {
                 baseCount = defaultBase,
                 additionalCount = 0,
-                spreadAngle = 15f,
+                spreadAngle = GetDefaultSpreadAngle(skillName),
                 useCircularPattern = false
             };
 
-            DebugManager.LogSkill($"[{skillName}] 초기 설정 - base: {defaultBase}");
+            DebugManager.LogSkill($"[{skillName}] 새 스킬 등록 - 기본: {defaultBase}개");
         }
 
         skillModifiers[skillName].additionalCount += count;
@@ -50,12 +123,28 @@ public class ProjectileCountModifier : MonoBehaviour
         int total = GetTotalCount(skillName);
         DebugManager.LogImportant($"[{skillName}] 개수 증가: {skillModifiers[skillName].baseCount}(base) + {skillModifiers[skillName].additionalCount}(add) = {total}개");
     }
+
+    // 스킬별 기본 개수 설정
+    int GetDefaultBaseCount(string skillName)
+    {
+        switch (skillName)
+        {
+            case "Missile": return 5;
+            case "Arrow": return 3;
+            case "Bolt": return 1;
+            case "Pierce": return 1;
+            case "Explosion": return 1;
+            case "Nova": return 1;
+            default: return 1;
+        }
+    }
+
     public bool HasSkill(string skillName)
     {
         return skillModifiers.ContainsKey(skillName);
     }
 
-    // 전체 발사체 개수 증가
+    // 다중 주타입 지원으로 수정
     public void AddProjectileCountToAll(int count)
     {
         var skillManager = GetComponent<SkillManager>();
@@ -64,47 +153,69 @@ public class ProjectileCountModifier : MonoBehaviour
             var skills = skillManager.GetAllSkills();
             foreach (var skill in skills)
             {
-                // ⭐ 오라 제외, 나머지 모든 스킬에 적용
-                if (skill.skillData.baseSkillType != "Aura")
+                // 발사체 주타입을 가진 스킬에만 적용 (오라 제외)
+                if (skill.skillData.HasPrimaryType(PrimarySkillType.Projectile) &&
+                    skill.skillData.baseSkillType != "Aura")
                 {
                     AddProjectileCount(skill.skillData.baseSkillType, count);
                 }
             }
         }
 
-        // 미래 스킬을 위한 기본값 (영역 스킬 포함!)
-        string[] defaultSkills = {
-        "Bolt", "Arrow", "Missile",      // 발사체
-        "Explosion", "Nova"  // 영역
-    };
+        // 미래 발사체 스킬을 위한 기본값 (오라 제외)
+        string[] projectileSkills = { "Bolt", "Arrow", "Missile", "Pierce" };
 
-        foreach (string skillName in defaultSkills)
+        foreach (string skillName in projectileSkills)
         {
-            if (!skillModifiers.ContainsKey(skillName))
+            AddProjectileCount(skillName, count);
+        }
+
+        DebugManager.LogImportant($"모든 발사체 스킬 개수 +{count} (미래 스킬 포함)");
+    }
+
+    // 다중 주타입 지원으로 수정
+    public void AddAreaCountToAll(int count)
+    {
+        var skillManager = GetComponent<SkillManager>();
+        if (skillManager != null)
+        {
+            var skills = skillManager.GetAllSkills();
+            foreach (var skill in skills)
             {
-                AddProjectileCount(skillName, count);
+                // 영역 주타입을 가진 스킬에만 적용
+                if (skill.skillData.HasPrimaryType(PrimarySkillType.Area))
+                {
+                    AddProjectileCount(skill.skillData.baseSkillType, count);
+                }
             }
         }
 
-        Debug.Log($"모든 스킬 개수 +{count} (오라 제외)");
+        // 미래 영역 스킬을 위한 기본값
+        string[] areaSkills = { "Explosion", "Nova", "Aura" };
+
+        foreach (string skillName in areaSkills)
+        {
+            AddProjectileCount(skillName, count);
+        }
+
+        DebugManager.LogImportant($"모든 영역 스킬 개수 +{count} (미래 스킬 포함)");
     }
 
-    // 총 발사체 개수 가져오기 - 로그 추가
     public int GetTotalCount(string skillName)
     {
         if (skillModifiers.ContainsKey(skillName))
         {
             var mod = skillModifiers[skillName];
             int total = mod.baseCount + mod.additionalCount;
-            DebugManager.LogSkill($"[GetTotalCount] {skillName}: base={mod.baseCount}, additional={mod.additionalCount}, total={total}");
             return total;
         }
 
-        DebugManager.LogSkill($"[GetTotalCount] {skillName}: 기본값 1 반환");
-        return 1;
+        // 등록되지 않은 스킬도 기본값 반환
+        int defaultCount = GetDefaultBaseCount(skillName);
+        DebugManager.LogSkill($"[GetTotalCount] {skillName}: 기본값 {defaultCount} 반환");
+        return defaultCount;
     }
 
-    // 발사 각도 계산
     public Vector3[] GetProjectileDirections(string skillName, Vector3 baseDirection)
     {
         int count = GetTotalCount(skillName);
@@ -154,10 +265,39 @@ public class ProjectileCountModifier : MonoBehaviour
     public void PrintStatus()
     {
         DebugManager.LogSeparator("발사체 개수 상태");
+
+        if (skillModifiers.Count == 0)
+        {
+            DebugManager.LogSkill("등록된 스킬 없음");
+            return;
+        }
+
         foreach (var kvp in skillModifiers)
         {
-            int total = kvp.Value.baseCount + kvp.Value.additionalCount;
-            DebugManager.LogSkill($"{kvp.Key}: {total}개");
+            var mod = kvp.Value;
+            int total = mod.baseCount + mod.additionalCount;
+
+            if (mod.additionalCount > 0)
+            {
+                DebugManager.LogSkill($"{kvp.Key}: {mod.baseCount}(기본) + {mod.additionalCount}(추가) = {total}개");
+            }
+            else
+            {
+                DebugManager.LogSkill($"{kvp.Key}: {total}개 (기본)");
+            }
+        }
+    }
+
+    // 다중 주타입 지원으로 수정
+    public void AddCountByTag(PrimarySkillType primaryType, int count)
+    {
+        if (primaryType == PrimarySkillType.Projectile)
+        {
+            AddProjectileCountToAll(count);
+        }
+        else if (primaryType == PrimarySkillType.Area)
+        {
+            AddAreaCountToAll(count);
         }
     }
 }

@@ -12,8 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 097c995529bb6714cbae2271c6aacabc, type: 3}
   m_Name: Card_ProjectileSpeed
   m_EditorClassIdentifier: 
-  cardName: "\uD0C4\uC18D \uC99D\uAC00"
-  description: "\uBC1C\uC0AC\uCCB4 \uC18D\uB3C4 20% \uC99D\uAC00"
+  cardName: "\uBC1C\uC0AC\uCCB4 \uD0C0\uC785 \uBC1C\uC0AC\uCCB4 \uC2A4\uD53C\uB4DC
+    \uC99D\uAC00"
+  description: "\uBC1C\uC0AC\uCCB4 \uD0C0\uC785 \uBC1C\uC0AC\uCCB4 \uC18D\uB3C4 20%
+    \uC99D\uAC00"
   cardIcon: {fileID: 0}
   cardBackground: {fileID: 0}
   cardType: 0

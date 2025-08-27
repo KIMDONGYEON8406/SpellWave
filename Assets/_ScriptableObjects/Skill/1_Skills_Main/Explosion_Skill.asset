@@ -14,13 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillBehavior: {fileID: 11400000, guid: 2ebf5a23894a1c149b8b7941eca4a5c6, type: 2}
   baseSkillType: Explosion
-  skillTags: 0a010000
+  primaryTypes: 0200000001000000
+  secondaryTypes: 0200000010000000
+  baseProjectileCount: 1
+  baseAreaCount: 1
+  spreadAngle: 15
+  useCircularPattern: 0
   description: "\uC8FC\uBCC0 \uC801\uB4E4\uC5D0\uAC8C \uD3ED\uBC1C \uB370\uBBF8\uC9C0\uB97C
     \uC785\uD799\uB2C8\uB2E4"
   skillIcon: {fileID: 0}
   baseDamage: 100
   baseCooldown: 4
-  baseRange: 2
+  baseRange: 4
   maxLevel: 5
   damagePerLevel: 20
   cooldownReductionPerLevel: 0.1
