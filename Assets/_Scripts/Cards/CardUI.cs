@@ -201,7 +201,7 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     private void OnCardClicked()
     {
-        Debug.Log($"카드 선택: {cardData.cardName}");
+        DebugManager.LogCard($"카드 선택: {cardData.cardName}");
         CardManager.Instance.SelectCard(cardData);
         StartCoroutine(SelectionEffect());
     }

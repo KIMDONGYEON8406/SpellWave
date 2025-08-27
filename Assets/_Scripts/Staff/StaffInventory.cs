@@ -29,7 +29,7 @@ public class StaffInventory
         if (ownedSkills.Count > 0)
         {
             equippedSkills.Add(ownedSkills[0]);
-            Debug.Log($"초기 스킬 장착: {ownedSkills[0].baseSkillType}");
+            DebugManager.LogSkill($"초기 스킬 장착: {ownedSkills[0].baseSkillType}");
         }
     }
 
@@ -38,18 +38,18 @@ public class StaffInventory
     {
         if (ownedSkills.Count >= 20)
         {
-            Debug.LogWarning("스킬 인벤토리가 가득 찼습니다! (20/20)");
+            DebugManager.LogWarning(LogCategory.Skill, "스킬 인벤토리가 가득 찼습니다! (20/20)");
             return false;
         }
 
         if (ownedSkills.Contains(newSkill))
         {
-            Debug.LogWarning("이미 보유한 스킬입니다!");
+            DebugManager.LogWarning(LogCategory.Skill, "이미 보유한 스킬입니다!");
             return false;
         }
 
         ownedSkills.Add(newSkill);
-        Debug.Log($"{staffData.staffName}에 {newSkill.baseSkillType} 추가!");
+        DebugManager.LogSkill($"{staffData.staffName}에 {newSkill.baseSkillType} 추가!");
         return true;
     }
 
@@ -59,26 +59,27 @@ public class StaffInventory
         // 이미 장착된 스킬인지 체크
         if (equippedSkills.Contains(skill))
         {
-            Debug.LogWarning($"{skill.baseSkillType}은 이미 장착되어 있습니다!");
+            DebugManager.LogWarning(LogCategory.Skill, $"{skill.baseSkillType}은 이미 장착되어 있습니다!");
             return false;
         }
 
         // 보유한 스킬인지 체크
         if (!ownedSkills.Contains(skill))
         {
-            Debug.LogError($"{skill.baseSkillType}은 보유하지 않은 스킬입니다!");
+            DebugManager.LogError(LogCategory.Skill, $"{skill.baseSkillType}은 보유하지 않은 스킬입니다!");
+
             return false;
         }
 
         // 최대 5개까지만 장착
         if (equippedSkills.Count >= 5)
         {
-            Debug.LogWarning("스킬 슬롯이 가득 찼습니다! (5/5)");
+            DebugManager.LogWarning(LogCategory.Skill, "스킬 슬롯이 가득 찼습니다! (5/5)");
             return false;
         }
 
         equippedSkills.Add(skill);
-        Debug.Log($"스킬 장착: {skill.baseSkillType} (현재 {equippedSkills.Count}/5)");
+        DebugManager.LogSkill($"스킬 장착: {skill.baseSkillType} (현재 {equippedSkills.Count}/5)");
         return true;
     }
 
@@ -87,13 +88,13 @@ public class StaffInventory
     {
         if (!ownedSkills.Contains(skill))
         {
-            Debug.LogError("보유하지 않은 스킬입니다!");
+            DebugManager.LogError(LogCategory.Skill, "보유하지 않은 스킬입니다!");
             return false;
         }
 
         if (slotIndex < 0 || slotIndex >= 5)
         {
-            Debug.LogError("잘못된 슬롯 번호입니다! (0~4)");
+            DebugManager.LogError(LogCategory.Skill, "잘못된 슬롯 번호입니다! (0~4)");
             return false;
         }
 

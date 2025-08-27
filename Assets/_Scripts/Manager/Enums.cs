@@ -10,37 +10,38 @@ public enum CardType
 // 스탯 타입
 public enum StatType
 {
-    // 플레이어 스탯
-    PlayerHealth,        // 최대 체력
-    PlayerMoveSpeed,     // 이동속도
-    PlayerAttackPower,   // 공격력
-    InstantHeal,         // 즉시 회복
+    // ===== 플레이어 스탯 (0~99) =====
+    PlayerHealth = 0,           // 최대 체력 증가 (%)
+    PlayerMoveSpeed = 1,         // 이동 속도 증가 (%)
+    PlayerAttackPower = 2,       // 공격력 증가 (%)
+    InstantHeal = 3,            // 즉시 체력 회복 (최대 체력의 %)
+    PlayerAttackRange = 4,       // 공격 범위 증가 (%)
 
-    // 전체 스킬 강화
-    AllSkillDamage,      // 모든 스킬 데미지
-    AllSkillCooldown,    // 모든 스킬 쿨타임
-    AllSkillRange,       // 모든 스킬 범위
-    AllSkillMultiCast,   // 모든 스킬 다중시전
+    // ===== 전체 스킬 강화 (100~199) =====
+    AllSkillDamage = 100,        // 모든 스킬 데미지 증가 (%)
+    AllSkillCooldown = 101,      // 모든 스킬 쿨타임 감소 (%)
+    AllSkillRange = 102,         // 모든 스킬 범위 증가 (%)
+    AllSkillMultiCast = 103,     // 모든 스킬 다중시전 확률 추가 (%)
 
-    // 발사체 타입 강화
-    ProjectileDamage,      // 발사체 데미지
-    ProjectileCooldown,    // 발사체 쿨타임
-    ProjectileCount,       // 발사체 개수 +1
-    ProjectileSpeed,       // 발사체 속도
-    ProjectileMultiCast,   // 발사체 다중시전
+    // ===== 발사체 타입 강화 (200~299) =====
+    ProjectileDamage = 200,      // 발사체 스킬 데미지 증가 (%)
+    ProjectileCooldown = 201,    // 발사체 스킬 쿨타임 감소 (%)
+    ProjectileCount = 202,       // 발사체 개수 증가 (+n개)
+    ProjectileSpeed = 203,       // 발사체 속도 증가 (%)
+    ProjectileMultiCast = 204,   // 발사체 다중시전 확률 추가 (%)
 
-    // 영역 타입 강화
-    AreaDamage,           // 영역 데미지
-    AreaCooldown,         // 영역 쿨타임
-    AreaRange,            // 영역 범위
-    AreaMultiCast,        // 영역 다중시전
-    AreaCount,            // 영역 개수 +1
+    // ===== 영역 타입 강화 (300~399) =====
+    AreaDamage = 300,           // 영역 스킬 데미지 증가 (%)
+    AreaCooldown = 301,         // 영역 스킬 쿨타임 감소 (%)
+    AreaRange = 302,            // 영역 스킬 범위 증가 (%)
+    AreaMultiCast = 303,        // 영역 스킬 다중시전 확률 추가 (%)
+    AreaCount = 304,            // 영역 스킬 개수 증가 (+n개, 폭발 등)
 
-    // DOT 타입 강화
-    DOTDamage,            // 지속 데미지
-    DOTTickRate,          // 틱 간격 (데미지 주기)
-    DOTDuration,          // 지속 시간
-    DOTMultiCast          // DOT 다중시전
+    // ===== 지속 효과 타입 강화 (400~499) =====
+    DOTDamage = 400,            // 지속 데미지 증가 (%)
+    DOTTickRate = 401,          // 틱 속도 증가 (데미지 주기 단축 %)
+    DOTDuration = 402,          // 지속 시간 증가 (%)
+    DOTMultiCast = 403          // 지속 효과 다중시전 확률 추가 (%)
 }
 
 // 카드 등급

@@ -16,5 +16,5 @@ MonoBehaviour:
   description: "\uC601\uC5ED \uC2A4\uD0AC\uC758 \uCFE8\uD0C0\uC784\uC744 \uAC10\uC18C\uC2DC\uD0B5\uB2C8\uB2E4"
   targetMode: 1
   requiredTags: 08000000
-  statToModify: 14
+  statToModify: 301
   verboseLogging: 0

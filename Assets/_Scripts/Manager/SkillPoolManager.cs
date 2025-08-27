@@ -83,7 +83,7 @@ public class SkillPoolManager : MonoBehaviour
     {
         if (StaffManager.Instance == null || StaffManager.Instance.currentStaff == null)
         {
-            Debug.LogWarning("[SkillPoolManager] StaffManager 또는 currentStaff가 없습니다!");
+            DebugManager.LogWarning(LogCategory.Pool, "StaffManager 또는 currentStaff가 없습니다!");
             return;
         }
 
@@ -118,7 +118,8 @@ public class SkillPoolManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"[SkillPoolManager] {currentStaff.staffName}에서 {runtimeSkillPools.Count}개 스킬 자동 수집");
+        DebugManager.LogPoolCreation($"{currentStaff.staffName}에서 {runtimeSkillPools.Count}개 스킬 자동 수집");
+
     }
 
     void AddSkillToPool(SkillData skillData)
@@ -133,7 +134,7 @@ public class SkillPoolManager : MonoBehaviour
         };
 
         runtimeSkillPools.Add(pool);
-        Debug.Log($"  - {skillData.baseSkillType} 추가 (풀 크기: {pool.initialPoolSize})");
+        DebugManager.LogPoolCreation($"  - {skillData.baseSkillType} 추가 (풀 크기: {pool.initialPoolSize})");
     }
 
     int GetPoolSizeForSkill(string skillName)
@@ -179,7 +180,7 @@ public class SkillPoolManager : MonoBehaviour
             if (!string.IsNullOrEmpty(skillPool.skillName) && skillPool.prefab != null)
             {
                 poolDictionary[skillPool.skillName] = skillPool;
-                Debug.Log($"[SkillPoolManager] 수동 풀 덮어쓰기: {skillPool.skillName}");
+                DebugManager.LogPoolCreation($"수동 풀 덮어쓰기: {skillPool.skillName}");
             }
         }
     }
@@ -195,7 +196,7 @@ public class SkillPoolManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"[SkillPoolManager] {poolDictionary.Count}개 풀 준비 완료");
+        DebugManager.LogPoolCreation($"{poolDictionary.Count}개 풀 준비 완료");
         PrintPoolStatus();
     }
 
@@ -226,7 +227,7 @@ public class SkillPoolManager : MonoBehaviour
     {
         if (!poolDictionary.ContainsKey(skillName))
         {
-            Debug.LogError($"[SkillPoolManager] '{skillName}' 풀이 존재하지 않습니다!");
+            DebugManager.LogError(LogCategory.Pool, $"'{skillName}' 풀이 존재하지 않습니다!");
             return null;
         }
 
@@ -241,11 +242,11 @@ public class SkillPoolManager : MonoBehaviour
         else if (pool.canExpand)
         {
             obj = CreatePoolObject(pool);
-            Debug.Log($"[SkillPoolManager] '{skillName}' 풀 확장");
+            DebugManager.LogPoolExpansion($"'{skillName}' 풀 확장");
         }
         else
         {
-            Debug.LogWarning($"[SkillPoolManager] '{skillName}' 풀이 비어있고 확장 불가!");
+            DebugManager.LogWarning(LogCategory.Pool, $"'{skillName}' 풀이 비어있고 확장 불가!");
             return null;
         }
 
@@ -295,7 +296,7 @@ public class SkillPoolManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"[SkillPoolManager] 풀에 속하지 않은 오브젝트: {obj.name}");
+            DebugManager.LogWarning(LogCategory.Pool, $"풀에 속하지 않은 오브젝트: {obj.name}");
             Destroy(obj);
         }
     }
@@ -304,7 +305,8 @@ public class SkillPoolManager : MonoBehaviour
 
     public void PrintPoolStatus()
     {
-        Debug.Log("=== Skill Pool Status ===");
+        DebugManager.LogPoolStatus("=== Skill Pool Status ===");
+
         foreach (var kvp in poolDictionary)
         {
             int activeCount = 0;
@@ -313,7 +315,7 @@ public class SkillPoolManager : MonoBehaviour
                 if (active == kvp.Key) activeCount++;
             }
 
-            Debug.Log($"{kvp.Key}: 풀={kvp.Value.pool.Count}, 활성={activeCount}");
+            DebugManager.LogPoolStatus($"{kvp.Key}: 풀={kvp.Value.pool.Count}, 활성={activeCount}");
         }
     }
 
@@ -322,7 +324,7 @@ public class SkillPoolManager : MonoBehaviour
     {
         if (poolDictionary.ContainsKey(skillName))
         {
-            Debug.LogWarning($"[SkillPoolManager] '{skillName}' 풀이 이미 존재합니다!");
+            DebugManager.LogWarning(LogCategory.Pool, $"'{skillName}' 풀이 이미 존재합니다!");
             return;
         }
 
@@ -343,7 +345,6 @@ public class SkillPoolManager : MonoBehaviour
             CreatePoolObject(pool);
         }
 
-        Debug.Log($"[SkillPoolManager] '{skillName}' 풀 런타임 추가 완료");
     }
 
     // Staff 변경 시 재수집
@@ -351,7 +352,6 @@ public class SkillPoolManager : MonoBehaviour
     {
         if (!autoCollectFromStaff) return;
 
-        Debug.Log("[SkillPoolManager] Staff 변경 감지, 풀 재구성");
 
         // 기존 활성 오브젝트 정리
         ReturnAllActiveSkills();

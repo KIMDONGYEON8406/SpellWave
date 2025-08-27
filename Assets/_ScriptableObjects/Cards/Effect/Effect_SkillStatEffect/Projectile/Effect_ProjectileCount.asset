@@ -16,5 +16,5 @@ MonoBehaviour:
   description: "\uBC1C\uC0AC\uCCB4\uB97C \uCD94\uAC00 +1\n"
   targetMode: 1
   requiredTags: 04000000
-  statToModify: 10
+  statToModify: 202
   verboseLogging: 0

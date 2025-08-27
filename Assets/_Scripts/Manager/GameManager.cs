@@ -53,9 +53,11 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            DebugManager.LogGame("GameManager 싱글톤 초기화");
         }
         else
         {
+            DebugManager.LogWarning(LogCategory.Game, "중복 GameManager 감지, 파괴됨");
             Destroy(gameObject);
         }
     }
@@ -64,7 +66,7 @@ public class GameManager : MonoBehaviour
     {
         if (timelineConfig == null)
         {
-            Debug.LogError("GameManager: TimelineConfig가 할당되지 않았습니다!");
+            DebugManager.LogError(LogCategory.Game, "TimelineConfig가 할당되지 않았습니다!");
             return;
         }
 
@@ -79,94 +81,215 @@ public class GameManager : MonoBehaviour
 
         InitializeStaff();
         StartStage();
-
-        // 디버그 스킬 자동 수집
         CollectAllSkills();
+
+        DebugManager.LogGame("GameManager 초기화 완료");
     }
 
     void CollectAllSkills()
     {
-        // Resources 폴더에서 모든 SkillData 찾기
         debugSkills.Clear();
         debugSkills.AddRange(Resources.LoadAll<SkillData>("Skills"));
 
-        // 또는 특정 경로에서 찾기
         var skills = Resources.LoadAll<SkillData>("");
         debugSkills.AddRange(skills);
 
-        Debug.Log($"디버그용 스킬 {debugSkills.Count}개 로드");
+        DebugManager.LogGame($"디버그용 스킬 {debugSkills.Count}개 로드");
+    }
+
+    void Update()
+    {
+        if (currentState == GameState.Playing && isStageActive)
+        {
+            UpdateTimeline();
+        }
+    }
+
+    public void StartStage()
+    {
+        currentTime = 0f;
+        isStageActive = true;
+        currentLevel = 1;
+        currentExp = 0;
+        expToNextLevel = timelineConfig.GetExpToLevelUp(currentLevel);
+
+        DebugManager.LogTimeline($"[timelineProgress] 스테이지 시작! 목표 시간: {timelineConfig.totalDuration / 60f:F1}분");
+        OnExpChanged?.Invoke(currentExp, expToNextLevel);
+    }
+
+    void InitializeStaff()
+    {
+        if (StaffManager.Instance != null && defaultStaff != null)
+        {
+            StaffManager.Instance.UnlockStaff(defaultStaff);
+            StaffManager.Instance.EquipStaff(defaultStaff);
+            DebugManager.LogGame($"초기 지팡이 장착: {defaultStaff.staffName}");
+        }
+        else if (defaultStaff == null)
+        {
+            DebugManager.LogWarning(LogCategory.Game, "기본 지팡이가 설정되지 않았습니다!");
+        }
+    }
+
+    public void ChangeState(GameState newState)
+    {
+        GameState oldState = currentState;
+        currentState = newState;
+        OnGameStateChanged?.Invoke(currentState);
+        DebugManager.LogGameState($"[gameStateChanges] 게임 상태 변경: {oldState} → {currentState}");
+    }
+
+    private void UpdateTimeline()
+    {
+        currentTime += Time.deltaTime;
+        totalGameTime += Time.deltaTime;
+
+        float progress = timelineConfig.GetProgress(currentTime);
+        OnProgressChanged?.Invoke(progress);
+
+        // 진행률 디버그 (10% 단위로만)
+        if (Mathf.FloorToInt(progress / 10f) != Mathf.FloorToInt((progress - Time.deltaTime * 100f / timelineConfig.totalDuration) / 10f))
+        {
+            DebugManager.LogTimeline($"[timelineProgress] 진행률: {progress:F0}%");
+        }
+
+        if (timelineConfig.IsStageComplete(currentTime))
+        {
+            CompleteStage();
+        }
+    }
+
+    public void AddExperience(int expAmount)
+    {
+        currentExp += expAmount;
+        DebugManager.LogExperience($"[experienceSystem] 경험치 +{expAmount} (총: {currentExp}/{expToNextLevel})");
+
+        while (currentExp >= expToNextLevel && currentLevel < timelineConfig.maxLevel)
+        {
+            LevelUp();
+        }
+
+        OnExpChanged?.Invoke(currentExp, expToNextLevel);
+    }
+
+    private void LevelUp()
+    {
+        currentExp -= expToNextLevel;
+        currentLevel++;
+        expToNextLevel = timelineConfig.GetExpToLevelUp(currentLevel);
+
+        DebugManager.LogLevelUp($"[levelUpSystem] 레벨업! 레벨 {currentLevel} (다음 레벨까지: {expToNextLevel})");
+        OnLevelUp?.Invoke(currentLevel);
+
+        ShowCardSelection();
+    }
+
+    private void CompleteStage()
+    {
+        isStageActive = false;
+        OnStageCompleted?.Invoke();
+
+        DebugManager.LogTimeline($"[timelineProgress] 스테이지 완료! 총 시간: {currentTime / 60f:F1}분, 최종 레벨: {currentLevel}");
+        ChangeState(GameState.Victory);
+    }
+
+    private void ShowCardSelection()
+    {
+        ChangeState(GameState.CardSelection);
+
+        if (CardManager.Instance != null)
+        {
+            CardManager.Instance.ShowRandomCards();
+        }
+        else
+        {
+            DebugManager.LogWarning(LogCategory.Game, "CardManager가 없어서 카드 선택을 건너뜁니다.");
+            ChangeState(GameState.Playing);
+        }
+    }
+
+    public void OnCardSelected(CardData selectedCard)
+    {
+        ApplyCardEffect(selectedCard);
+        ChangeState(GameState.Playing);
+    }
+
+    private void ApplyCardEffect(CardData selectedCard)
+    {
+        DebugManager.LogGame($"카드 효과 적용 완료 - {selectedCard.cardName}");
     }
 
     // ===== 디버그 스킬 획득 메서드들 =====
-
     [ContextMenu("디버그/스킬 획득/오라 (Aura)")]
     public void DebugAddAuraSkill()
     {
+        DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 오라 스킬 추가");
         AddSkillByName("Aura");
     }
 
     [ContextMenu("디버그/스킬 획득/볼 (Bolt)")]
     public void DebugAddBoltSkill()
     {
+        DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 볼트 스킬 추가");
         AddSkillByName("Bolt");
     }
 
     [ContextMenu("디버그/스킬 획득/애로우 (Arrow)")]
     public void DebugAddArrowSkill()
     {
+        DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 애로우 스킬 추가");
         AddSkillByName("Arrow");
     }
 
     [ContextMenu("디버그/스킬 획득/익스플로전 (Explosion)")]
     public void DebugAddExplosionSkill()
     {
+        DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 익스플로전 스킬 추가");
         AddSkillByName("Explosion");
     }
 
     [ContextMenu("디버그/스킬 획득/미사일 (Missile)")]
     public void DebugAddMissileSkill()
     {
+        DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 미사일 스킬 추가");
         AddSkillByName("Missile");
     }
 
     [ContextMenu("디버그/모든 기본 스킬 획득")]
     public void DebugAddAllBasicSkills()
     {
+        DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 모든 기본 스킬 추가");
         string[] basicSkills = { "Bolt", "Arrow", "Explosion", "Missile" };
         foreach (string skillName in basicSkills)
         {
             AddSkillByName(skillName);
         }
     }
+
     [ContextMenu("디버그/스킬 획득/오라 (Aura) - 단일")]
     public void DebugAddAuraSingle()
     {
-        // 이미 오라가 있는지 확인
         var skillManager = player?.GetComponent<SkillManager>();
         if (skillManager != null)
         {
             var existingAura = skillManager.GetSkill("Aura");
             if (existingAura != null)
             {
-                Debug.LogWarning("오라가 이미 존재합니다!");
+                DebugManager.LogWarning(LogCategory.Game, "[debugCommands] 오라가 이미 존재합니다!");
                 return;
             }
         }
 
-        // 오라가 없을 때만 추가
+        DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 오라 단일 획득");
         AddSkillByName("Aura");
-        Debug.Log("오라 스킬 단일 획득");
     }
 
-    // 스킬 이름으로 찾아서 추가
     void AddSkillByName(string skillName)
     {
-        // debugSkills에서 찾기
         SkillData skillToAdd = debugSkills.Find(s => s != null && s.baseSkillType == skillName);
-        var skillManager = player?.GetComponent<SkillManager>();
+
         if (skillToAdd == null)
         {
-            // StaffData에서 찾기
             if (StaffManager.Instance != null && StaffManager.Instance.currentStaff != null)
             {
                 var staff = StaffManager.Instance.currentStaff;
@@ -185,84 +308,74 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"스킬을 찾을 수 없음: {skillName}");
+            DebugManager.LogWarning(LogCategory.Game, $"[debugCommands] 스킬을 찾을 수 없음: {skillName}");
         }
     }
 
-    // 실제 스킬 추가 로직
     void AddDebugSkill(SkillData skillData)
     {
         if (skillData == null) return;
 
-        // StaffManager를 통해 인벤토리에 추가
         var inventory = StaffManager.Instance?.GetCurrentInventory();
         if (inventory != null)
         {
-            // 인벤토리에 추가
             if (!inventory.ownedSkills.Contains(skillData))
             {
                 inventory.ownedSkills.Add(skillData);
-                Debug.Log($"[디버그] 인벤토리에 {skillData.baseSkillType} 추가");
+                DebugManager.LogDebugCommand($"[debugCommands] 인벤토리에 {skillData.baseSkillType} 추가");
             }
 
-            // 바로 장착
             if (!inventory.equippedSkills.Contains(skillData))
             {
                 if (inventory.equippedSkills.Count < 5)
                 {
                     inventory.equippedSkills.Add(skillData);
-
-                    // SkillManager 업데이트
                     StaffManager.Instance.UpdateEquippedSkills(inventory.equippedSkills);
-
-                    Debug.Log($"[디버그] {skillData.baseSkillType} 스킬 장착 완료! (슬롯 {inventory.equippedSkills.Count}/5)");
+                    DebugManager.LogDebugCommand($"[debugCommands] {skillData.baseSkillType} 스킬 장착 완료! (슬롯 {inventory.equippedSkills.Count}/5)");
                 }
                 else
                 {
-                    Debug.LogWarning("스킬 슬롯이 가득 참 (5/5)");
+                    DebugManager.LogWarning(LogCategory.Game, "[debugCommands] 스킬 슬롯이 가득 참 (5/5)");
                 }
             }
             else
             {
-                Debug.Log($"{skillData.baseSkillType}은 이미 장착됨");
+                DebugManager.LogDebugCommand($"[debugCommands] {skillData.baseSkillType}은 이미 장착됨");
             }
         }
         else
         {
-            Debug.LogError("StaffInventory를 찾을 수 없음!");
+            DebugManager.LogError(LogCategory.Game, "[debugCommands] StaffInventory를 찾을 수 없음!");
         }
     }
 
     // ===== 카드 효과 즉시 적용 =====
-
     [ContextMenu("디버그/카드 효과/범위 +25%")]
     public void DebugApplyRangeCard()
     {
+        DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 범위 +25% 적용");
         ApplyStatBoost(StatType.AllSkillRange, 25f);
     }
 
     [ContextMenu("디버그/카드 효과/범위 +50%")]
     public void DebugApplyRangeCard50()
     {
+        DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 범위 +50% 적용");
         ApplyStatBoost(StatType.AllSkillRange, 50f);
     }
 
     [ContextMenu("디버그/카드 효과/데미지 +25%")]
     public void DebugApplyDamageCard()
     {
+        DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 데미지 +25% 적용");
         ApplyStatBoost(StatType.AllSkillDamage, 25f);
     }
 
     [ContextMenu("디버그/카드 효과/쿨타임 -25%")]
     public void DebugApplyCooldownCard()
     {
+        DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 쿨타임 -25% 적용");
         ApplyStatBoost(StatType.AllSkillCooldown, 25f);
-    }
-
-    [ContextMenu("디버그/카드 효과/영역 스킬 범위 +50%")]
-    public void DebugApplyAreaRangeCard()
-    {
-        ApplyStatBoost(StatType.AreaRange, 50f);
     }
 
     void ApplyStatBoost(StatType statType, float percentage)
@@ -275,7 +388,7 @@ public class GameManager : MonoBehaviour
         SkillManager skillManager = player?.GetComponent<SkillManager>();
         if (skillManager == null)
         {
-            Debug.LogError("SkillManager를 찾을 수 없습니다!");
+            DebugManager.LogError(LogCategory.Game, "[debugCommands] SkillManager를 찾을 수 없습니다!");
             return;
         }
 
@@ -315,197 +428,96 @@ public class GameManager : MonoBehaviour
             if (affected)
             {
                 affectedCount++;
-                Debug.Log($"[디버그] {skill.skillData.baseSkillType}: {statType} +{percentage}% 적용");
-                Debug.Log($"  → 현재 배율 - DMG: {skill.damageMultiplier:F2}, CD: {skill.cooldownMultiplier:F2}, Range: {skill.rangeMultiplier:F2}");
+                DebugManager.LogDebugCommand($"[debugCommands] {skill.skillData.baseSkillType}: {statType} +{percentage}% 적용");
             }
         }
 
-        Debug.Log($"[디버그 카드 효과] {affectedCount}개 스킬에 {statType} +{percentage}% 적용 완료!");
+        DebugManager.LogDebugCommand($"[debugCommands] {affectedCount}개 스킬에 {statType} +{percentage}% 적용 완료!");
     }
 
-    // ===== 스킬 정보 출력 =====
-
-    [ContextMenu("디버그/현재 스킬 정보 출력")]
-    public void DebugPrintSkillInfo()
+    // ===== 기존 테스트 메서드들 =====
+    [ContextMenu("레벨업 테스트")]
+    public void TestLevelUp()
     {
-        if (player == null)
+        if (!Application.isPlaying)
         {
-            player = FindObjectOfType<Player>();
+            DebugManager.LogWarning(LogCategory.Game, "[debugCommands] 플레이 모드에서만 작동합니다!");
+            return;
         }
 
-        SkillManager skillManager = player?.GetComponent<SkillManager>();
-        if (skillManager != null)
+        currentLevel++;
+        DebugManager.LogDebugCommand($"[debugCommands] 강제 레벨업! 현재 레벨: {currentLevel}");
+
+        if (currentLevel % 4 == 0)
         {
-            skillManager.PrintSkillInfo();
-
-            // 추가 정보
-            var skills = skillManager.GetAllSkills();
-            foreach (var skill in skills)
-            {
-                Debug.Log($"[상세] {skill.skillData.baseSkillType}:");
-                Debug.Log($"  - Damage Multiplier: {skill.damageMultiplier:F2}");
-                Debug.Log($"  - Cooldown Multiplier: {skill.cooldownMultiplier:F2}");
-                Debug.Log($"  - Range Multiplier: {skill.rangeMultiplier:F2}");
-            }
-        }
-    }
-
-    [ContextMenu("디버그/오라 상태 확인")]
-    public void DebugCheckAuraStatus()
-    {
-        if (player == null)
-        {
-            player = FindObjectOfType<Player>();
-        }
-
-        Transform aura = player.transform.Find("PermanentAura");
-        if (aura != null)
-        {
-            var dotArea = aura.GetComponent<ElementalDOTArea>();
-            if (dotArea != null)
-            {
-                Debug.Log($"[오라 상태]");
-                Debug.Log($"  - Radius: {dotArea.radius}");
-                Debug.Log($"  - DPS: {dotArea.damagePerSecond}");
-
-                var collider = aura.GetComponent<SphereCollider>();
-                if (collider != null)
-                {
-                    Debug.Log($"  - Collider Radius: {collider.radius}");
-                }
-
-                var particle = aura.Find("Freeze circle")?.GetComponent<ParticleSystem>();
-                if (particle != null)
-                {
-                    var main = particle.main;
-                    Debug.Log($"  - Particle Size: X={main.startSizeXMultiplier}, Y={main.startSizeYMultiplier}");
-                    Debug.Log($"  - Particle Scale: {particle.transform.localScale}");
-                }
-            }
+            DebugManager.LogDebugCommand("[debugCommands] >>> 스킬 카드가 나와야 함!");
         }
         else
         {
-            Debug.Log("오라가 없습니다!");
+            DebugManager.LogDebugCommand("[debugCommands] >>> 스탯 카드가 나와야 함!");
+        }
+
+        OnLevelUp?.Invoke(currentLevel);
+        ShowCardSelection();
+    }
+
+    [ContextMenu("경험치 +100")]
+    public void AddTestExp()
+    {
+        if (Application.isPlaying)
+        {
+            DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 경험치 +100");
+            AddExperience(100);
         }
     }
 
-    // 기존 메서드들...
-    void Update()
+    [ContextMenu("강제 스테이지 완료")]
+    public void ForceCompleteStage()
     {
-        if (currentState == GameState.Playing && isStageActive)
+        if (Application.isPlaying)
         {
-            UpdateTimeline();
-        }
-    }
-
-    public void StartStage()
-    {
-        currentTime = 0f;
-        isStageActive = true;
-        currentLevel = 1;
-        currentExp = 0;
-        expToNextLevel = timelineConfig.GetExpToLevelUp(currentLevel);
-
-        Debug.Log($"스테이지 시작! 목표 시간: {timelineConfig.totalDuration / 60f:F1}분");
-        OnExpChanged?.Invoke(currentExp, expToNextLevel);
-    }
-
-    void InitializeStaff()
-    {
-        if (StaffManager.Instance != null && defaultStaff != null)
-        {
-            StaffManager.Instance.UnlockStaff(defaultStaff);
-            StaffManager.Instance.EquipStaff(defaultStaff);
-            Debug.Log($"초기 지팡이 장착: {defaultStaff.staffName}");
-        }
-        else if (defaultStaff == null)
-        {
-            Debug.LogWarning("GameManager: 기본 지팡이가 설정되지 않았습니다!");
-        }
-    }
-
-    public void ChangeState(GameState newState)
-    {
-        currentState = newState;
-        OnGameStateChanged?.Invoke(currentState);
-        Debug.Log($"게임 상태 변경: {currentState}");
-    }
-
-    private void UpdateTimeline()
-    {
-        currentTime += Time.deltaTime;
-        totalGameTime += Time.deltaTime;
-
-        float progress = timelineConfig.GetProgress(currentTime);
-        OnProgressChanged?.Invoke(progress);
-
-        if (timelineConfig.IsStageComplete(currentTime))
-        {
+            DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 강제 스테이지 완료");
             CompleteStage();
         }
     }
 
-    public void AddExperience(int expAmount)
+    [ContextMenu("스테이지 재시작")]
+    public void RestartStage()
     {
-        currentExp += expAmount;
-        //Debug.Log($"경험치 +{expAmount} (총: {currentExp}/{expToNextLevel})");
-
-        while (currentExp >= expToNextLevel && currentLevel < timelineConfig.maxLevel)
+        if (Application.isPlaying)
         {
-            LevelUp();
-        }
-
-        OnExpChanged?.Invoke(currentExp, expToNextLevel);
-    }
-
-    private void LevelUp()
-    {
-        currentExp -= expToNextLevel;
-        currentLevel++;
-        expToNextLevel = timelineConfig.GetExpToLevelUp(currentLevel);
-
-        Debug.Log($"레벨업! 레벨 {currentLevel}");
-        OnLevelUp?.Invoke(currentLevel);
-
-        ShowCardSelection();
-    }
-
-    private void CompleteStage()
-    {
-        isStageActive = false;
-        OnStageCompleted?.Invoke();
-
-        Debug.Log($"스테이지 완료! 총 시간: {currentTime / 60f:F1}분, 최종 레벨: {currentLevel}");
-        ChangeState(GameState.Victory);
-    }
-
-    private void ShowCardSelection()
-    {
-        ChangeState(GameState.CardSelection);
-
-        if (CardManager.Instance != null)
-        {
-            CardManager.Instance.ShowRandomCards();
-        }
-        else
-        {
-            Debug.LogWarning("CardManager가 없어서 카드 선택을 건너뜁니다.");
+            DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 스테이지 재시작");
             ChangeState(GameState.Playing);
+            StartStage();
         }
     }
 
-    public void OnCardSelected(CardData selectedCard)
+    [ContextMenu("디버그/글로벌 스탯 확인")]
+    public void DebugCheckGlobalStats()
     {
-        ApplyCardEffect(selectedCard);
-        ChangeState(GameState.Playing);
+        DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 글로벌 스탯 확인");
+        var modifier = SkillStatModifier.Instance;
+        if (modifier != null)
+        {
+            modifier.PrintGlobalStats();
+        }
     }
 
-    private void ApplyCardEffect(CardData selectedCard)
+    [ContextMenu("디버그/발사체 개수 +2")]
+    public void DebugAddProjectileCount()
     {
-        Debug.Log($"GameManager: 카드 효과 적용 완료 - {selectedCard.cardName}");
+        DebugManager.LogDebugCommand("[debugCommands] 디버그 명령: 발사체 개수 +2");
+        var modifier = player.GetComponent<ProjectileCountModifier>();
+        if (modifier == null)
+        {
+            modifier = player.gameObject.AddComponent<ProjectileCountModifier>();
+        }
+
+        modifier.AddProjectileCountToAll(2);
+        DebugManager.LogDebugCommand("[debugCommands] 모든 스킬 발사체 +2개!");
     }
 
-    // 정보 접근 메서드들
+    // 정보 접근 메서드들 (기존과 동일)
     public float GetStageProgress()
     {
         return timelineConfig != null ? timelineConfig.GetProgress(currentTime) : 0f;
@@ -545,133 +557,4 @@ public class GameManager : MonoBehaviour
     {
         return timelineConfig != null ? timelineConfig.GetCurrentSpawnRate(currentTime) : 0.5f;
     }
-
-    // ===== 디버그 메서드들 =====
-    [ContextMenu("레벨업 테스트")]
-    public void TestLevelUp()
-    {
-        if (!Application.isPlaying)
-        {
-            Debug.LogWarning("플레이 모드에서만 작동합니다!");
-            return;
-        }
-
-        currentLevel++;
-        Debug.Log($"강제 레벨업! 현재 레벨: {currentLevel}");
-
-        if (currentLevel % 4 == 0)
-        {
-            Debug.Log(">>> 스킬 카드가 나와야 함!");
-        }
-        else
-        {
-            Debug.Log(">>> 스탯 카드가 나와야 함!");
-        }
-
-        OnLevelUp?.Invoke(currentLevel);
-        ShowCardSelection();
-    }
-
-    [ContextMenu("경험치 +100")]
-    public void AddTestExp()
-    {
-        if (Application.isPlaying)
-        {
-            AddExperience(100);
-        }
-    }
-
-    [ContextMenu("강제 스테이지 완료")]
-    public void ForceCompleteStage()
-    {
-        if (Application.isPlaying)
-        {
-            CompleteStage();
-        }
-    }
-
-    [ContextMenu("스테이지 재시작")]
-    public void RestartStage()
-    {
-        if (Application.isPlaying)
-        {
-            ChangeState(GameState.Playing);
-            StartStage();
-        }
-    }
-    [ContextMenu("디버그/글로벌 스탯 확인")]
-    public void DebugCheckGlobalStats()
-    {
-        var modifier = SkillStatModifier.Instance;
-        if (modifier != null)
-        {
-            modifier.PrintGlobalStats();
-        }
-    }
-    [ContextMenu("디버그/발사체 개수 +2")]
-    public void DebugAddProjectileCount()
-    {
-        var modifier = player.GetComponent<ProjectileCountModifier>();
-        if (modifier == null)
-        {
-            modifier = player.gameObject.AddComponent<ProjectileCountModifier>();
-        }
-
-        modifier.AddProjectileCountToAll(2);
-        Debug.Log("모든 스킬 발사체 +2개!");
-    }
-
-    [ContextMenu("디버그/다중시전 확률 +30%")]
-    public void DebugAddMultiCast()
-    {
-        var multiCast = player.GetComponent<MultiCastSystem>();
-        if (multiCast == null)
-        {
-            multiCast = player.gameObject.AddComponent<MultiCastSystem>();
-        }
-
-        var skills = player.GetComponent<SkillManager>().GetAllSkills();
-        foreach (var skill in skills)
-        {
-            multiCast.AddMultiCastChance(skill.skillData.baseSkillType, 30f,
-                skill.skillData.HasTag(SkillTag.Projectile) ?
-                StatType.ProjectileMultiCast : StatType.AreaMultiCast);
-        }
-
-        Debug.Log("모든 스킬 다중시전 확률 +30%!");
-    }
-    [ContextMenu("디버그/익스플로전 범위 확인")]
-    public void DebugCheckExplosionRange()
-    {
-        var skillManager = player?.GetComponent<SkillManager>();
-        if (skillManager == null) return;
-
-        var explosion = skillManager.GetSkill("Explosion");
-        if (explosion != null)
-        {
-            Debug.Log($"=== Explosion 범위 상태 ===");
-            Debug.Log($"Base Range: {explosion.skillData.baseRange}");
-            Debug.Log($"Level: {explosion.currentLevel}");
-            Debug.Log($"Range at Level: {explosion.skillData.GetRangeAtLevel(explosion.currentLevel)}");
-            Debug.Log($"Range Multiplier: {explosion.rangeMultiplier:F2}");
-            Debug.Log($"Final Range: {explosion.CurrentRange:F1}");
-        }
-        else
-        {
-            Debug.Log("Explosion 스킬이 없습니다!");
-        }
-    }
-    [ContextMenu("디버그/Bolt 발사체 +3개")]
-    public void DebugAddBoltProjectiles()
-    {
-        var modifier = player.GetComponent<ProjectileCountModifier>();
-        if (modifier == null)
-        {
-            modifier = player.gameObject.AddComponent<ProjectileCountModifier>();
-        }
-
-        modifier.AddProjectileCount("Bolt", 3);
-        Debug.Log($"Bolt 발사체 +3개 추가 완료! 현재: {modifier.GetTotalCount("Bolt")}개");
-    }
-
 }

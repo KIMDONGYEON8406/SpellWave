@@ -35,7 +35,7 @@ public class CardSelectionUI : MonoBehaviour
         if (backgroundButton != null)
         {
             backgroundButton.onClick.AddListener(() => {
-                Debug.Log("카드를 선택해주세요!");
+                DebugManager.LogUI("카드를 선택해주세요!");
             });
         }
     }
@@ -150,7 +150,7 @@ public class CardSelectionUI : MonoBehaviour
         // 시간 재개
         Time.timeScale = 1f;
 
-        Debug.Log("카드 선택 UI 닫힘");
+        DebugManager.LogUI("카드 선택 UI 닫힘");
     }
 
     // 기존 카드들 제거

@@ -1,11 +1,12 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
 public class SkillManager : MonoBehaviour
 {
     [Header("스킬 설정")]
-    public int maxSkills = 5;  // 3에서 5로 변경
+    public int maxSkills = 5;
 
     [Header("디버그")]
     [SerializeField] private bool showDebugLogs = false;
@@ -19,15 +20,21 @@ public class SkillManager : MonoBehaviour
 
         if (owner == null)
         {
-            DebugManager.LogError(LogCategory.Skill, "Player 컴포넌트를 찾을 수 없습니다!");
+            DebugManager.LogError(LogCategory.Skill, "[skillInitialization] Player 컴포넌트를 찾을 수 없습니다!");
             owner = gameObject.AddComponent<Player>();
-            DebugManager.Log(LogCategory.Skill, "Player 컴포넌트 자동 생성", LogLevel.Warning);
+            DebugManager.LogWarning(LogCategory.Skill, "[skillInitialization] Player 컴포넌트 자동 생성");
         }
+
+        DebugManager.LogSkillInitialization($"SkillManager 초기화 완료 (최대 슬롯: {maxSkills})");
     }
 
     public bool AddSkillFromData(SkillData skillData)
     {
-        if (skillData == null) return false;
+        if (skillData == null)
+        {
+            DebugManager.LogError(LogCategory.Skill, "[skillManagement] SkillData가 null입니다!");
+            return false;
+        }
 
         if (owner == null)
         {
@@ -35,13 +42,14 @@ public class SkillManager : MonoBehaviour
             if (owner == null)
             {
                 owner = gameObject.AddComponent<Player>();
+                DebugManager.LogSkillInitialization("Player 컴포넌트 자동 추가");
             }
         }
 
         // 이미 있는 스킬인지 체크
         if (equippedSkills.ContainsKey(skillData.baseSkillType))
         {
-            DebugManager.LogSkill($"{skillData.baseSkillType}는 이미 장착됨");
+            DebugManager.LogSkillManagement($"{skillData.baseSkillType}는 이미 장착됨");
             return false;
         }
 
@@ -60,9 +68,10 @@ public class SkillManager : MonoBehaviour
             if (statModifier != null)
             {
                 statModifier.OnSkillAdded(skill);
+                DebugManager.LogSkillStats($"{skillData.baseSkillType}에 글로벌 보너스 적용");
             }
 
-            DebugManager.LogImportant($"새 스킬 추가: {skillData.baseSkillType}");
+            DebugManager.LogSkillManagement($"새 스킬 추가: {skillData.baseSkillType} (현재 {equippedSkills.Count}/{maxSkills})");
 
             if (skillData.baseSkillType == "Aura")
             {
@@ -72,18 +81,30 @@ public class SkillManager : MonoBehaviour
             return true;
         }
 
-        DebugManager.Log(LogCategory.Skill, $"스킬 슬롯 가득 참 ({equippedSkills.Count}/{maxSkills})", LogLevel.Warning);
+        DebugManager.LogWarning(LogCategory.Skill, $"[skillManagement] 스킬 슬롯 가득 참 ({equippedSkills.Count}/{maxSkills})");
         return false;
     }
 
     public SkillInstance GetSkill(string skillName)
     {
-        return equippedSkills.ContainsKey(skillName) ? equippedSkills[skillName] : null;
+        bool found = equippedSkills.ContainsKey(skillName);
+        if (showDebugLogs)
+        {
+            DebugManager.LogSkillManagement($"스킬 조회: {skillName} ({(found ? "발견" : "없음")})");
+        }
+
+        return found ? equippedSkills[skillName] : null;
     }
 
     public List<SkillInstance> GetAllSkills()
     {
-        return equippedSkills.Values.ToList();
+        var skillList = equippedSkills.Values.ToList();
+        if (showDebugLogs)
+        {
+            DebugManager.LogSkillManagement($"모든 스킬 조회: {skillList.Count}개");
+        }
+
+        return skillList;
     }
 
     public int GetSkillCount()
@@ -103,15 +124,18 @@ public class SkillManager : MonoBehaviour
                 Destroy(skillToRemove.gameObject);
             }
 
-            DebugManager.LogSkill($"스킬 제거: {skillName}");
+            DebugManager.LogSkillManagement($"스킬 제거: {skillName} (남은 스킬: {equippedSkills.Count}/{maxSkills})");
             return true;
         }
 
+        DebugManager.LogWarning(LogCategory.Skill, $"[skillManagement] 제거할 스킬을 찾을 수 없음: {skillName}");
         return false;
     }
 
     public void ClearAllSkills()
     {
+        int removedCount = equippedSkills.Count;
+
         foreach (var skill in equippedSkills.Values)
         {
             if (skill != null)
@@ -121,39 +145,37 @@ public class SkillManager : MonoBehaviour
         }
 
         equippedSkills.Clear();
-
-        if (showDebugLogs)
-        {
-            DebugManager.LogSkill("모든 스킬 제거");
-        }
+        DebugManager.LogSkillManagement($"모든 스킬 제거 ({removedCount}개 스킬)");
     }
 
     public void PrintSkillInfo()
     {
         DebugManager.LogSeparator($"보유 스킬 ({equippedSkills.Count}/{maxSkills})");
+
         foreach (var kvp in equippedSkills)
         {
             SkillInstance skill = kvp.Value;
-            DebugManager.LogSkill($"{skill.skillData.baseSkillType} Lv.{skill.currentLevel}");
+
+            DebugManager.LogSkillStats($"{skill.skillData.baseSkillType} Lv.{skill.currentLevel}");
 
             if (showDebugLogs)
             {
-                DebugManager.LogSkill($"  데미지: {skill.CurrentDamage:F1}");
-                DebugManager.LogSkill($"  쿨타임: {skill.CurrentCooldown:F1}초");
-                DebugManager.LogSkill($"  범위: {skill.CurrentRange:F1}m");
+                DebugManager.LogSkillStats($"  데미지: {skill.CurrentDamage:F1}");
+                DebugManager.LogSkillStats($"  쿨타임: {skill.CurrentCooldown:F1}초");
+                DebugManager.LogSkillStats($"  범위: {skill.CurrentRange:F1}m");
             }
         }
     }
 
     private void CreateAuraImmediately(SkillInstance auraSkill)
     {
-        DebugManager.LogImportant("오라 스킬 획득! 즉시 생성합니다.");
+        DebugManager.LogSkillExecution("오라 스킬 획득! 즉시 생성 시작");
 
         // 이미 오라가 있는지 확인
         Transform existingAura = transform.Find("PermanentAura");
         if (existingAura != null)
         {
-            DebugManager.Log(LogCategory.Skill, "오라가 이미 존재합니다.", LogLevel.Warning);
+            DebugManager.LogWarning(LogCategory.Skill, "[skillExecution] 오라가 이미 존재합니다.");
             return;
         }
 
@@ -178,22 +200,156 @@ public class SkillManager : MonoBehaviour
             auraSkill.skillData.skillBehavior.Execute(context);
             auraSkill.RecordSkillUse();
 
-            DebugManager.LogSkill($"오라 생성 완료! 범위: {auraSkill.CurrentRange}m");
+            DebugManager.LogSkillExecution($"오라 생성 완료! 범위: {auraSkill.CurrentRange:F1}m, 데미지: {auraSkill.CurrentDamage:F1}");
+        }
+        else
+        {
+            DebugManager.LogError(LogCategory.Skill, "[skillExecution] 오라 스킬에 Behavior가 없습니다!");
         }
     }
 
+    // 스킬 레벨업 처리
+    public bool LevelUpSkill(string skillName)
+    {
+        if (equippedSkills.ContainsKey(skillName))
+        {
+            var skill = equippedSkills[skillName];
+            if (skill.currentLevel < skill.skillData.maxLevel)
+            {
+                int oldLevel = skill.currentLevel;
+                skill.LevelUp();
+
+                DebugManager.LogSkillLevelUp($"{skillName} 레벨업: Lv.{oldLevel} → Lv.{skill.currentLevel}");
+                DebugManager.LogSkillStats($"  새 스탯 - 데미지:{skill.CurrentDamage:F1} 쿨타임:{skill.CurrentCooldown:F1} 범위:{skill.CurrentRange:F1}");
+
+                return true;
+            }
+            else
+            {
+                DebugManager.LogWarning(LogCategory.Skill, $"[skillLevelUp] {skillName}은 이미 최대 레벨입니다 (Lv.{skill.skillData.maxLevel})");
+                return false;
+            }
+        }
+
+        DebugManager.LogError(LogCategory.Skill, $"[skillLevelUp] 레벨업할 스킬을 찾을 수 없음: {skillName}");
+        return false;
+    }
+
+    // 플레이어 스탯 접근 메서드들
     public float GetPlayerAttackDamage()
     {
-        return owner != null ? owner.AttackPower : 0f;
+        float damage = owner != null ? owner.AttackPower : 0f;
+        if (showDebugLogs)
+        {
+            DebugManager.LogSkillStats($"플레이어 공격력 조회: {damage:F1}");
+        }
+        return damage;
     }
 
     public float GetPlayerAttackRange()
     {
-        return owner != null ? owner.AttackRange : 0f;
+        float range = owner != null ? owner.AttackRange : 0f;
+        if (showDebugLogs)
+        {
+            DebugManager.LogSkillStats($"플레이어 공격 범위 조회: {range:F1}");
+        }
+        return range;
     }
 
     public float GetPlayerAttackSpeed()
     {
-        return 1f;  // 고정값 (사용 안 함)
+        return 1f;  // 고정값
+    }
+
+    // 디버그 전용 메서드들
+    [ContextMenu("디버그/스킬 정보 출력")]
+    void DebugPrintSkillInfo()
+    {
+        PrintSkillInfo();
+    }
+
+    [ContextMenu("디버그/모든 스킬 레벨업")]
+    void DebugLevelUpAllSkills()
+    {
+        DebugManager.LogSkillLevelUp("[skillLevelUp] 디버그 명령: 모든 스킬 레벨업");
+
+        int leveledUpCount = 0;
+        foreach (var skillName in equippedSkills.Keys.ToList())
+        {
+            if (LevelUpSkill(skillName))
+            {
+                leveledUpCount++;
+            }
+        }
+
+        DebugManager.LogSkillLevelUp($"[skillLevelUp] {leveledUpCount}개 스킬 레벨업 완료");
+    }
+
+    [ContextMenu("디버그/스킬 슬롯 상태")]
+    void DebugPrintSlotStatus()
+    {
+        DebugManager.LogSeparator("스킬 슬롯 상태");
+        DebugManager.LogSkillManagement($"사용 중: {equippedSkills.Count}/{maxSkills}");
+        DebugManager.LogSkillManagement($"남은 슬롯: {maxSkills - equippedSkills.Count}");
+
+        if (equippedSkills.Count > 0)
+        {
+            DebugManager.LogSkillManagement("장착된 스킬 목록:");
+            foreach (var skillName in equippedSkills.Keys)
+            {
+                DebugManager.LogSkillManagement($"  - {skillName}");
+            }
+        }
+    }
+
+    [ContextMenu("디버그/스킬 상세 스탯")]
+    void DebugPrintDetailedStats()
+    {
+        DebugManager.LogSeparator("스킬 상세 스탯");
+
+        foreach (var kvp in equippedSkills)
+        {
+            var skill = kvp.Value;
+            DebugManager.LogSkillStats($"=== {skill.skillData.baseSkillType} ===");
+            DebugManager.LogSkillStats($"레벨: {skill.currentLevel}/{skill.skillData.maxLevel}");
+            DebugManager.LogSkillStats($"기본 데미지: {skill.skillData.GetDamageAtLevel(skill.currentLevel):F1}");
+            DebugManager.LogSkillStats($"최종 데미지: {skill.CurrentDamage:F1} (배율: {skill.damageMultiplier:F2}x)");
+            DebugManager.LogSkillStats($"기본 쿨타임: {skill.skillData.GetCooldownAtLevel(skill.currentLevel):F1}초");
+            DebugManager.LogSkillStats($"최종 쿨타임: {skill.CurrentCooldown:F1}초 (배율: {skill.cooldownMultiplier:F2}x)");
+            DebugManager.LogSkillStats($"기본 범위: {skill.skillData.GetRangeAtLevel(skill.currentLevel):F1}");
+            DebugManager.LogSkillStats($"최종 범위: {skill.CurrentRange:F1} (배율: {skill.rangeMultiplier:F2}x)");
+        }
+    }
+
+    // 스킬 존재 여부 체크
+    public bool HasSkill(string skillName)
+    {
+        return equippedSkills.ContainsKey(skillName);
+    }
+
+    // 특정 태그를 가진 스킬들 가져오기
+    public List<SkillInstance> GetSkillsByTag(SkillTag tag)
+    {
+        var matchingSkills = equippedSkills.Values.Where(skill => skill.skillData.HasTag(tag)).ToList();
+
+        if (showDebugLogs)
+        {
+            DebugManager.LogSkillManagement($"{tag} 태그 스킬 조회: {matchingSkills.Count}개");
+        }
+
+        return matchingSkills;
+    }
+
+    // 스킬 타입별 개수 조회
+    public int GetSkillCountByTag(SkillTag tag)
+    {
+        int count = equippedSkills.Values.Count(skill => skill.skillData.HasTag(tag));
+
+        if (showDebugLogs)
+        {
+            DebugManager.LogSkillManagement($"{tag} 태그 스킬 개수: {count}");
+        }
+
+        return count;
     }
 }

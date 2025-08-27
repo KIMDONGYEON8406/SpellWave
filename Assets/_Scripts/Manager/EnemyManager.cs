@@ -24,7 +24,7 @@ public class EnemyManager : MonoBehaviour
     public void RegisterEnemy(EnemyAI enemy)
     {
         allEnemies.Add(enemy);
-        //Debug.Log($"적 등록: 총 {allEnemies.Count}마리");
+        DebugManager.LogTargetingSystem($"적 등록: 총 {allEnemies.Count}마리");
     }
 
     // 적이 죽을 때 호출 - 모든 리스트에서 제거
@@ -32,7 +32,7 @@ public class EnemyManager : MonoBehaviour
     {
         allEnemies.Remove(enemy);
         enemiesInRange.Remove(enemy);
-        //Debug.Log($"적 제거: 남은 적 {allEnemies.Count}마리");
+        DebugManager.LogTargetingSystem($"적 제거: 남은 적 {allEnemies.Count}마리");
     }
 
     // 적이 플레이어 공격 범위에 들어왔을 때 호출
@@ -42,7 +42,7 @@ public class EnemyManager : MonoBehaviour
         if (!enemiesInRange.Contains(enemy))
         {
             enemiesInRange.Add(enemy);
-            Debug.Log($"공격 범위 진입: {enemy.name}");
+            DebugManager.LogTargetingSystem($"공격 범위 진입: {enemy.name}");
         }
     }
 
@@ -50,7 +50,7 @@ public class EnemyManager : MonoBehaviour
     public void RemoveFromAttackRange(EnemyAI enemy)
     {
         enemiesInRange.Remove(enemy);
-        Debug.Log($"공격 범위 이탈: {enemy.name}");
+        DebugManager.LogTargetingSystem($"공격 범위 이탈: {enemy.name}");
     }
 
     // 플레이어가 호출 - 공격 범위 내 가장 가까운 적 반환
@@ -86,7 +86,7 @@ public class EnemyManager : MonoBehaviour
     // 디버그용 - 현재 상태 출력
     public void PrintStatus()
     {
-        Debug.Log($"전체 적: {allEnemies.Count}마리, 공격 범위 내: {enemiesInRange.Count}마리");
+        DebugManager.LogTargetingSystem($"전체 적: {allEnemies.Count}마리, 공격 범위 내: {enemiesInRange.Count}마리");
     }
 
     // EnemyManager.cs ���� ��򰡿� ��ƿ��Ƽ �߰�(����)

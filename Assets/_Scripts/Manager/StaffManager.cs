@@ -66,7 +66,7 @@ public class StaffManager : MonoBehaviour
     {
         if (newStaff == null || !unlockedStaffs.Contains(newStaff))
         {
-            Debug.LogError("해금되지 않은 지팡이입니다!");
+            DebugManager.LogError(LogCategory.System, "해금되지 않은 지팡이입니다!");
             return;
         }
 
@@ -75,7 +75,7 @@ public class StaffManager : MonoBehaviour
         // 스킬매니저 업데이트
         UpdateSkillManager();
 
-        Debug.Log($"지팡이 장착: {newStaff.staffName}");
+        DebugManager.LogSystem($"지팡이 장착: {newStaff.staffName}");
     }
 
     // 현재 지팡이의 장착된 스킬들을 스킬매니저에 적용

@@ -10,12 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e07fec71d59a06144a46d9a24d6f7e20, type: 3}
-  m_Name: Effect_AllProjectileMultiCast
+  m_Name: Effect_Area Count
   m_EditorClassIdentifier: 
-  effectName: "\uBAA8\uB4E0 \uC2A4\uD0AC \uB2E4\uC911\uC2DC\uC804"
-  description: "\uBAA8\uB4E0 \uC2A4\uD0AC\uC758 \uB2E4\uC911\uC2DC\uC804\uD655\uB960
-    \uC99D\uAC00"
-  targetMode: 0
-  requiredTags: 
-  statToModify: 204
+  effectName: "\uC601\uC5ED \uBC94\uC704 \uAC2F\uC218 \uC99D\uAC00"
+  description: "\uC601\uC5ED \uC2A4\uD0AC\uC758 \uAC2F\uC218\uB97C +1 \uC99D\uAC00\uC2DC\uD0B5\uB2C8\uB2E4"
+  targetMode: 1
+  requiredTags: 08000000
+  statToModify: 304
   verboseLogging: 0

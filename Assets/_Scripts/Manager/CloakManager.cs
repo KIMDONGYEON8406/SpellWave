@@ -40,7 +40,7 @@ public class CloakManager : MonoBehaviour
         if (!unlockedCloaks.Contains(cloak))
         {
             unlockedCloaks.Add(cloak);
-            Debug.Log($"새 망토 해금: {cloak.cloakName}");
+            DebugManager.LogSystem($"새 망토 해금: {cloak.cloakName}");
         }
     }
 
@@ -48,14 +48,14 @@ public class CloakManager : MonoBehaviour
     {
         if (newCloak == null || !unlockedCloaks.Contains(newCloak))
         {
-            Debug.LogError("해금되지 않은 망토입니다!");
+            DebugManager.LogError(LogCategory.System, "해금되지 않은 망토입니다!");
             return;
         }
 
         currentCloak = newCloak;
         ApplyCloakStats();
 
-        Debug.Log($"망토 장착: {newCloak.cloakName} (속성: {newCloak.elementType})");
+        DebugManager.LogSystem($"망토 장착: {newCloak.cloakName} (속성: {newCloak.elementType})");
     }
 
     private void ApplyCloakStats()
@@ -68,7 +68,7 @@ public class CloakManager : MonoBehaviour
         if (player == null || currentCloak == null) return;
 
         // 스탯 보너스는 나중에 구현
-        Debug.Log($"망토 효과 적용: {currentCloak.elementType} 속성");
+        DebugManager.LogSystem($"망토 효과 적용: {currentCloak.elementType} 속성");
     }
 
     public ElementType GetCurrentElement()

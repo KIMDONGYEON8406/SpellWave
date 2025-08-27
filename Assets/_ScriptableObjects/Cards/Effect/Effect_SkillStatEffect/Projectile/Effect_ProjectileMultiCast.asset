@@ -17,5 +17,5 @@ MonoBehaviour:
     \uC5C5"
   targetMode: 1
   requiredTags: 04000000
-  statToModify: 12
+  statToModify: 204
   verboseLogging: 0

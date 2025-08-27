@@ -75,13 +75,14 @@ public class CardManager : MonoBehaviour
         }
     }
 
-    // 이 메서드가 누락된 것 같습니다
     private List<CardData> GetRandomCards(int count)
     {
         List<CardData> availableCards = GetAvailableCards();
         List<CardData> selectedCards = new List<CardData>();
 
+        // cardsToShow(3개) 제한 강제 적용
         int actualCount = Mathf.Min(count, availableCards.Count);
+        actualCount = Mathf.Min(actualCount, cardsToShow);  // 이 줄 추가!
 
         for (int i = 0; i < actualCount; i++)
         {
@@ -90,6 +91,13 @@ public class CardManager : MonoBehaviour
             int randomIndex = Random.Range(0, availableCards.Count);
             selectedCards.Add(availableCards[randomIndex]);
             availableCards.RemoveAt(randomIndex);
+        }
+
+        // 디버그 로그 추가
+        if (selectedCards.Count != cardsToShow)
+        {
+            DebugManager.LogWarning(LogCategory.Card,
+                $"카드 개수 불일치! 설정: {cardsToShow}, 실제: {selectedCards.Count}");
         }
 
         return selectedCards;
