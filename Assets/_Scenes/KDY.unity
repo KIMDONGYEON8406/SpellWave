@@ -673,6 +673,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 282ec71c575338e428aab2a1abc0863b, type: 2}
   cardsToShow: 3
   cardSelectionUI: {fileID: 170272251}
+  detailedDebug: 0
 --- !u!4 &365913561
 Transform:
   m_ObjectHideFlags: 0
@@ -1138,7 +1139,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 2
-  player: {fileID: 1194627156}
+  player: {fileID: 0}
+  defaultStaff: {fileID: 0}
   timelineConfig: {fileID: 11400000, guid: 5a9dd0dfeff24f74eb056a9c0be7686f, type: 2}
   currentTime: 0
   isStageActive: 0
@@ -1146,6 +1148,7 @@ MonoBehaviour:
   currentExp: 0
   expToNextLevel: 100
   totalGameTime: 0
+  debugSkills: []
 --- !u!4 &677839856
 Transform:
   m_ObjectHideFlags: 0
@@ -1717,17 +1720,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1191411854}
   m_CullTransparentMesh: 1
---- !u!114 &1194627156 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6650432905946922833, guid: f2b1c6a3418c0294a89e1948f4bdb9e6, type: 3}
-  m_PrefabInstance: {fileID: 2701316537926616322}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1769834316}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bb1a453c1aaf12440af967d1b4bb944e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1375392704
 GameObject:
   m_ObjectHideFlags: 0
@@ -2586,7 +2578,9 @@ PrefabInstance:
       propertyPath: projectilePrefab
       value: 
       objectReference: {fileID: 7677694619646138299, guid: 0adf575e33d2e9c46bf965d0e8df9569, type: 3}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5417448505272509511, guid: f2b1c6a3418c0294a89e1948f4bdb9e6, type: 3}
+    - {fileID: 6650432905946922833, guid: f2b1c6a3418c0294a89e1948f4bdb9e6, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
