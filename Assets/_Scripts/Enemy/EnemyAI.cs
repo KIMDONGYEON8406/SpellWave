@@ -1,38 +1,38 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /*
-[¸ñÀû]
-- ½ºÆù Áï½Ã ¹«Á¶°Ç ÇÃ·¹ÀÌ¾î¸¦ µû¶ó°¨(°¨Áö ¹üÀ§/°ø°Ý ¹üÀ§ ÁøÀÔ/ÀÌÅ» ·ÎÁ÷ ¾øÀ½).
-- Ç®¸µ(ºñÈ°¼º¡êÀçÈ°¼º)°ú EnemyManager µî·Ï/ÇØÁ¦ Å¸ÀÌ¹Ö¿¡ ¸ÂÃã.
-- HP/½ºÅÈÀº EnemyStats(SO)ÀÇ EnemyRuntimeStats¸¸ »ç¿ë.
+[ï¿½ï¿½ï¿½ï¿½]
+- ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾î¸¦ ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½Å» ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½).
+- Ç®ï¿½ï¿½(ï¿½ï¿½È°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È°ï¿½ï¿½)ï¿½ï¿½ EnemyManager ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½ Å¸ï¿½Ì¹Ö¿ï¿½ ï¿½ï¿½ï¿½ï¿½.
+- HP/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ EnemyStats(SO)ï¿½ï¿½ EnemyRuntimeStatsï¿½ï¿½ ï¿½ï¿½ï¿½.
 
-[ÀüÁ¦]
-- EnemyStats ScriptableObject°¡ ÀÖ°í CreateRuntimeStats(...)·Î ·±Å¸ÀÓ ½ºÅÈ »ý¼º.
-- PlayerÀÇ Tag = "Player".
-- Àû ÇÁ¸®ÆÕ¿¡ Rigidbody + Collider Á¸Àç(±ÇÀå: isKinematic=true, useGravity=false, Interpolate).
+[ï¿½ï¿½ï¿½ï¿½]
+- EnemyStats ScriptableObjectï¿½ï¿½ ï¿½Ö°ï¿½ CreateRuntimeStats(...)ï¿½ï¿½ ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+- Playerï¿½ï¿½ Tag = "Player".
+- ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ¿ï¿½ Rigidbody + Collider ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½: isKinematic=true, useGravity=false, Interpolate).
 
-[ÀÎ½ºÆåÅÍ]
-- enemyStats           : Àû ½ºÅÈ SO (ÇÊ¼ö)
-- experienceOnDeath    : Ã³Ä¡ ½Ã ÁÙ °æÇèÄ¡
-- alwaysRotateToTarget : ÀÌµ¿ ¹æÇâÀ¸·Î °í°³ µ¹¸±Áö(´ë·®ÀÌ¸é false ±ÇÀå)
-- rotationLerp         : È¸Àü º¸°£ ¼Óµµ(ÃÊ´ç)
+[ï¿½Î½ï¿½ï¿½ï¿½ï¿½ï¿½]
+- enemyStats           : ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ SO (ï¿½Ê¼ï¿½)
+- experienceOnDeath    : Ã³Ä¡ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¡
+- alwaysRotateToTarget : ï¿½Ìµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ë·®ï¿½Ì¸ï¿½ false ï¿½ï¿½ï¿½ï¿½)
+- rotationLerp         : È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½(ï¿½Ê´ï¿½)
 */
 public class EnemyAI : MonoBehaviour
 {
-    [Header("Àû µ¥ÀÌÅÍ(SO)")]
-    [SerializeField] private EnemyStats enemyStats;   // ScriptableObject (ÇÊ¼ö)
+    [Header("ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(SO)")]
+    [SerializeField] private EnemyStats enemyStats;   // ScriptableObject (ï¿½Ê¼ï¿½)
 
-    [Header("ÀüÅõ/°æÇèÄ¡")]
+    [Header("ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½Ä¡")]
     [SerializeField] private int experienceOnDeath = 25;
 
-    [Header("ÃßÀû ¿É¼Ç(´ë·®ÀÏ ¶§ È¸Àü OFF ±ÇÀå)")]
+    [Header("ï¿½ï¿½ï¿½ï¿½ ï¿½É¼ï¿½(ï¿½ë·®ï¿½ï¿½ ï¿½ï¿½ È¸ï¿½ï¿½ OFF ï¿½ï¿½ï¿½ï¿½)")]
     public bool alwaysRotateToTarget = false;
     public float rotationLerp = 12f;
 
-    // ·±Å¸ÀÓ ½ºÅÈ(ÀÌ °³Ã¼ Àü¿ë º¹Á¦º»)
+    // ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
     private EnemyRuntimeStats stats;
 
-    // Ä³½Ã
+    // Ä³ï¿½ï¿½
     private Transform player;
     private Rigidbody rb;
 
@@ -45,27 +45,27 @@ public class EnemyAI : MonoBehaviour
 
     void OnEnable()
     {
-        // EnemyManager µî·Ï(Ç® ÀçÈ°¼º Æ÷ÇÔ)
+        // EnemyManager ï¿½ï¿½ï¿½(Ç® ï¿½ï¿½È°ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
         if (EnemyManager.instance != null)
             EnemyManager.instance.RegisterEnemy(this);
 
-        // ·±Å¸ÀÓ ½ºÅÈ »ý¼º/¸®¼Â
+        // ï¿½ï¿½Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½
         if (stats == null)
         {
-            // ¿þÀÌºê ÁÖÀÔÀ» ¾ÆÁ÷ ¾È ÇÑ´Ù¸é 1·Î »ý¼º
+            // ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ñ´Ù¸ï¿½ 1ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             stats = (enemyStats != null)
                 ? enemyStats.CreateRuntimeStats(1)
                 : new EnemyRuntimeStats { maxHP = 60f, currentHP = 60f, moveSpeed = 2.5f, followRange = 9999f, attackRange = 2.5f, attackInterval = 1f, contactDamage = 10f };
         }
         else
         {
-            stats.currentHP = stats.maxHP; // Ç® Àç»ç¿ë ½Ã HP ¸®¼Â
+            stats.currentHP = stats.maxHP; // Ç® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ HP ï¿½ï¿½ï¿½ï¿½
         }
     }
 
     void OnDisable()
     {
-        // EnemyManager ÇØÁ¦(Ç® ºñÈ°¼º Æ÷ÇÔ)
+        // EnemyManager ï¿½ï¿½ï¿½ï¿½(Ç® ï¿½ï¿½È°ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
         if (EnemyManager.instance != null)
             EnemyManager.instance.UnregisterEnemy(this);
     }
@@ -74,7 +74,7 @@ public class EnemyAI : MonoBehaviour
     {
         if (player == null) return;
 
-        // Ç×»ó ÃßÀû(°¨Áö/¹üÀ§ Ã¼Å© ¾øÀ½)
+        // ï¿½×»ï¿½ ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½ Ã¼Å© ï¿½ï¿½ï¿½ï¿½)
         Vector3 to = player.position - transform.position;
         to.y = 0f;
 
@@ -82,7 +82,7 @@ public class EnemyAI : MonoBehaviour
             ? to.normalized * stats.moveSpeed * Time.fixedDeltaTime
             : Vector3.zero;
 
-        // ¹°¸® ÀÏ°ü¼º À§ÇØ kinematic Rigidbody¸é MovePosition ±ÇÀå
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½Ï°ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ kinematic Rigidbodyï¿½ï¿½ MovePosition ï¿½ï¿½ï¿½ï¿½
         if (rb != null) rb.MovePosition(rb.position + step);
         else transform.position += step;
 
@@ -93,7 +93,7 @@ public class EnemyAI : MonoBehaviour
         }
     }
 
-    // ===== ÇÇÇØ/»ç¸Á =====
+    // ===== ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ =====
     public void TakeDamage(float damage)
     {
         stats.TakeDamage(damage);
@@ -111,7 +111,7 @@ public class EnemyAI : MonoBehaviour
         else gameObject.SetActive(false);
     }
 
-    // ½ºÆù·¯°¡ ¿þÀÌºê ¹Ý¿µÇÏ°í ½ÍÀ» ¶§ È£Ãâ
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ìºï¿½ ï¿½Ý¿ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ È£ï¿½ï¿½
     public void InitializeForWave(int waveIndex)
     {
         if (enemyStats != null)

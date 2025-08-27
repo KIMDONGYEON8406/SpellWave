@@ -1,66 +1,118 @@
-using UnityEngine;
+ï»¿using UnityEngine;
+using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "New Skill Data", menuName = "Game/Skill Data")]
 public class SkillData : ScriptableObject
 {
-    [Header("±âº» Á¤º¸")]
-    public string skillName;
+    [Header("ìŠ¤í‚¬ ë™ì‘")]
+    public SkillBehavior skillBehavior;
+
+    [Header("ê¸°ë³¸ ì •ë³´")]
+    public string baseSkillType = "Bolt";
+
+    [Header("ìŠ¤í‚¬ íƒœê·¸")]
+    public List<SkillTag> skillTags = new List<SkillTag>();
+
     [TextArea(2, 4)]
     public string description;
     public Sprite skillIcon;
 
-    [Header("½ºÅ³ Å¸ÀÔ")]
-    public SkillType skillType;
-
-    [Header("±âº» ½ºÅÈ")]
+    [Header("ê¸°ë³¸ ìŠ¤íƒ¯")]
     public float baseDamage = 50f;
     public float baseCooldown = 2f;
     public float baseRange = 5f;
     public int maxLevel = 5;
 
-    [Header("·¹º§º° Áõ°¡·®")]
+    [Header("ë ˆë²¨ë³„ ì¦ê°€ëŸ‰")]
     public float damagePerLevel = 10f;
-    public float cooldownReductionPerLevel = 0.1f; // ·¹º§´ç ÄğÅ¸ÀÓ 10% °¨¼Ò
+    public float cooldownReductionPerLevel = 0.1f;
     public float rangeIncreasePerLevel = 0.5f;
 
-    [Header("½ºÅ³ ÇÁ¸®ÆÕ")]
-    public GameObject skillPrefab; // ½ÇÁ¦ ½ºÅ³ ·ÎÁ÷ÀÌ µé¾î°£ ÇÁ¸®ÆÕ
-
-    [Header("ÀÌÆåÆ® ÇÁ¸®ÆÕ (¼±ÅÃ»çÇ×)")]
+    [Header("ìŠ¤í‚¬ í”„ë¦¬íŒ¹")]
+    public GameObject skillPrefab;
     public GameObject hitEffectPrefab;
     public GameObject castEffectPrefab;
 
-    [Header("½ºÅ³ Æ¯¼º")]
+    [Header("ìŠ¤í‚¬ íŠ¹ì„±")]
     public bool canLevelUp = true;
-    public bool isPassive = false; // ÆĞ½Ãºê ½ºÅ³ ¿©ºÎ
+    public bool isPassive = false;
+    public bool autoTarget = true;
+    public float autoCastPriority = 1f;
 
-    // ·¹º§¿¡ µû¸¥ µ¥¹ÌÁö °è»ê
+    public bool HasTag(SkillTag tag)
+    {
+        return skillTags.Contains(tag);
+    }
+
+    public bool HasAnyTag(params SkillTag[] tags)
+    {
+        foreach (var tag in tags)
+        {
+            if (skillTags.Contains(tag))
+                return true;
+        }
+        return false;
+    }
+
+    public string GetDisplayName(ElementType element)
+    {
+        return SkillNameGenerator.GetSkillName(baseSkillType, element);
+    }
+    public string GetTypeDescription()
+    {
+        List<string> types = new List<string>();
+
+        if (HasTag(SkillTag.Projectile)) types.Add("ë°œì‚¬ì²´");
+        if (HasTag(SkillTag.Area)) types.Add("ì˜ì—­");
+        if (HasTag(SkillTag.DOT)) types.Add("ì§€ì†");
+        if (HasTag(SkillTag.Instant)) types.Add("ì¦‰ì‹œ");
+        if (HasTag(SkillTag.Homing)) types.Add("ìœ ë„");
+
+        if (types.Count == 0) return "ê¸°ë³¸";
+
+        return string.Join(", ", types);
+    }
+
+    public string GetCardDescription(ElementType element)
+    {
+        string baseDesc = description;
+
+        // íƒ€ì… í‘œì‹œ ì¶”ê°€
+        string typeInfo = GetTypeDescription();
+        if (!string.IsNullOrEmpty(typeInfo))
+        {
+            baseDesc = $"íƒ€ì…: {typeInfo}\n{baseDesc}";
+        }
+
+        return baseDesc;
+    }
+
     public float GetDamageAtLevel(int level)
     {
         return baseDamage + (damagePerLevel * (level - 1));
     }
 
-    // ·¹º§¿¡ µû¸¥ ÄğÅ¸ÀÓ °è»ê
     public float GetCooldownAtLevel(int level)
     {
         float reduction = cooldownReductionPerLevel * (level - 1);
         return Mathf.Max(0.1f, baseCooldown * (1f - reduction));
     }
 
-    // ·¹º§¿¡ µû¸¥ ¹üÀ§ °è»ê
     public float GetRangeAtLevel(int level)
     {
         return baseRange + (rangeIncreasePerLevel * (level - 1));
     }
 }
 
-// ½ºÅ³ Å¸ÀÔ enum
-public enum SkillType
+[System.Flags]
+public enum SkillTag
 {
-    Projectile,     // ¹ß»çÃ¼ (ÆÄÀÌ¾îº¼)
-    AreaAttack,     // ¹üÀ§°ø°İ (¸ŞÅ×¿À)
-    AreaDOT,        // Áö¼Óµ¥¹ÌÁö (ÆÄÀÌ¾î½¯µå)
-    Passive,        // ÆĞ½Ãºê (È­»ó)
-    Buff,           // ¹öÇÁ (°ø°İ·Â Áõ°¡)
-    Summon          // ¼ÒÈ¯ (¹Ì´Ï¾ğ ¼ÒÈ¯)
+    SingleTarget = 1 << 0,
+    MultiTarget = 1 << 1,
+    Projectile = 1 << 2,
+    Area = 1 << 3,
+    DOT = 1 << 4,
+    Homing = 1 << 5,
+    Pierce = 1 << 6,
+    Instant = 1 << 8,
 }

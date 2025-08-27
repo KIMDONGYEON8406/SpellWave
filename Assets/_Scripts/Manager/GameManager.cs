@@ -1,44 +1,51 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 public enum GameState
 {
-    MainMenu,      // ¸ŞÀÎ ¸Ş´º
-    CharacterSelect, // Ä³¸¯ÅÍ ¼±ÅÃ
-    Playing,       // °ÔÀÓ ÇÃ·¹ÀÌ Áß
-    Paused,        // ÀÏ½ÃÁ¤Áö
-    CardSelection, // Ä«µå ¼±ÅÃ Áß
-    GameOver,      // °ÔÀÓ ¿À¹ö
-    Victory        // °ÔÀÓ Å¬¸®¾î
+    MainMenu,
+    CharacterSelect,
+    Playing,
+    Paused,
+    CardSelection,
+    GameOver,
+    Victory
 }
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    [Header("°ÔÀÓ »óÅÂ")]
+    [Header("ê²Œì„ ìƒíƒœ")]
     public GameState currentState = GameState.Playing;
-    public Character player;
+    public Player player;
 
-    [Header("Å¸ÀÓ¶óÀÎ ¼³Á¤")] // [¼öÁ¤] Timeline ½Ã½ºÅÛ - [KDY]
+    [Header("ì´ˆê¸° ì¥ë¹„")]
+    public StaffData defaultStaff;
+
+    [Header("íƒ€ì„ë¼ì¸ ì„¤ì •")]
     public TimelineConfig timelineConfig;
 
-    [Header("Å¸ÀÓ¶óÀÎ ÁøÇà»óÈ²")] // [Ãß°¡] Timeline ÁøÇà °ü¸® - [KDY]
-    public float currentTime = 0f;           // ÇöÀç ½ºÅ×ÀÌÁö ÁøÇà ½Ã°£
-    public bool isStageActive = false;       // ½ºÅ×ÀÌÁö ÁøÇà ÁßÀÎÁö
-    public int currentLevel = 1;             // ÇöÀç ·¹º§
-    public int currentExp = 0;               // ÇöÀç °æÇèÄ¡
-    public int expToNextLevel = 100;         // ´ÙÀ½ ·¹º§±îÁö ÇÊ¿äÇÑ °æÇèÄ¡
+    [Header("íƒ€ì„ë¼ì¸ ì§„í–‰ìƒí™©")]
+    public float currentTime = 0f;
+    public bool isStageActive = false;
+    public int currentLevel = 1;
+    public int currentExp = 0;
+    public int expToNextLevel = 100;
 
-    [Header("°ÔÀÓ Å¸ÀÌ¸Ó")]
-    public float totalGameTime = 0f;         // ÀüÃ¼ °ÔÀÓ ½Ã°£
+    [Header("ê²Œì„ íƒ€ì´ë¨¸")]
+    public float totalGameTime = 0f;
 
-    // ===== ÀÌº¥Æ®µé ===== [¼öÁ¤] Timeline ±â¹İÀ¸·Î º¯°æ - [KDY]
-    public static event Action<float> OnProgressChanged;        // ÁøÃ´µµ º¯°æ (0~100%)
-    public static event Action<int> OnLevelUp;                  // ·¹º§¾÷
-    public static event Action<int, int> OnExpChanged;          // °æÇèÄ¡ º¯°æ (ÇöÀç°æÇèÄ¡, ÇÊ¿ä°æÇèÄ¡)
-    public static event Action OnStageCompleted;               // ½ºÅ×ÀÌÁö ¿Ï·á
-    public static event Action<GameState> OnGameStateChanged;   // »óÅÂ º¯°æ
+    [Header("ë””ë²„ê·¸ìš© ìŠ¤í‚¬ ëª©ë¡")]
+    [SerializeField] private List<SkillData> debugSkills = new List<SkillData>();
+
+    // ì´ë²¤íŠ¸ë“¤
+    public static event Action<float> OnProgressChanged;
+    public static event Action<int> OnLevelUp;
+    public static event Action<int, int> OnExpChanged;
+    public static event Action OnStageCompleted;
+    public static event Action<GameState> OnGameStateChanged;
 
     void Awake()
     {
@@ -46,26 +53,58 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            DebugManager.LogGame("GameManager ì‹±ê¸€í†¤ ì´ˆê¸°í™”");
         }
         else
         {
+            DebugManager.LogWarning(LogCategory.Game, "ì¤‘ë³µ GameManager ê°ì§€, íŒŒê´´ë¨");
             Destroy(gameObject);
         }
     }
 
     void Start()
     {
-        // [¼öÁ¤] Timeline ½Ã½ºÅÛ ½ÃÀÛ - [KDY]
         if (timelineConfig == null)
         {
-            Debug.LogError("GameManager: TimelineConfig°¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù!");
+            DebugManager.LogError(LogCategory.Game, "TimelineConfigê°€ í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
             return;
         }
 
+        if (player == null)
+        {
+            player = GameObject.FindObjectOfType<Player>();
+            if (player != null && player.tag != "Player")
+            {
+                player.tag = "Player";
+            }
+        }
+
+        InitializeStaff();
         StartStage();
+        CollectAllSkills();
+
+        DebugManager.LogGame("GameManager ì´ˆê¸°í™” ì™„ë£Œ");
     }
 
-    // [Ãß°¡] ½ºÅ×ÀÌÁö ½ÃÀÛ ÇÔ¼ö - [KDY]
+    void CollectAllSkills()
+    {
+        debugSkills.Clear();
+        debugSkills.AddRange(Resources.LoadAll<SkillData>("Skills"));
+
+        var skills = Resources.LoadAll<SkillData>("");
+        debugSkills.AddRange(skills);
+
+        DebugManager.LogGame($"ë””ë²„ê·¸ìš© ìŠ¤í‚¬ {debugSkills.Count}ê°œ ë¡œë“œ");
+    }
+
+    void Update()
+    {
+        if (currentState == GameState.Playing && isStageActive)
+        {
+            UpdateTimeline();
+        }
+    }
+
     public void StartStage()
     {
         currentTime = 0f;
@@ -74,62 +113,57 @@ public class GameManager : MonoBehaviour
         currentExp = 0;
         expToNextLevel = timelineConfig.GetExpToLevelUp(currentLevel);
 
-        //// ÇÃ·¹ÀÌ¾î ½ºÅÈ ÃÊ±âÈ­ (½ºÅ×ÀÌÁö ½ÃÀÛ ½Ã)
-        //if (player != null && player.GetPlayerStats() != null)
-        //{
-        //    player.GetPlayerStats().ResetToDefault();
-        //}
-
-        //Debug.Log($"½ºÅ×ÀÌÁö ½ÃÀÛ! ¸ñÇ¥ ½Ã°£: {timelineConfig.totalDuration / 60f:F1}ºĞ");
-        //OnExpChanged?.Invoke(currentExp, expToNextLevel);
+        DebugManager.LogTimeline($"[timelineProgress] ìŠ¤í…Œì´ì§€ ì‹œì‘! ëª©í‘œ ì‹œê°„: {timelineConfig.totalDuration / 60f:F1}ë¶„");
+        OnExpChanged?.Invoke(currentExp, expToNextLevel);
     }
 
-    // °ÔÀÓ »óÅÂ º¯°æ ¸Ş¼­µå
-    public void ChangeState(GameState newState)
+    void InitializeStaff()
     {
-        currentState = newState;
-        OnGameStateChanged?.Invoke(currentState);
-        Debug.Log($"°ÔÀÓ »óÅÂ º¯°æ: {currentState}");
-    }
-
-    private void ApplyCardEffect(CardData selectedCard)
-    {
-        Debug.Log($"GameManager: Ä«µå È¿°ú Àû¿ë ¿Ï·á - {selectedCard.cardName}");
-    }
-
-    void Update()
-    {
-        if (currentState == GameState.Playing && isStageActive)
+        if (StaffManager.Instance != null && defaultStaff != null)
         {
-            UpdateTimeline(); // [¼öÁ¤] Timeline ¾÷µ¥ÀÌÆ® - [KDY]
+            StaffManager.Instance.UnlockStaff(defaultStaff);
+            StaffManager.Instance.EquipStaff(defaultStaff);
+            DebugManager.LogGame($"ì´ˆê¸° ì§€íŒ¡ì´ ì¥ì°©: {defaultStaff.staffName}");
+        }
+        else if (defaultStaff == null)
+        {
+            DebugManager.LogWarning(LogCategory.Game, "ê¸°ë³¸ ì§€íŒ¡ì´ê°€ ì„¤ì •ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤!");
         }
     }
 
-    // [Ãß°¡] Timeline ¾÷µ¥ÀÌÆ® ÇÔ¼ö - [KDY]
+    public void ChangeState(GameState newState)
+    {
+        GameState oldState = currentState;
+        currentState = newState;
+        OnGameStateChanged?.Invoke(currentState);
+        DebugManager.LogGameState($"[gameStateChanges] ê²Œì„ ìƒíƒœ ë³€ê²½: {oldState} â†’ {currentState}");
+    }
+
     private void UpdateTimeline()
     {
-        // ½Ã°£ ¾÷µ¥ÀÌÆ®
         currentTime += Time.deltaTime;
         totalGameTime += Time.deltaTime;
 
-        // ÁøÃ´µµ ¾÷µ¥ÀÌÆ® (0~100%)
         float progress = timelineConfig.GetProgress(currentTime);
         OnProgressChanged?.Invoke(progress);
 
-        // ½ºÅ×ÀÌÁö ¿Ï·á Ã¼Å©
+        // ì§„í–‰ë¥  ë””ë²„ê·¸ (10% ë‹¨ìœ„ë¡œë§Œ)
+        if (Mathf.FloorToInt(progress / 10f) != Mathf.FloorToInt((progress - Time.deltaTime * 100f / timelineConfig.totalDuration) / 10f))
+        {
+            DebugManager.LogTimeline($"[timelineProgress] ì§„í–‰ë¥ : {progress:F0}%");
+        }
+
         if (timelineConfig.IsStageComplete(currentTime))
         {
             CompleteStage();
         }
     }
 
-    // [Ãß°¡] °æÇèÄ¡ È¹µæ ÇÔ¼ö - [KDY]
     public void AddExperience(int expAmount)
     {
         currentExp += expAmount;
-        Debug.Log($"°æÇèÄ¡ +{expAmount} (ÃÑ: {currentExp}/{expToNextLevel})");
+        DebugManager.LogExperience($"[experienceSystem] ê²½í—˜ì¹˜ +{expAmount} (ì´: {currentExp}/{expToNextLevel})");
 
-        // ·¹º§¾÷ Ã¼Å©
         while (currentExp >= expToNextLevel && currentLevel < timelineConfig.maxLevel)
         {
             LevelUp();
@@ -138,43 +172,38 @@ public class GameManager : MonoBehaviour
         OnExpChanged?.Invoke(currentExp, expToNextLevel);
     }
 
-    // [Ãß°¡] ·¹º§¾÷ Ã³¸® - [KDY]
     private void LevelUp()
     {
         currentExp -= expToNextLevel;
         currentLevel++;
         expToNextLevel = timelineConfig.GetExpToLevelUp(currentLevel);
 
-        Debug.Log($"·¹º§¾÷! ·¹º§ {currentLevel}");
+        DebugManager.LogLevelUp($"[levelUpSystem] ë ˆë²¨ì—…! ë ˆë²¨ {currentLevel} (ë‹¤ìŒ ë ˆë²¨ê¹Œì§€: {expToNextLevel})");
         OnLevelUp?.Invoke(currentLevel);
 
-        // Ä«µå ¼±ÅÃ Ç¥½Ã
         ShowCardSelection();
     }
 
-    // [Ãß°¡] ½ºÅ×ÀÌÁö ¿Ï·á Ã³¸® - [KDY]
     private void CompleteStage()
     {
         isStageActive = false;
         OnStageCompleted?.Invoke();
 
-        Debug.Log($"½ºÅ×ÀÌÁö ¿Ï·á! ÃÑ ½Ã°£: {currentTime / 60f:F1}ºĞ, ÃÖÁ¾ ·¹º§: {currentLevel}");
+        DebugManager.LogTimeline($"[timelineProgress] ìŠ¤í…Œì´ì§€ ì™„ë£Œ! ì´ ì‹œê°„: {currentTime / 60f:F1}ë¶„, ìµœì¢… ë ˆë²¨: {currentLevel}");
         ChangeState(GameState.Victory);
     }
 
-    // ===== Ä«µå ½Ã½ºÅÛ ===== [¼öÁ¤] ·¹º§¾÷ ±â¹İÀ¸·Î º¯°æ - [KDY]
     private void ShowCardSelection()
     {
         ChangeState(GameState.CardSelection);
 
-        // [¼öÁ¤] CardManager null Ã¼Å© Ãß°¡ - [KDY]
         if (CardManager.Instance != null)
         {
             CardManager.Instance.ShowRandomCards();
         }
         else
         {
-            Debug.LogWarning("CardManager°¡ ¾ø¾î¼­ Ä«µå ¼±ÅÃÀ» °Ç³Ê¶İ´Ï´Ù.");
+            DebugManager.LogWarning(LogCategory.Game, "CardManagerê°€ ì—†ì–´ì„œ ì¹´ë“œ ì„ íƒì„ ê±´ë„ˆëœë‹ˆë‹¤.");
             ChangeState(GameState.Playing);
         }
     }
@@ -185,7 +214,310 @@ public class GameManager : MonoBehaviour
         ChangeState(GameState.Playing);
     }
 
-    // ===== °ÔÀÓ Á¤º¸ Á¢±Ù ¸Ş¼­µåµé ===== [¼öÁ¤] Timeline ±â¹İÀ¸·Î º¯°æ - [KDY]
+    private void ApplyCardEffect(CardData selectedCard)
+    {
+        DebugManager.LogGame($"ì¹´ë“œ íš¨ê³¼ ì ìš© ì™„ë£Œ - {selectedCard.cardName}");
+    }
+
+    // ===== ë””ë²„ê·¸ ìŠ¤í‚¬ íšë“ ë©”ì„œë“œë“¤ =====
+    [ContextMenu("ë””ë²„ê·¸/ìŠ¤í‚¬ íšë“/ì˜¤ë¼ (Aura)")]
+    public void DebugAddAuraSkill()
+    {
+        DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ì˜¤ë¼ ìŠ¤í‚¬ ì¶”ê°€");
+        AddSkillByName("Aura");
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ìŠ¤í‚¬ íšë“/ë³¼ (Bolt)")]
+    public void DebugAddBoltSkill()
+    {
+        DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ë³¼íŠ¸ ìŠ¤í‚¬ ì¶”ê°€");
+        AddSkillByName("Bolt");
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ìŠ¤í‚¬ íšë“/ì• ë¡œìš° (Arrow)")]
+    public void DebugAddArrowSkill()
+    {
+        DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ì• ë¡œìš° ìŠ¤í‚¬ ì¶”ê°€");
+        AddSkillByName("Arrow");
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ìŠ¤í‚¬ íšë“/ìµìŠ¤í”Œë¡œì „ (Explosion)")]
+    public void DebugAddExplosionSkill()
+    {
+        DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ìµìŠ¤í”Œë¡œì „ ìŠ¤í‚¬ ì¶”ê°€");
+        AddSkillByName("Explosion");
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ìŠ¤í‚¬ íšë“/ë¯¸ì‚¬ì¼ (Missile)")]
+    public void DebugAddMissileSkill()
+    {
+        DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ë¯¸ì‚¬ì¼ ìŠ¤í‚¬ ì¶”ê°€");
+        AddSkillByName("Missile");
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ëª¨ë“  ê¸°ë³¸ ìŠ¤í‚¬ íšë“")]
+    public void DebugAddAllBasicSkills()
+    {
+        DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ëª¨ë“  ê¸°ë³¸ ìŠ¤í‚¬ ì¶”ê°€");
+        string[] basicSkills = { "Bolt", "Arrow", "Explosion", "Missile" };
+        foreach (string skillName in basicSkills)
+        {
+            AddSkillByName(skillName);
+        }
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ìŠ¤í‚¬ íšë“/ì˜¤ë¼ (Aura) - ë‹¨ì¼")]
+    public void DebugAddAuraSingle()
+    {
+        var skillManager = player?.GetComponent<SkillManager>();
+        if (skillManager != null)
+        {
+            var existingAura = skillManager.GetSkill("Aura");
+            if (existingAura != null)
+            {
+                DebugManager.LogWarning(LogCategory.Game, "[debugCommands] ì˜¤ë¼ê°€ ì´ë¯¸ ì¡´ì¬í•©ë‹ˆë‹¤!");
+                return;
+            }
+        }
+
+        DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ì˜¤ë¼ ë‹¨ì¼ íšë“");
+        AddSkillByName("Aura");
+    }
+
+    void AddSkillByName(string skillName)
+    {
+        SkillData skillToAdd = debugSkills.Find(s => s != null && s.baseSkillType == skillName);
+
+        if (skillToAdd == null)
+        {
+            if (StaffManager.Instance != null && StaffManager.Instance.currentStaff != null)
+            {
+                var staff = StaffManager.Instance.currentStaff;
+                skillToAdd = staff.defaultSkills.Find(s => s != null && s.baseSkillType == skillName);
+
+                if (skillToAdd == null)
+                {
+                    skillToAdd = staff.availableSkillPool.Find(s => s != null && s.baseSkillType == skillName);
+                }
+            }
+        }
+
+        if (skillToAdd != null)
+        {
+            AddDebugSkill(skillToAdd);
+        }
+        else
+        {
+            DebugManager.LogWarning(LogCategory.Game, $"[debugCommands] ìŠ¤í‚¬ì„ ì°¾ì„ ìˆ˜ ì—†ìŒ: {skillName}");
+        }
+    }
+
+    void AddDebugSkill(SkillData skillData)
+    {
+        if (skillData == null) return;
+
+        var inventory = StaffManager.Instance?.GetCurrentInventory();
+        if (inventory != null)
+        {
+            if (!inventory.ownedSkills.Contains(skillData))
+            {
+                inventory.ownedSkills.Add(skillData);
+                DebugManager.LogDebugCommand($"[debugCommands] ì¸ë²¤í† ë¦¬ì— {skillData.baseSkillType} ì¶”ê°€");
+            }
+
+            if (!inventory.equippedSkills.Contains(skillData))
+            {
+                if (inventory.equippedSkills.Count < 5)
+                {
+                    inventory.equippedSkills.Add(skillData);
+                    StaffManager.Instance.UpdateEquippedSkills(inventory.equippedSkills);
+                    DebugManager.LogDebugCommand($"[debugCommands] {skillData.baseSkillType} ìŠ¤í‚¬ ì¥ì°© ì™„ë£Œ! (ìŠ¬ë¡¯ {inventory.equippedSkills.Count}/5)");
+                }
+                else
+                {
+                    DebugManager.LogWarning(LogCategory.Game, "[debugCommands] ìŠ¤í‚¬ ìŠ¬ë¡¯ì´ ê°€ë“ ì°¸ (5/5)");
+                }
+            }
+            else
+            {
+                DebugManager.LogDebugCommand($"[debugCommands] {skillData.baseSkillType}ì€ ì´ë¯¸ ì¥ì°©ë¨");
+            }
+        }
+        else
+        {
+            DebugManager.LogError(LogCategory.Game, "[debugCommands] StaffInventoryë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŒ!");
+        }
+    }
+
+    // ===== ì¹´ë“œ íš¨ê³¼ ì¦‰ì‹œ ì ìš© =====
+    [ContextMenu("ë””ë²„ê·¸/ì¹´ë“œ íš¨ê³¼/ë²”ìœ„ +25%")]
+    public void DebugApplyRangeCard()
+    {
+        DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ë²”ìœ„ +25% ì ìš©");
+        ApplyStatBoost(StatType.AllSkillRange, 25f);
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ì¹´ë“œ íš¨ê³¼/ë²”ìœ„ +50%")]
+    public void DebugApplyRangeCard50()
+    {
+        DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ë²”ìœ„ +50% ì ìš©");
+        ApplyStatBoost(StatType.AllSkillRange, 50f);
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ì¹´ë“œ íš¨ê³¼/ë°ë¯¸ì§€ +25%")]
+    public void DebugApplyDamageCard()
+    {
+        DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ë°ë¯¸ì§€ +25% ì ìš©");
+        ApplyStatBoost(StatType.AllSkillDamage, 25f);
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ì¹´ë“œ íš¨ê³¼/ì¿¨íƒ€ì„ -25%")]
+    public void DebugApplyCooldownCard()
+    {
+        DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ì¿¨íƒ€ì„ -25% ì ìš©");
+        ApplyStatBoost(StatType.AllSkillCooldown, 25f);
+    }
+
+    void ApplyStatBoost(StatType statType, float percentage)
+    {
+        if (player == null)
+        {
+            player = FindObjectOfType<Player>();
+        }
+
+        SkillManager skillManager = player?.GetComponent<SkillManager>();
+        if (skillManager == null)
+        {
+            DebugManager.LogError(LogCategory.Game, "[debugCommands] SkillManagerë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
+            return;
+        }
+
+        var allSkills = skillManager.GetAllSkills();
+        int affectedCount = 0;
+
+        foreach (var skill in allSkills)
+        {
+            bool affected = false;
+
+            switch (statType)
+            {
+                case StatType.AllSkillDamage:
+                    skill.damageMultiplier += (percentage / 100f);
+                    affected = true;
+                    break;
+
+                case StatType.AllSkillCooldown:
+                    skill.cooldownMultiplier *= (1f - percentage / 100f);
+                    affected = true;
+                    break;
+
+                case StatType.AllSkillRange:
+                    skill.rangeMultiplier += (percentage / 100f);
+                    affected = true;
+                    break;
+
+                case StatType.AreaRange:
+                    if (skill.skillData.HasTag(SkillTag.Area) || skill.skillData.baseSkillType == "Aura")
+                    {
+                        skill.rangeMultiplier += (percentage / 100f);
+                        affected = true;
+                    }
+                    break;
+            }
+
+            if (affected)
+            {
+                affectedCount++;
+                DebugManager.LogDebugCommand($"[debugCommands] {skill.skillData.baseSkillType}: {statType} +{percentage}% ì ìš©");
+            }
+        }
+
+        DebugManager.LogDebugCommand($"[debugCommands] {affectedCount}ê°œ ìŠ¤í‚¬ì— {statType} +{percentage}% ì ìš© ì™„ë£Œ!");
+    }
+
+    // ===== ê¸°ì¡´ í…ŒìŠ¤íŠ¸ ë©”ì„œë“œë“¤ =====
+    [ContextMenu("ë ˆë²¨ì—… í…ŒìŠ¤íŠ¸")]
+    public void TestLevelUp()
+    {
+        if (!Application.isPlaying)
+        {
+            DebugManager.LogWarning(LogCategory.Game, "[debugCommands] í”Œë ˆì´ ëª¨ë“œì—ì„œë§Œ ì‘ë™í•©ë‹ˆë‹¤!");
+            return;
+        }
+
+        currentLevel++;
+        DebugManager.LogDebugCommand($"[debugCommands] ê°•ì œ ë ˆë²¨ì—…! í˜„ì¬ ë ˆë²¨: {currentLevel}");
+
+        if (currentLevel % 4 == 0)
+        {
+            DebugManager.LogDebugCommand("[debugCommands] >>> ìŠ¤í‚¬ ì¹´ë“œê°€ ë‚˜ì™€ì•¼ í•¨!");
+        }
+        else
+        {
+            DebugManager.LogDebugCommand("[debugCommands] >>> ìŠ¤íƒ¯ ì¹´ë“œê°€ ë‚˜ì™€ì•¼ í•¨!");
+        }
+
+        OnLevelUp?.Invoke(currentLevel);
+        ShowCardSelection();
+    }
+
+    [ContextMenu("ê²½í—˜ì¹˜ +100")]
+    public void AddTestExp()
+    {
+        if (Application.isPlaying)
+        {
+            DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ê²½í—˜ì¹˜ +100");
+            AddExperience(100);
+        }
+    }
+
+    [ContextMenu("ê°•ì œ ìŠ¤í…Œì´ì§€ ì™„ë£Œ")]
+    public void ForceCompleteStage()
+    {
+        if (Application.isPlaying)
+        {
+            DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ê°•ì œ ìŠ¤í…Œì´ì§€ ì™„ë£Œ");
+            CompleteStage();
+        }
+    }
+
+    [ContextMenu("ìŠ¤í…Œì´ì§€ ì¬ì‹œì‘")]
+    public void RestartStage()
+    {
+        if (Application.isPlaying)
+        {
+            DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ìŠ¤í…Œì´ì§€ ì¬ì‹œì‘");
+            ChangeState(GameState.Playing);
+            StartStage();
+        }
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ê¸€ë¡œë²Œ ìŠ¤íƒ¯ í™•ì¸")]
+    public void DebugCheckGlobalStats()
+    {
+        DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ê¸€ë¡œë²Œ ìŠ¤íƒ¯ í™•ì¸");
+        var modifier = SkillStatModifier.Instance;
+        if (modifier != null)
+        {
+            modifier.PrintGlobalStats();
+        }
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ë°œì‚¬ì²´ ê°œìˆ˜ +2")]
+    public void DebugAddProjectileCount()
+    {
+        DebugManager.LogDebugCommand("[debugCommands] ë””ë²„ê·¸ ëª…ë ¹: ë°œì‚¬ì²´ ê°œìˆ˜ +2");
+        var modifier = player.GetComponent<ProjectileCountModifier>();
+        if (modifier == null)
+        {
+            modifier = player.gameObject.AddComponent<ProjectileCountModifier>();
+        }
+
+        modifier.AddProjectileCountToAll(2);
+        DebugManager.LogDebugCommand("[debugCommands] ëª¨ë“  ìŠ¤í‚¬ ë°œì‚¬ì²´ +2ê°œ!");
+    }
+
+    // ì •ë³´ ì ‘ê·¼ ë©”ì„œë“œë“¤ (ê¸°ì¡´ê³¼ ë™ì¼)
     public float GetStageProgress()
     {
         return timelineConfig != null ? timelineConfig.GetProgress(currentTime) : 0f;
@@ -211,7 +543,6 @@ public class GameManager : MonoBehaviour
         return $"{minutes:00}:{seconds:00}";
     }
 
-    // ===== Timeline Á¤º¸ Á¢±Ù ===== [Ãß°¡] - [KDY]
     public TimelineConfig GetTimelineConfig()
     {
         return timelineConfig;
@@ -225,34 +556,5 @@ public class GameManager : MonoBehaviour
     public float GetCurrentSpawnRate()
     {
         return timelineConfig != null ? timelineConfig.GetCurrentSpawnRate(currentTime) : 0.5f;
-    }
-
-    // ===== µğ¹ö±×¿ë ===== [¼öÁ¤] Timeline ±â¹İÀ¸·Î º¯°æ - [KDY]
-    [ContextMenu("°æÇèÄ¡ +100")]
-    public void AddTestExp()
-    {
-        if (Application.isPlaying)
-        {
-            AddExperience(100);
-        }
-    }
-
-    [ContextMenu("°­Á¦ ½ºÅ×ÀÌÁö ¿Ï·á")]
-    public void ForceCompleteStage()
-    {
-        if (Application.isPlaying)
-        {
-            CompleteStage();
-        }
-    }
-
-    [ContextMenu("½ºÅ×ÀÌÁö Àç½ÃÀÛ")]
-    public void RestartStage()
-    {
-        if (Application.isPlaying)
-        {
-            ChangeState(GameState.Playing);
-            StartStage();
-        }
     }
 }

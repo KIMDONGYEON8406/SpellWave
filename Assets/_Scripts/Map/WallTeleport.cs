@@ -1,30 +1,30 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// º®(Trigger)¿¡ ºÙ¿© ¾²´Â ÅÚ·¹Æ÷Æ® ½ºÅ©¸³Æ®(OFFSET ºÒÇÊ¿ä):
-/// - Ãæµ¹ÇÑ ´ë»óÀÇ X/Z¸¦ 'oppositeWall'ÀÇ X/Z·Î Áï½Ã ÀÌµ¿½ÃÅ²´Ù. (Y´Â À¯Áö)
-/// - ¸ñÀûÁö Transform(oppositeWall)À» ¸Ê ¾ÈÂÊÀ¸·Î »ìÂ¦ ¹èÄ¡ÇØµÎ¸é ÀçÃæµ¹ÀÌ ¾ø´Ù.
-/// - ÂªÀº Äğ´Ù¿îÀ¸·Î ¿Õº¹ Æ¨±èÀ» ¹æÁöÇÏ°í, ÅÚ·¹Æ÷Æ® ÀÌº¥Æ®¸¦ ºê·ÎµåÄ³½ºÆ®ÇÑ´Ù.
+/// ë²½(Trigger)ì— ë¶™ì—¬ ì“°ëŠ” í…”ë ˆí¬íŠ¸ ìŠ¤í¬ë¦½íŠ¸(OFFSET ë¶ˆí•„ìš”):
+/// - ì¶©ëŒí•œ ëŒ€ìƒì˜ X/Zë¥¼ 'oppositeWall'ì˜ X/Zë¡œ ì¦‰ì‹œ ì´ë™ì‹œí‚¨ë‹¤. (YëŠ” ìœ ì§€)
+/// - ëª©ì ì§€ Transform(oppositeWall)ì„ ë§µ ì•ˆìª½ìœ¼ë¡œ ì‚´ì§ ë°°ì¹˜í•´ë‘ë©´ ì¬ì¶©ëŒì´ ì—†ë‹¤.
+/// - ì§§ì€ ì¿¨ë‹¤ìš´ìœ¼ë¡œ ì™•ë³µ íŠ•ê¹€ì„ ë°©ì§€í•˜ê³ , í…”ë ˆí¬íŠ¸ ì´ë²¤íŠ¸ë¥¼ ë¸Œë¡œë“œìºìŠ¤íŠ¸í•œë‹¤.
 /// </summary>
 [RequireComponent(typeof(Collider))]
 public class WallTeleport : MonoBehaviour
 {
-    [Header("¿öÇÁ ¸ñÀûÁö (¹İ´ëÆí º®/ºó ¿ÀºêÁ§Æ® µî)")]
-    public Transform oppositeWall;   // ¸Ê ¾ÈÂÊÀ¸·Î 0.2~0.5m Á¤µµ ¾Õ´ç°Ü µĞ ¸ñÀûÁö
+    [Header("ì›Œí”„ ëª©ì ì§€ (ë°˜ëŒ€í¸ ë²½/ë¹ˆ ì˜¤ë¸Œì íŠ¸ ë“±)")]
+    public Transform oppositeWall;   // ë§µ ì•ˆìª½ìœ¼ë¡œ 0.2~0.5m ì •ë„ ì•ë‹¹ê²¨ ë‘” ëª©ì ì§€
 
-    [Header("¿öÇÁ ´ë»ó ÅÂ±× (¿©±â Æ÷ÇÔµÈ ÅÂ±×¸¸ ¿öÇÁ)")]
+    [Header("ì›Œí”„ ëŒ€ìƒ íƒœê·¸ (ì—¬ê¸° í¬í•¨ëœ íƒœê·¸ë§Œ ì›Œí”„)")]
     public string[] warpTags = { "Player", "Enemy", "Projectile" };
 
-    [Header("ÀçÃæµ¹ ¹æÁö Äğ´Ù¿î(ÃÊ)")]
+    [Header("ì¬ì¶©ëŒ ë°©ì§€ ì¿¨ë‹¤ìš´(ì´ˆ)")]
     public float cooldown = 0.1f;
 
-    // Äİ¶óÀÌ´õº° ¸¶Áö¸· ¿öÇÁ ½Ã°¢ -> Áï½Ã ÀçÆ®¸®°Å ¹æÁö
+    // ì½œë¼ì´ë”ë³„ ë§ˆì§€ë§‰ ì›Œí”„ ì‹œê° -> ì¦‰ì‹œ ì¬íŠ¸ë¦¬ê±° ë°©ì§€
     private static readonly Dictionary<Collider, float> lastWarpTime = new Dictionary<Collider, float>();
 
     private void Reset()
     {
-        // º®Àº ¹İµå½Ã Trigger·Î »ç¿ë
+        // ë²½ì€ ë°˜ë“œì‹œ Triggerë¡œ ì‚¬ìš©
         var col = GetComponent<Collider>();
         if (col) col.isTrigger = true;
     }
@@ -34,10 +34,10 @@ public class WallTeleport : MonoBehaviour
         if (oppositeWall == null) return;
         if (!IsWarpTarget(other.tag)) return;
 
-        // °°Àº ÇÁ·¹ÀÓ/¾ÆÁÖ ÂªÀº ½Ã°£ ³» ÀçÆ®¸®°Å ¹æÁö
+        // ê°™ì€ í”„ë ˆì„/ì•„ì£¼ ì§§ì€ ì‹œê°„ ë‚´ ì¬íŠ¸ë¦¬ê±° ë°©ì§€
         if (lastWarpTime.TryGetValue(other, out float t) && Time.time - t < cooldown) return;
 
-        // ÇöÀç ³ôÀÌ(Y)´Â À¯ÁöÇÏ°í, X/Z¸¸ ¸ñÀûÁö·Î ÀÌµ¿
+        // í˜„ì¬ ë†’ì´(Y)ëŠ” ìœ ì§€í•˜ê³ , X/Zë§Œ ëª©ì ì§€ë¡œ ì´ë™
         Vector3 cur = other.transform.position;
         Vector3 dst = new Vector3(oppositeWall.position.x, cur.y, oppositeWall.position.z);
 
@@ -47,7 +47,7 @@ public class WallTeleport : MonoBehaviour
 
         lastWarpTime[other] = Time.time;
 
-        // ÅÚ·¹Æ÷Æ® ¾Ë¸²(Ä«¸Ş¶ó°¡ °°Àº ÇÁ·¹ÀÓ¿¡ Áï½Ã ½º³ÀÇÏµµ·Ï)
+        // í…”ë ˆí¬íŠ¸ ì•Œë¦¼(ì¹´ë©”ë¼ê°€ ê°™ì€ í”„ë ˆì„ì— ì¦‰ì‹œ ìŠ¤ëƒ…í•˜ë„ë¡)
         TeleportHub.Notify(other.transform);
     }
 

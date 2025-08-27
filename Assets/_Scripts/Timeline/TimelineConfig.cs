@@ -1,65 +1,65 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 [CreateAssetMenu(fileName = "New TimelineConfig", menuName = "SpellWave/Timeline Config")]
 public class TimelineConfig : ScriptableObject
 {
-    [Header("Å¸ÀÓ¶óÀÎ ±âº» ¼³Á¤")]
-    [Tooltip("½ºÅ×ÀÌÁö ÃÑ ½Ã°£ (ÃÊ) - 10ºÐ")]
-    public float totalDuration = 600f; // 10ºÐ
+    [Header("íƒ€ìž„ë¼ì¸ ê¸°ë³¸ ì„¤ì •")]
+    [Tooltip("ìŠ¤í…Œì´ì§€ ì´ ì‹œê°„ (ì´ˆ) - 10ë¶„")]
+    public float totalDuration = 600f; // 10ë¶„
 
-    [Header("°æÇèÄ¡ ½Ã½ºÅÛ")]
-    [Tooltip("·¹º§¾÷¿¡ ÇÊ¿äÇÑ ±âº» °æÇèÄ¡")]
+    [Header("ê²½í—˜ì¹˜ ì‹œìŠ¤í…œ")]
+    [Tooltip("ë ˆë²¨ì—…ì— í•„ìš”í•œ ê¸°ë³¸ ê²½í—˜ì¹˜")]
     public int baseExpToLevelUp = 100;
-    [Tooltip("·¹º§´ç °æÇèÄ¡ Áõ°¡·®")]
+    [Tooltip("ë ˆë²¨ë‹¹ ê²½í—˜ì¹˜ ì¦ê°€ëŸ‰")]
     public float expIncreasePerLevel = 1.2f;
-    [Tooltip("ÃÖ´ë ·¹º§")]
+    [Tooltip("ìµœëŒ€ ë ˆë²¨")]
     public int maxLevel = 50;
 
-    [Header("¸ó½ºÅÍ ¼³Á¤")]
-    [Tooltip("»ç¿ëÇÒ ±âº» ¸ó½ºÅÍ µ¥ÀÌÅÍ")]
+    [Header("ëª¬ìŠ¤í„° ì„¤ì •")]
+    [Tooltip("ì‚¬ìš©í•  ê¸°ë³¸ ëª¬ìŠ¤í„° ë°ì´í„°")]
     public EnemyStats monsterBase;
-    [Tooltip("½Ã°£¿¡ µû¸¥ ¸ó½ºÅÍ °­È­ ¹èÀ²")]
+    [Tooltip("ì‹œê°„ì— ë”°ë¥¸ ëª¬ìŠ¤í„° ê°•í™” ë°°ìœ¨")]
     public float difficultyScaleOverTime = 1.5f;
 
-    [Header("½ºÆù ¼³Á¤")]
-    [Tooltip("ÃÊ±â ¸ó½ºÅÍ ¼ö")]
+    [Header("ìŠ¤í° ì„¤ì •")]
+    [Tooltip("ì´ˆê¸° ëª¬ìŠ¤í„° ìˆ˜")]
     public int initialEnemies = 3;
-    [Tooltip("ÃÊ´ç ½ºÆù ¸ó½ºÅÍ ¼ö")]
+    [Tooltip("ì´ˆë‹¹ ìŠ¤í° ëª¬ìŠ¤í„° ìˆ˜")]
     public float spawnRatePerSec = 0.3f;
-    [Tooltip("½Ã°£¿¡ µû¸¥ ½ºÆù·ü Áõ°¡")]
+    [Tooltip("ì‹œê°„ì— ë”°ë¥¸ ìŠ¤í°ë¥  ì¦ê°€")]
     public float spawnRateIncrease = 1.3f;
 
-    [Header("½ºÆù À§Ä¡")]
+    [Header("ìŠ¤í° ìœ„ì¹˜")]
     public float spawnRadius = 15f;
     public float minDistanceFromPlayer = 8f;
 
-    // ÁøÃ´µµ °è»ê (0~100%)
+    // ì§„ì²™ë„ ê³„ì‚° (0~100%)
     public float GetProgress(float currentTime)
     {
         return Mathf.Clamp01(currentTime / totalDuration) * 100f;
     }
 
-    // ÇöÀç ½Ã°£¿¡ µû¸¥ ³­ÀÌµµ ¹èÀ²
+    // í˜„ìž¬ ì‹œê°„ì— ë”°ë¥¸ ë‚œì´ë„ ë°°ìœ¨
     public float GetDifficultyMultiplier(float currentTime)
     {
         float progress = currentTime / totalDuration;
         return 1f + (progress * difficultyScaleOverTime);
     }
 
-    // ÇöÀç ½Ã°£¿¡ µû¸¥ ½ºÆù·ü
+    // í˜„ìž¬ ì‹œê°„ì— ë”°ë¥¸ ìŠ¤í°ë¥ 
     public float GetCurrentSpawnRate(float currentTime)
     {
         float progress = currentTime / totalDuration;
         return spawnRatePerSec * (1f + progress * spawnRateIncrease);
     }
 
-    // ·¹º§º° ÇÊ¿ä °æÇèÄ¡ °è»ê
+    // ë ˆë²¨ë³„ í•„ìš” ê²½í—˜ì¹˜ ê³„ì‚°
     public int GetExpToLevelUp(int currentLevel)
     {
         return Mathf.RoundToInt(baseExpToLevelUp * Mathf.Pow(expIncreasePerLevel, currentLevel - 1));
     }
 
-    // ½ºÅ×ÀÌÁö ¿Ï·á ¿©ºÎ
+    // ìŠ¤í…Œì´ì§€ ì™„ë£Œ ì—¬ë¶€
     public bool IsStageComplete(float currentTime)
     {
         return currentTime >= totalDuration;

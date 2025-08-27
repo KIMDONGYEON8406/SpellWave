@@ -1,29 +1,29 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /*
-[¸ñÀû]
-- ÀÚ½ÅÀÇ ¼Ò¼Ó Ç®(EnemyPool)À» ±â¾ïÇØ µÎ¾ú´Ù°¡ Despawn() ½Ã Ç®·Î ¹İÈ¯ÇÑ´Ù.
-- Ç® ÂüÁ¶°¡ ¾øÀ¸¸é ¾ÈÀü¸ÁÀ¸·Î ºñÈ°¼ºÈ­(SetActive(false))¸¸ ¼öÇà.
+[ëª©ì ]
+- ìì‹ ì˜ ì†Œì† í’€(EnemyPool)ì„ ê¸°ì–µí•´ ë‘ì—ˆë‹¤ê°€ Despawn() ì‹œ í’€ë¡œ ë°˜í™˜í•œë‹¤.
+- í’€ ì°¸ì¡°ê°€ ì—†ìœ¼ë©´ ì•ˆì „ë§ìœ¼ë¡œ ë¹„í™œì„±í™”(SetActive(false))ë§Œ ìˆ˜í–‰.
 
-[ÀÎ½ºÆåÅÍ]
-- ¼³Á¤ÇÒ °Í ¾øÀ½. Àû ÇÁ¸®ÆÕ¿¡ ÀÌ ½ºÅ©¸³Æ®¸¸ Ãß°¡.
+[ì¸ìŠ¤í™í„°]
+- ì„¤ì •í•  ê²ƒ ì—†ìŒ. ì  í”„ë¦¬íŒ¹ì— ì´ ìŠ¤í¬ë¦½íŠ¸ë§Œ ì¶”ê°€.
 
-[¿¬°á ¼ø¼­]
-1) Àû ÇÁ¸®ÆÕ ¼±ÅÃ ¡æ Add Component ¡æ PooledEnemy
-2) EnemyPool.Get()ÀÌ È£ÃâµÉ ¶§ SetPool()·Î Ç® ÂüÁ¶¸¦ ÀÚµ¿ ÁÖÀÔÇÑ´Ù.
+[ì—°ê²° ìˆœì„œ]
+1) ì  í”„ë¦¬íŒ¹ ì„ íƒ â†’ Add Component â†’ PooledEnemy
+2) EnemyPool.Get()ì´ í˜¸ì¶œë  ë•Œ SetPool()ë¡œ í’€ ì°¸ì¡°ë¥¼ ìë™ ì£¼ì…í•œë‹¤.
 */
 [DisallowMultipleComponent]
 public class PooledEnemy : MonoBehaviour
 {
     private EnemyPool _pool;
 
-    /// <summary>EnemyPool¿¡¼­ È£Ãâ: Ç® ÂüÁ¶ ÁÖÀÔ</summary>
+    /// <summary>EnemyPoolì—ì„œ í˜¸ì¶œ: í’€ ì°¸ì¡° ì£¼ì…</summary>
     public void SetPool(EnemyPool pool) => _pool = pool;
 
-    /// <summary>»ç¸Á/¼Ò¸ê ½Ã È£Ãâ: ÆÄ±« ´ë½Å Ç®·Î ¹İÈ¯</summary>
+    /// <summary>ì‚¬ë§/ì†Œë©¸ ì‹œ í˜¸ì¶œ: íŒŒê´´ ëŒ€ì‹  í’€ë¡œ ë°˜í™˜</summary>
     public void Despawn()
     {
         if (_pool != null) _pool.Return(gameObject);
-        else gameObject.SetActive(false); // ¾ÈÀü¸Á
+        else gameObject.SetActive(false); // ì•ˆì „ë§
     }
 }

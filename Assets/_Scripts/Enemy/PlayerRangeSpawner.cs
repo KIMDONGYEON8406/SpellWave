@@ -1,75 +1,75 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /*
-[¸ñÀû]
-- º®/¾Æ·¹³ª ÁÂÇ¥ ¾øÀÌ, "ÇÃ·¹ÀÌ¾î À§Ä¡ ±âÁØ ¿øÇü ¹üÀ§(µµ³Ó)"¿¡¼­ ÀûÀ» ½ºÆùÇÑ´Ù.
-- ÃÊ´ç ½ºÆù·üÀ» Àû»ê(accumulator)ÇÏ¿© ´Ù·® ½ºÆùÀ» Áö¿øÇÑ´Ù.
-- µ¿½Ã »ıÁ¸ ¼ö cap, ÇÁ·¹ÀÓ´ç »ı¼º »óÇÑÀ¸·Î ±Ş½ºÆÄÀÌÅ©¸¦ ¹æÁöÇÑ´Ù.
-- ½ºÆù ½Ã ÇÃ·¹ÀÌ¾î¸¦ ÇâÇØ º¸°Ô(È¸Àü) ÇÏ¸ç, ÇÊ¿ä ½Ã Ä«¸Ş¶ó Á¤¸é ÆËÀÎ ¹æÁöµµ Áö¿øÇÑ´Ù.
-- Ç®¸µ(EnemyPool)°ú EnemyAI(Ç®¸µ ´ëÀÀ) ±¸Á¶¿Í ¿ÏÀüÈ÷ È£È¯µÈ´Ù.
+[ëª©ì ]
+- ë²½/ì•„ë ˆë‚˜ ì¢Œí‘œ ì—†ì´, "í”Œë ˆì´ì–´ ìœ„ì¹˜ ê¸°ì¤€ ì›í˜• ë²”ìœ„(ë„ë„›)"ì—ì„œ ì ì„ ìŠ¤í°í•œë‹¤.
+- ì´ˆë‹¹ ìŠ¤í°ë¥ ì„ ì ì‚°(accumulator)í•˜ì—¬ ë‹¤ëŸ‰ ìŠ¤í°ì„ ì§€ì›í•œë‹¤.
+- ë™ì‹œ ìƒì¡´ ìˆ˜ cap, í”„ë ˆì„ë‹¹ ìƒì„± ìƒí•œìœ¼ë¡œ ê¸‰ìŠ¤íŒŒì´í¬ë¥¼ ë°©ì§€í•œë‹¤.
+- ìŠ¤í° ì‹œ í”Œë ˆì´ì–´ë¥¼ í–¥í•´ ë³´ê²Œ(íšŒì „) í•˜ë©°, í•„ìš” ì‹œ ì¹´ë©”ë¼ ì •ë©´ íŒì¸ ë°©ì§€ë„ ì§€ì›í•œë‹¤.
+- í’€ë§(EnemyPool)ê³¼ EnemyAI(í’€ë§ ëŒ€ì‘) êµ¬ì¡°ì™€ ì™„ì „íˆ í˜¸í™˜ëœë‹¤.
 
-[ÀÎ½ºÆåÅÍ]
-- player                : ÇÃ·¹ÀÌ¾î Transform (ÇÊ¼ö)
-- pool                  : EnemyPool (ÇÊ¼ö)
-- maxAlive              : µ¿½Ã ÃâÇö ¼ö »óÇÑ(¿¹: 300)
-- maxSpawnsPerFrame     : 1ÇÁ·¹ÀÓ ÃÖ´ë ½ºÆù ¼ö(¿¹: 20)
-- minRadiusFromPlayer   : ÇÃ·¹ÀÌ¾î·ÎºÎÅÍ ÃÖ¼Ò ¹İÁö¸§(¿¹: 6)
-- maxRadiusFromPlayer   : ÇÃ·¹ÀÌ¾î·ÎºÎÅÍ ÃÖ´ë ¹İÁö¸§(¿¹: 16~24)
-- snapToGround          : ¹Ù´Ú¿¡ Raycast·Î ºÙÀÏÁö ¿©ºÎ
-- groundMask            : ¹Ù´Ú ·¹ÀÌ¾î(¿¹: Ground)
-- raycastHeight         : ·¹ÀÌ ½ÃÀÛ ³ôÀÌ(ÇÃ·¹ÀÌ¾î À§¿¡¼­ ½î¸é ¾ÈÀü)
-- ySpawnOffset          : snapToGround°¡ falseÀÏ ¶§ Y º¸Á¤Ä¡
-- avoidFrontOfCamera    : Ä«¸Ş¶ó Á¤¸é ÆËÀÎ ¹æÁö(µÚ/Ãø¸é À§ÁÖ·Î ½ºÆù)
-- cameraTransform       : ¸ŞÀÎ Ä«¸Ş¶ó Transform (avoidFrontOfCamera true¸é ÇÒ´ç)
-- manualRateOverride    : 0 ÀÌ»óÀÌ¸é ¼öµ¿ ½ºÆù·ü(ÃÊ´ç), -1ÀÌ¸é GameManager.GetCurrentSpawnRate() »ç¿ë
+[ì¸ìŠ¤í™í„°]
+- player                : í”Œë ˆì´ì–´ Transform (í•„ìˆ˜)
+- pool                  : EnemyPool (í•„ìˆ˜)
+- maxAlive              : ë™ì‹œ ì¶œí˜„ ìˆ˜ ìƒí•œ(ì˜ˆ: 300)
+- maxSpawnsPerFrame     : 1í”„ë ˆì„ ìµœëŒ€ ìŠ¤í° ìˆ˜(ì˜ˆ: 20)
+- minRadiusFromPlayer   : í”Œë ˆì´ì–´ë¡œë¶€í„° ìµœì†Œ ë°˜ì§€ë¦„(ì˜ˆ: 6)
+- maxRadiusFromPlayer   : í”Œë ˆì´ì–´ë¡œë¶€í„° ìµœëŒ€ ë°˜ì§€ë¦„(ì˜ˆ: 16~24)
+- snapToGround          : ë°”ë‹¥ì— Raycastë¡œ ë¶™ì¼ì§€ ì—¬ë¶€
+- groundMask            : ë°”ë‹¥ ë ˆì´ì–´(ì˜ˆ: Ground)
+- raycastHeight         : ë ˆì´ ì‹œì‘ ë†’ì´(í”Œë ˆì´ì–´ ìœ„ì—ì„œ ì˜ë©´ ì•ˆì „)
+- ySpawnOffset          : snapToGroundê°€ falseì¼ ë•Œ Y ë³´ì •ì¹˜
+- avoidFrontOfCamera    : ì¹´ë©”ë¼ ì •ë©´ íŒì¸ ë°©ì§€(ë’¤/ì¸¡ë©´ ìœ„ì£¼ë¡œ ìŠ¤í°)
+- cameraTransform       : ë©”ì¸ ì¹´ë©”ë¼ Transform (avoidFrontOfCamera trueë©´ í• ë‹¹)
+- manualRateOverride    : 0 ì´ìƒì´ë©´ ìˆ˜ë™ ìŠ¤í°ë¥ (ì´ˆë‹¹), -1ì´ë©´ GameManager.GetCurrentSpawnRate() ì‚¬ìš©
 
-[¿¬°á ¼ø¼­]
-1) Empty ¡æ "PlayerRangeSpawner" »ı¼º ¡æ º» ½ºÅ©¸³Æ® ºÎÂø
-2) player = Player, pool = EnemyPool µå·¡±×
-3) manualRateOverride¸¦ Å×½ºÆ® ½Ã 30~60 µîÀ¸·Î ¼³Á¤(È¤Àº -1·Î µÎ°í GameManager API »ç¿ë)
-4) ÇÊ¿ä ½Ã avoidFrontOfCamera = true, cameraTransform = Main Camera
-5) ±âÁ¸ EnemySpawner´Â ºñÈ°¼ºÈ­/»èÁ¦
+[ì—°ê²° ìˆœì„œ]
+1) Empty â†’ "PlayerRangeSpawner" ìƒì„± â†’ ë³¸ ìŠ¤í¬ë¦½íŠ¸ ë¶€ì°©
+2) player = Player, pool = EnemyPool ë“œë˜ê·¸
+3) manualRateOverrideë¥¼ í…ŒìŠ¤íŠ¸ ì‹œ 30~60 ë“±ìœ¼ë¡œ ì„¤ì •(í˜¹ì€ -1ë¡œ ë‘ê³  GameManager API ì‚¬ìš©)
+4) í•„ìš” ì‹œ avoidFrontOfCamera = true, cameraTransform = Main Camera
+5) ê¸°ì¡´ EnemySpawnerëŠ” ë¹„í™œì„±í™”/ì‚­ì œ
 
-[ÁÖÀÇ]
-- ÇÃ·¹ÀÌ¾î/Àû Rigidbody´Â Interpolate ±ÇÀå(´ë·® ½ºÆù ½Ã ½Ã°¢ ²÷±è ¿ÏÈ­).
-- EnemyManager°¡ ÀÖ´Ù¸é AliveCount/Count Àü¿ë ¸Ş¼­µå »ç¿ëÀÌ ¼º´É»ó À¯¸®.
+[ì£¼ì˜]
+- í”Œë ˆì´ì–´/ì  RigidbodyëŠ” Interpolate ê¶Œì¥(ëŒ€ëŸ‰ ìŠ¤í° ì‹œ ì‹œê° ëŠê¹€ ì™„í™”).
+- EnemyManagerê°€ ìˆë‹¤ë©´ AliveCount/Count ì „ìš© ë©”ì„œë“œ ì‚¬ìš©ì´ ì„±ëŠ¥ìƒ ìœ ë¦¬.
 */
 
 public class PlayerRangeSpawner : MonoBehaviour
 {
-    [Header("ÇÊ¼ö ÂüÁ¶")]
+    [Header("í•„ìˆ˜ ì°¸ì¡°")]
     public Transform player;
     public EnemyPool pool;
 
-    [Header("µ¿½Ã ¼ö / ÇÁ·¹ÀÓ »óÇÑ")]
-    [Tooltip("µ¿½Ã¿¡ Á¸Àç °¡´ÉÇÑ Àû ÃÖ´ë ¼ö")]
+    [Header("ë™ì‹œ ìˆ˜ / í”„ë ˆì„ ìƒí•œ")]
+    [Tooltip("ë™ì‹œì— ì¡´ì¬ ê°€ëŠ¥í•œ ì  ìµœëŒ€ ìˆ˜")]
     public int maxAlive = 300;
-    [Tooltip("ÇÑ ÇÁ·¹ÀÓ¿¡ »ı¼º °¡´ÉÇÑ ÃÖ´ë ¼ö(ÇÁ·¹ÀÓ ±Ş½ºÆÄÀÌÅ© ¹æÁö)")]
+    [Tooltip("í•œ í”„ë ˆì„ì— ìƒì„± ê°€ëŠ¥í•œ ìµœëŒ€ ìˆ˜(í”„ë ˆì„ ê¸‰ìŠ¤íŒŒì´í¬ ë°©ì§€)")]
     public int maxSpawnsPerFrame = 20;
 
-    [Header("ÇÃ·¹ÀÌ¾î Áß½É ½ºÆù ¹üÀ§(µµ³Ó)")]
-    [Tooltip("ÇÃ·¹ÀÌ¾î·ÎºÎÅÍ ÃÖ¼Ò ¹İÁö¸§")]
+    [Header("í”Œë ˆì´ì–´ ì¤‘ì‹¬ ìŠ¤í° ë²”ìœ„(ë„ë„›)")]
+    [Tooltip("í”Œë ˆì´ì–´ë¡œë¶€í„° ìµœì†Œ ë°˜ì§€ë¦„")]
     public float minRadiusFromPlayer = 6f;
-    [Tooltip("ÇÃ·¹ÀÌ¾î·ÎºÎÅÍ ÃÖ´ë ¹İÁö¸§")]
+    [Tooltip("í”Œë ˆì´ì–´ë¡œë¶€í„° ìµœëŒ€ ë°˜ì§€ë¦„")]
     public float maxRadiusFromPlayer = 18f;
 
-    [Header("¹Ù´Ú ºÙÀÌ±â(¼±ÅÃ)")]
+    [Header("ë°”ë‹¥ ë¶™ì´ê¸°(ì„ íƒ)")]
     public bool snapToGround = false;
     public LayerMask groundMask;
-    [Tooltip("½ºÆù À§Ä¡ »ó°ø¿¡¼­ ¾Æ·¡·Î ½ò ·¹ÀÌ ½ÃÀÛ ³ôÀÌ")]
+    [Tooltip("ìŠ¤í° ìœ„ì¹˜ ìƒê³µì—ì„œ ì•„ë˜ë¡œ ì  ë ˆì´ ì‹œì‘ ë†’ì´")]
     public float raycastHeight = 5f;
 
-    [Header("Y º¸Á¤(ground snap ¹Ì»ç¿ë ½Ã)")]
+    [Header("Y ë³´ì •(ground snap ë¯¸ì‚¬ìš© ì‹œ)")]
     public float ySpawnOffset = 0f;
 
-    [Header("Ä«¸Ş¶ó Á¤¸é ÆËÀÎ ¹æÁö(¼±ÅÃ)")]
+    [Header("ì¹´ë©”ë¼ ì •ë©´ íŒì¸ ë°©ì§€(ì„ íƒ)")]
     public bool avoidFrontOfCamera = false;
     public Transform cameraTransform;
-    [Tooltip("Ä«¸Ş¶ó Á¤¸é È¸ÇÇ ½Ã ÃÖ´ë ½Ãµµ È½¼ö(¹«ÇÑ·çÇÁ ¹æÁö)")]
+    [Tooltip("ì¹´ë©”ë¼ ì •ë©´ íšŒí”¼ ì‹œ ìµœëŒ€ ì‹œë„ íšŸìˆ˜(ë¬´í•œë£¨í”„ ë°©ì§€)")]
     public int maxAngleTries = 8;
 
-    [Header("½ºÆù·ü(ÃÊ´ç)")]
-    [Tooltip("0 ÀÌ»óÀÌ¸é ¼öµ¿ ½ºÆù·ü »ç¿ë, -1ÀÌ¸é GameManager.GetCurrentSpawnRate() »ç¿ë")]
+    [Header("ìŠ¤í°ë¥ (ì´ˆë‹¹)")]
+    [Tooltip("0 ì´ìƒì´ë©´ ìˆ˜ë™ ìŠ¤í°ë¥  ì‚¬ìš©, -1ì´ë©´ GameManager.GetCurrentSpawnRate() ì‚¬ìš©")]
     public float manualRateOverride = -1f;
 
     private float _acc;
@@ -95,7 +95,7 @@ public class PlayerRangeSpawner : MonoBehaviour
     {
         if (manualRateOverride >= 0f) return manualRateOverride;
         if (GameManager.Instance != null) return GameManager.Instance.GetCurrentSpawnRate();
-        return 1f; // ¾ÈÀü ±âº»°ª
+        return 1f; // ì•ˆì „ ê¸°ë³¸ê°’
     }
 
     private bool TrySpawnOne()
@@ -103,24 +103,24 @@ public class PlayerRangeSpawner : MonoBehaviour
         int alive = CountAliveEnemies();
         if (alive >= maxAlive) return false;
 
-        // ÇÃ·¹ÀÌ¾î Áß½É ¿øÇü ¹üÀ§¿¡¼­ À§Ä¡ »ùÇÃ¸µ
+        // í”Œë ˆì´ì–´ ì¤‘ì‹¬ ì›í˜• ë²”ìœ„ì—ì„œ ìœ„ì¹˜ ìƒ˜í”Œë§
         Vector3 pos = SamplePositionAroundPlayer();
 
-        // ¹Ù´Ú ½º³À ¶Ç´Â Y º¸Á¤
+        // ë°”ë‹¥ ìŠ¤ëƒ… ë˜ëŠ” Y ë³´ì •
         if (snapToGround)
         {
             Vector3 start = pos + Vector3.up * raycastHeight;
             if (Physics.Raycast(start, Vector3.down, out RaycastHit hit, raycastHeight * 2f, groundMask, QueryTriggerInteraction.Ignore))
                 pos = hit.point;
             else
-                pos.y = player.position.y + ySpawnOffset; // ½ÇÆĞ ½Ã ¾ÈÀü ´ëÃ¼
+                pos.y = player.position.y + ySpawnOffset; // ì‹¤íŒ¨ ì‹œ ì•ˆì „ ëŒ€ì²´
         }
         else
         {
             pos.y = player.position.y + ySpawnOffset;
         }
 
-        // ÇÃ·¹ÀÌ¾î¸¦ ¹Ù¶óº¸´Â ÃÊ±â È¸Àü
+        // í”Œë ˆì´ì–´ë¥¼ ë°”ë¼ë³´ëŠ” ì´ˆê¸° íšŒì „
         Vector3 to = player.position - pos; to.y = 0f;
         if (to.sqrMagnitude < 0.0001f) to = Vector3.forward;
         Quaternion rot = Quaternion.LookRotation(to.normalized);
@@ -133,16 +133,16 @@ public class PlayerRangeSpawner : MonoBehaviour
     {
         if (EnemyManager.instance != null)
         {
-            // EnemyManager¿¡ Ä«¿îÆ® utilÀÌ ÀÖ´Ù¸é ±×°Í »ç¿ë(¼º´É À¯¸®)
+            // EnemyManagerì— ì¹´ìš´íŠ¸ utilì´ ìˆë‹¤ë©´ ê·¸ê²ƒ ì‚¬ìš©(ì„±ëŠ¥ ìœ ë¦¬)
             // return EnemyManager.instance.AliveCount;
             return EnemyManager.instance.GetAllEnemiesCountSafe();
         }
-        return FindObjectsOfType<EnemyAI>().Length; // ÃÖÈÄÀÇ ´ëÃ¼(ºñ¿ë Å­)
+        return FindObjectsOfType<EnemyAI>().Length; // ìµœí›„ì˜ ëŒ€ì²´(ë¹„ìš© í¼)
     }
 
     private Vector3 SamplePositionAroundPlayer()
     {
-        // ÇÃ·¹ÀÌ¾î ±âÁØ ·£´ı °¢/¹İÁö¸§ »ùÇÃ
+        // í”Œë ˆì´ì–´ ê¸°ì¤€ ëœë¤ ê°/ë°˜ì§€ë¦„ ìƒ˜í”Œ
         int tries = 0;
         while (true)
         {
@@ -152,15 +152,15 @@ public class PlayerRangeSpawner : MonoBehaviour
             Vector3 offset = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
             Vector3 candidate = player.position + offset;
 
-            // Ä«¸Ş¶ó Á¤¸é ÆËÀÎ È¸ÇÇ: Ä«¸Ş¶ó Àü¹æ°ú offsetÀÇ ³»ÀûÀÌ 0º¸´Ù Å©¸é Á¤¸é
+            // ì¹´ë©”ë¼ ì •ë©´ íŒì¸ íšŒí”¼: ì¹´ë©”ë¼ ì „ë°©ê³¼ offsetì˜ ë‚´ì ì´ 0ë³´ë‹¤ í¬ë©´ ì •ë©´
             if (avoidFrontOfCamera && cameraTransform != null)
             {
                 Vector3 dirFromPlayer = (candidate - player.position).normalized;
                 float dot = Vector3.Dot(cameraTransform.forward.normalized, dirFromPlayer);
-                if (dot > 0f) // Á¤¸é(0~1) ¡æ ÇÇÇÑ´Ù
+                if (dot > 0f) // ì •ë©´(0~1) â†’ í”¼í•œë‹¤
                 {
                     tries++;
-                    if (tries < maxAngleTries) continue; // Àç½Ãµµ
+                    if (tries < maxAngleTries) continue; // ì¬ì‹œë„
                 }
             }
 
@@ -173,10 +173,10 @@ public class PlayerRangeSpawner : MonoBehaviour
     {
         if (player == null) return;
         Gizmos.color = Color.cyan;
-        // ¹Ù±ù ¿ø
+        // ë°”ê¹¥ ì›
         UnityEditor.Handles.color = Color.cyan;
         UnityEditor.Handles.DrawWireDisc(player.position, Vector3.up, maxRadiusFromPlayer);
-        // ¾ÈÂÊ ¿ø
+        // ì•ˆìª½ ì›
         UnityEditor.Handles.color = Color.blue;
         UnityEditor.Handles.DrawWireDisc(player.position, Vector3.up, minRadiusFromPlayer);
     }

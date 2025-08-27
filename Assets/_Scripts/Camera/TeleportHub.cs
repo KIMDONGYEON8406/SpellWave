@@ -1,16 +1,16 @@
-using System;
+ï»¿using System;
 using UnityEngine;
 
 /// <summary>
-/// ÅÚ·¹Æ÷Æ®°¡ ¹ß»ıÇßÀ½À» ºê·ÎµåÄ³½ºÆ®ÇÏ´Â Á¤Àû Çãºê.
-/// - Ä«¸Ş¶ó µî ±¸µ¶ÀÚ´Â ÀÌ ÀÌº¥Æ®¸¦ ¹Ş¾Æ °°Àº ÇÁ·¹ÀÓ¿¡ ½º³À Ã³¸®.
+/// í…”ë ˆí¬íŠ¸ê°€ ë°œìƒí–ˆìŒì„ ë¸Œë¡œë“œìºìŠ¤íŠ¸í•˜ëŠ” ì •ì  í—ˆë¸Œ.
+/// - ì¹´ë©”ë¼ ë“± êµ¬ë…ìëŠ” ì´ ì´ë²¤íŠ¸ë¥¼ ë°›ì•„ ê°™ì€ í”„ë ˆì„ì— ìŠ¤ëƒ… ì²˜ë¦¬.
 /// </summary>
 public static class TeleportHub
 {
-    /// <param name="Transform">ÅÚ·¹Æ÷Æ®µÈ ´ë»ó(ÁÖ·Î Player)</param>
+    /// <param name="Transform">í…”ë ˆí¬íŠ¸ëœ ëŒ€ìƒ(ì£¼ë¡œ Player)</param>
     public static event Action<Transform> OnTeleported;
 
-    /// <summary>ÅÚ·¹Æ÷Æ® ¹ß»ıÀ» ¾Ë¸²</summary>
+    /// <summary>í…”ë ˆí¬íŠ¸ ë°œìƒì„ ì•Œë¦¼</summary>
     public static void Notify(Transform t)
     {
         OnTeleported?.Invoke(t);
