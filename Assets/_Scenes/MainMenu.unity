@@ -806,7 +806,7 @@ GameObject:
   - component: {fileID: 1170415455}
   - component: {fileID: 1170415454}
   m_Layer: 0
-  m_Name: LobbyCanvas
+  m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1105,6 +1105,6 @@ SceneRoots:
   - {fileID: 705507995}
   - {fileID: 1170415457}
   - {fileID: 1507034965}
+  - {fileID: 916792066}
   - {fileID: 180835843}
   - {fileID: 739766410}
-  - {fileID: 916792066}
