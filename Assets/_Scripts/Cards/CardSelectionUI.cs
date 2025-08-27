@@ -156,6 +156,12 @@ public class CardSelectionUI : MonoBehaviour
     // 기존 카드들 제거
     private void ClearCards()
     {
+        // 더 확실한 제거
+        foreach (Transform child in cardContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
         foreach (GameObject cardObj in currentCardObjects)
         {
             if (cardObj != null)

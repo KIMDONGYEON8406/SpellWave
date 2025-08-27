@@ -18,27 +18,46 @@ public class DebugManager : MonoBehaviour
         }
     }
 
+    [Header("전역 설정")]
+    public bool masterSwitch = true;
+    public LogLevel globalLogLevel = LogLevel.Info;
+
+    [Header("시스템별 로그 설정")]
+    public bool enableCardSystem = true;      // 카드 관련 전체
+    public bool enableSkillSystem = true;     // 스킬 관련 전체
+    public bool enableCombatSystem = true;    // 전투 관련 전체
+    public bool enablePoolSystem = false;     // 풀링 관련 전체
+    public bool enableSpawnSystem = false;    // 스폰 관련 전체
+    public bool enableUISystem = false;       // UI 관련 전체
+
+    //[Header("세부 카테고리")]
     [System.Serializable]
-    public class DebugSettings
+    public class DetailedSettings
     {
-        public bool enableCardLogs = true;
-        public bool enableSkillLogs = true;
-        public bool enableCombatLogs = true;
-        public bool enableUILogs = false;
-        public bool enableAILogs = false;
+        [Header("스킬 시스템 세부")]
+        public bool skillExecution = true;
+        public bool skillCooldown = true;
+        public bool skillDamage = true;
+        public bool skillEffects = true;
+
+        [Header("전투 시스템 세부")]
+        public bool enemyDamage = true;
+        public bool playerDamage = true;
+        public bool passiveEffects = true;
+
+        [Header("카드 시스템 세부")]
+        public bool cardSelection = true;
+        public bool cardEffectApply = true;
     }
 
-    [Header("디버그 설정")]
-    public DebugSettings settings = new DebugSettings();
+    public DetailedSettings detailSettings = new DetailedSettings();
 
-    [Header("전체 설정")]
-    public bool masterSwitch = true;  // 모든 로그 on/off
+    [Header("출력 옵션")]
     public bool useColors = true;
     public bool showTimestamp = false;
+    public int maxLogsPerSecond = 10;
 
-    // 카테고리별 카운터 (너무 많은 로그 방지)
     private Dictionary<string, int> logCounts = new Dictionary<string, int>();
-    private float resetCounterTime = 1f;
     private float lastResetTime;
 
     void Awake()
@@ -54,8 +73,7 @@ public class DebugManager : MonoBehaviour
 
     void Update()
     {
-        // 1초마다 카운터 리셋
-        if (Time.time - lastResetTime > resetCounterTime)
+        if (Time.time - lastResetTime > 1f)
         {
             logCounts.Clear();
             lastResetTime = Time.time;
@@ -65,22 +83,25 @@ public class DebugManager : MonoBehaviour
     // 메인 로그 메서드
     public static void Log(LogCategory category, string message, LogLevel level = LogLevel.Info)
     {
-        if (!Instance.masterSwitch) return;
+        if (!Instance || !Instance.masterSwitch) return;
+        if (level < Instance.globalLogLevel) return;
         if (!Instance.IsCategoryEnabled(category)) return;
 
-        // 스팸 방지 (1초에 같은 카테고리 10개 이상 막기)
+        // 스팸 방지
         string key = $"{category}_{level}";
         if (!Instance.logCounts.ContainsKey(key))
             Instance.logCounts[key] = 0;
 
         Instance.logCounts[key]++;
-        if (Instance.logCounts[key] > 10)
-            return;  // 너무 많은 로그 무시
+        if (Instance.logCounts[key] > Instance.maxLogsPerSecond)
+            return;
 
         string formattedMessage = Instance.FormatMessage(category, message, level);
 
         switch (level)
         {
+            case LogLevel.None:
+                return;
             case LogLevel.Error:
                 Debug.LogError(formattedMessage);
                 break;
@@ -93,22 +114,26 @@ public class DebugManager : MonoBehaviour
         }
     }
 
-    // 간편 메서드들
+    // 시스템별 간편 메서드
     public static void LogCard(string message) => Log(LogCategory.Card, message);
     public static void LogSkill(string message) => Log(LogCategory.Skill, message);
     public static void LogCombat(string message) => Log(LogCategory.Combat, message);
+    public static void LogUI(string message) => Log(LogCategory.UI, message);
+    public static void LogPool(string message) => Log(LogCategory.Pool, message);
+    public static void LogSpawn(string message) => Log(LogCategory.Spawn, message);
     public static void LogError(LogCategory category, string message) => Log(category, message, LogLevel.Error);
+    public static void LogWarning(LogCategory category, string message) => Log(category, message, LogLevel.Warning);
 
-    // 중요 이벤트용 (항상 출력)
+    // 중요 로그 (항상 출력)
     public static void LogImportant(string message)
     {
-        Debug.Log($"<color=yellow><b>⭐ {message}</b></color>");
+        if (!Instance || !Instance.masterSwitch) return;
+        Debug.Log($"<color=yellow><b>★ {message}</b></color>");
     }
 
-    // 구분선 출력
     public static void LogSeparator(string title = "")
     {
-        if (!Instance.masterSwitch) return;
+        if (!Instance || !Instance.masterSwitch) return;
 
         if (string.IsNullOrEmpty(title))
             Debug.Log("════════════════════════════════════════");
@@ -120,11 +145,13 @@ public class DebugManager : MonoBehaviour
     {
         switch (category)
         {
-            case LogCategory.Card: return settings.enableCardLogs;
-            case LogCategory.Skill: return settings.enableSkillLogs;
-            case LogCategory.Combat: return settings.enableCombatLogs;
-            case LogCategory.UI: return settings.enableUILogs;
-            case LogCategory.AI: return settings.enableAILogs;
+            case LogCategory.Card: return enableCardSystem;
+            case LogCategory.Skill: return enableSkillSystem;
+            case LogCategory.Combat: return enableCombatSystem;
+            case LogCategory.UI: return enableUISystem;
+            case LogCategory.Pool: return enablePoolSystem;
+            case LogCategory.Spawn: return enableSpawnSystem;
+            case LogCategory.System: return true;
             default: return true;
         }
     }
@@ -133,14 +160,11 @@ public class DebugManager : MonoBehaviour
     {
         string prefix = "";
 
-        // 타임스탬프
         if (showTimestamp)
             prefix += $"[{Time.time:F2}] ";
 
-        // 카테고리
         string categoryStr = $"[{category}]";
 
-        // 색상 적용
         if (useColors)
         {
             string color = GetColor(category, level);
@@ -152,20 +176,56 @@ public class DebugManager : MonoBehaviour
 
     private string GetColor(LogCategory category, LogLevel level)
     {
-        // 레벨 우선
         if (level == LogLevel.Error) return "red";
         if (level == LogLevel.Warning) return "yellow";
 
-        // 카테고리별 색상
         switch (category)
         {
             case LogCategory.Card: return "cyan";
             case LogCategory.Skill: return "lime";
             case LogCategory.Combat: return "orange";
             case LogCategory.UI: return "magenta";
-            case LogCategory.AI: return "white";
+            case LogCategory.Pool: return "gray";
+            case LogCategory.Spawn: return "white";
+            case LogCategory.System: return "blue";
             default: return "white";
         }
+    }
+
+    // 시스템별 일괄 켜기/끄기
+    [ContextMenu("모든 로그 켜기")]
+    public void EnableAllLogs()
+    {
+        masterSwitch = true;
+        enableCardSystem = true;
+        enableSkillSystem = true;
+        enableCombatSystem = true;
+        enablePoolSystem = true;
+        enableSpawnSystem = true;
+        enableUISystem = true;
+    }
+
+    [ContextMenu("모든 로그 끄기")]
+    public void DisableAllLogs()
+    {
+        masterSwitch = false;
+    }
+
+    [ContextMenu("전투 관련만 켜기")]
+    public void EnableOnlyCombat()
+    {
+        DisableAllLogs();
+        masterSwitch = true;
+        enableCombatSystem = true;
+        enableSkillSystem = true;
+    }
+
+    [ContextMenu("성능 관련 끄기")]
+    public void DisablePerformanceHeavy()
+    {
+        enablePoolSystem = false;
+        enableSpawnSystem = false;
+        enableCombatSystem = false;
     }
 }
 
@@ -175,13 +235,16 @@ public enum LogCategory
     Skill,
     Combat,
     UI,
-    AI,
+    Pool,
+    Spawn,
     System
 }
 
 public enum LogLevel
 {
-    Info,
+    None,
+    Error,
     Warning,
-    Error
+    Info,
+    Debug
 }

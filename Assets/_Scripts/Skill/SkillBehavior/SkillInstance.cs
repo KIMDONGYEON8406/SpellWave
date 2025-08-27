@@ -16,21 +16,20 @@ public class SkillInstance : MonoBehaviour
     private Player owner;
 
     public float CurrentDamage
-{
-    get
     {
-        // Player로 변경
-        float playerAttackPower = 10f;
-        Player player = GetComponentInParent<Player>();
-        if (player != null)
+        get
         {
-            playerAttackPower = player.AttackPower;
+            float playerAttackPower = 10f;
+            Player player = GetComponentInParent<Player>();
+            if (player != null)
+            {
+                playerAttackPower = player.AttackPower;
+            }
+
+            float baseDamage = skillData.GetDamageAtLevel(currentLevel);
+            return (playerAttackPower + baseDamage) * damageMultiplier;
         }
-        
-        float baseDamage = skillData.GetDamageAtLevel(currentLevel);
-        return (playerAttackPower + baseDamage) * damageMultiplier;
     }
-}
 
     public float CurrentCooldown
     {
@@ -46,7 +45,7 @@ public class SkillInstance : MonoBehaviour
         get
         {
             float baseRange = skillData.GetRangeAtLevel(currentLevel);
-            return baseRange * rangeMultiplier;
+            return baseRange * rangeMultiplier;  // 단순 계산만, 중복 방지
         }
     }
 
@@ -74,15 +73,15 @@ public class SkillInstance : MonoBehaviour
 
         if (owner == null)
         {
-            Debug.LogError("Player owner가 null입니다!");
+            DebugManager.LogError(LogCategory.Skill, "Player owner가 null입니다!");
         }
 
         if (skillData == null)
         {
-            Debug.LogError("SkillData가 null입니다!");
+            DebugManager.LogError(LogCategory.Skill, "SkillData가 null입니다!");
         }
 
-        Debug.Log($"스킬 초기화: {skillData?.baseSkillType} Lv.{currentLevel}");
+        DebugManager.LogSkill($"스킬 초기화: {skillData?.baseSkillType} Lv.{currentLevel}");
     }
 
     public void LevelUp()
@@ -90,12 +89,26 @@ public class SkillInstance : MonoBehaviour
         if (currentLevel < skillData.maxLevel)
         {
             currentLevel++;
-            Debug.Log($"{skillData.baseSkillType} 레벨업! Lv.{currentLevel} " +
+
+            // 레벨업 후 스탯 재계산
+            RefreshStats();
+
+            DebugManager.LogSkill($"{skillData.baseSkillType} 레벨업! Lv.{currentLevel} " +
                      $"(데미지: {CurrentDamage:F1}, 쿨타임: {CurrentCooldown:F1}초)");
         }
         else
         {
-            Debug.LogWarning($"{skillData.baseSkillType}은 이미 최대 레벨입니다! (Lv.{skillData.maxLevel})");
+            DebugManager.LogError(LogCategory.Skill, $"{skillData.baseSkillType}은 이미 최대 레벨입니다! (Lv.{skillData.maxLevel})");
+        }
+    }
+
+    // 새로 추가: 스탯 재계산 메서드
+    public void RefreshStats()
+    {
+        var modifier = SkillStatModifier.Instance;
+        if (modifier != null)
+        {
+            modifier.OnSkillAdded(this);
         }
     }
 

@@ -12,13 +12,18 @@ public class AreaAttackBehavior_Instant : SkillBehavior
         Player character = context.Caster.GetComponent<Player>();
         float searchRange = character.AttackRange;
 
-        // 발사체/영역 개수 체크
         var countModifier = context.Caster.GetComponent<ProjectileCountModifier>();
-        int explosionCount = context.BaseProjectileCount > 0 ? context.BaseProjectileCount : 1;
+        int explosionCount = 1;
 
         if (countModifier != null)
         {
+            // AreaCount를 체크하도록 수정
             explosionCount = countModifier.GetTotalCount("Explosion");
+            if (explosionCount == 1)  // 기본값이면 context 체크
+            {
+                explosionCount = context.BaseProjectileCount > 0 ? context.BaseProjectileCount : 1;
+            }
+            DebugManager.LogSkill($"[Explosion] 개수: {explosionCount}");
         }
 
         Collider[] nearbyEnemies = Physics.OverlapSphere(
@@ -29,7 +34,7 @@ public class AreaAttackBehavior_Instant : SkillBehavior
 
         if (nearbyEnemies.Length == 0)
         {
-            Debug.Log("[Explosion] 범위 내 적 없음");
+            DebugManager.LogSkill("[Explosion] 범위 내 적 없음");
             return;
         }
 
@@ -82,11 +87,14 @@ public class AreaAttackBehavior_Instant : SkillBehavior
 
     void PerformExplosion(SkillExecutionContext context, Vector3 explosionCenter, int index)
     {
+        // Context의 Range 사용 (이미 보너스 적용된 값)
         float explosionRadius = context.Range;
+
+        DebugManager.LogImportant($"[Explosion #{index + 1}] 실제 폭발 범위: {explosionRadius:F1}m");
 
         Collider[] victims = Physics.OverlapSphere(explosionCenter, explosionRadius, LayerMask.GetMask("Enemy"));
 
-        Debug.Log($"[Explosion #{index + 1}] 위치: {explosionCenter}, 범위: {explosionRadius:F1}, 피해자: {victims.Length}명");
+        DebugManager.LogCombat($"[Explosion #{index + 1}] 위치: {explosionCenter}, 범위: {explosionRadius:F1}, 피해자: {victims.Length}명");
 
         foreach (Collider enemy in victims)
         {
@@ -112,16 +120,17 @@ public class AreaAttackBehavior_Instant : SkillBehavior
                 Quaternion.identity
             );
 
-            // 크기 조정
-            float prefabRadius = 0.5f;
-            float scaleMultiplier = explosionRadius / prefabRadius;
+            // 크기를 실제 범위에 맞게 조정
+            float prefabBaseRadius = 0.5f;
+            float scaleMultiplier = explosionRadius / prefabBaseRadius;
             explosion.transform.localScale = Vector3.one * scaleMultiplier;
+
+            DebugManager.LogSkill($"[Explosion Visual] Scale: {scaleMultiplier:F2}x (범위: {explosionRadius:F1}m)");
 
             Object.Destroy(explosion, 2f);
         }
         else
         {
-            // 기본 폭발 이펙트
             CreateDefaultExplosion(explosionCenter, explosionRadius);
         }
     }
@@ -130,7 +139,9 @@ public class AreaAttackBehavior_Instant : SkillBehavior
     {
         GameObject explosion = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         explosion.transform.position = position;
-        explosion.transform.localScale = Vector3.one * radius * 2;
+        explosion.transform.localScale = Vector3.one * radius * 2; // 직경으로 설정
+
+        DebugManager.LogSkill($"[Default Explosion] 범위: {radius:F1}m, Scale: {radius * 2:F1}");
 
         Destroy(explosion.GetComponent<Collider>());
 
@@ -147,7 +158,9 @@ public class AreaAttackBehavior_Instant : SkillBehavior
     {
         GameObject warning = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         warning.transform.position = position + Vector3.up * 0.01f;
-        warning.transform.localScale = new Vector3(radius * 2, 0.01f, radius * 2);
+        warning.transform.localScale = new Vector3(radius * 2, 0.01f, radius * 2); // 범위 반영
+
+        DebugManager.LogSkill($"[Warning] 범위: {radius:F1}m");
 
         Object.Destroy(warning.GetComponent<Collider>());
 

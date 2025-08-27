@@ -661,5 +661,17 @@ public class GameManager : MonoBehaviour
             Debug.Log("Explosion 스킬이 없습니다!");
         }
     }
+    [ContextMenu("디버그/Bolt 발사체 +3개")]
+    public void DebugAddBoltProjectiles()
+    {
+        var modifier = player.GetComponent<ProjectileCountModifier>();
+        if (modifier == null)
+        {
+            modifier = player.gameObject.AddComponent<ProjectileCountModifier>();
+        }
+
+        modifier.AddProjectileCount("Bolt", 3);
+        Debug.Log($"Bolt 발사체 +3개 추가 완료! 현재: {modifier.GetTotalCount("Bolt")}개");
+    }
 
 }

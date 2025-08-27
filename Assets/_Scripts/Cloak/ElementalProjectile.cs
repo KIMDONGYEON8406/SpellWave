@@ -45,7 +45,7 @@ public class ElementalProjectile : MonoBehaviour
         if (speed > 0 && direction != Vector3.zero)
         {
             rb.velocity = direction * speed;
-            //Debug.Log($"초기 속도 설정: {rb.velocity}");
+            DebugManager.LogCombat($"초기 속도 설정: {rb.velocity}");
         }
     }
 
@@ -54,7 +54,7 @@ public class ElementalProjectile : MonoBehaviour
         // Start에서도 한 번 더 체크
         if (!initialized)
         {
-            Debug.LogWarning("ElementalProjectile이 Initialize 없이 시작됨!");
+            DebugManager.LogCombat("ElementalProjectile이 Initialize 없이 시작됨!");
             return;
         }
 
@@ -85,7 +85,7 @@ public class ElementalProjectile : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log($"충돌: {other.name}, Tag: {other.tag}, Layer: {other.gameObject.layer}");
+        DebugManager.LogCombat($"충돌: {other.name}, Tag: {other.tag}, Layer: {other.gameObject.layer}");
 
         if (other.CompareTag("Enemy"))
         {
@@ -95,7 +95,7 @@ public class ElementalProjectile : MonoBehaviour
             // 이미 관통한 적인지 확인
             if (pierce != null && pierce.HasPierced(other.gameObject))
             {
-                Debug.Log($"이미 관통한 적: {other.name} - 스킵");
+                DebugManager.LogCombat($"이미 관통한 적: {other.name} - 스킵");
                 return;  // 이미 데미지 준 적은 무시
             }
 
@@ -105,7 +105,7 @@ public class ElementalProjectile : MonoBehaviour
             {
                 enemy.TakeDamage(damage);
                 ApplyPassiveToEnemy(enemy);
-                Debug.Log($"적 타격! {other.name}에게 {damage} 데미지!");
+                DebugManager.LogCombat($"적 타격! {other.name}에게 {damage} 데미지!");
             }
 
             // 관통 처리 부분
@@ -115,13 +115,13 @@ public class ElementalProjectile : MonoBehaviour
 
                 if (pierce.CanPierce())
                 {
-                    Debug.Log($"관통! 남은 횟수: {pierce.RemainingPierceCount}");  // 프로퍼티 사용
+                    DebugManager.LogCombat($"관통! 남은 횟수: {pierce.RemainingPierceCount}");  // 프로퍼티 사용
                     return;
                 }
             }
 
             // 관통 불가능하면 파괴
-            Debug.Log("발사체 파괴");
+            DebugManager.LogCombat("발사체 파괴");
             Destroy(gameObject);
         }
     }
@@ -162,7 +162,7 @@ public class ElementalProjectile : MonoBehaviour
                 enemy.TakeDamage(chainDamage);
                 chainedCount++;
 
-                Debug.Log($"연쇄 공격! {chainDamage} 데미지");
+                DebugManager.LogCombat($"연쇄 공격! {chainDamage} 데미지");
             }
         }
     }

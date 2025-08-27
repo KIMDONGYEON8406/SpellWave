@@ -13,14 +13,14 @@ public class DOTAreaBehavior_Aura : SkillBehavior
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player == null)
         {
-            Debug.LogError("[Aura] Player not found!");
+            DebugManager.LogSkill("[Aura] Player not found!");
             return;
         }
 
         Transform existingAura = player.transform.Find("PermanentAura");
         if (existingAura != null)
         {
-            Debug.LogError("오라가 이미 있습니다!");
+            DebugManager.LogError(LogCategory.Skill, "오라가 이미 있습니다!");
             return;
         }
 
@@ -65,7 +65,7 @@ public class DOTAreaBehavior_Aura : SkillBehavior
             auraSkill
         );
 
-        Debug.Log($"[오라 생성 완료] 플레이어 자식으로 직접 생성");
+        DebugManager.LogSkill($"[오라 생성 완료] 플레이어 자식으로 직접 생성");
     }
 
     GameObject CreateDefaultAura()

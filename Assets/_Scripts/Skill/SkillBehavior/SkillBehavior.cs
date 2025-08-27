@@ -23,6 +23,7 @@ public abstract class SkillBehavior : ScriptableObject
 [System.Serializable]
 public class SkillExecutionContext
 {
+    public string SkillName;
     public GameObject Caster;
     public Transform Target;
     public float Damage;

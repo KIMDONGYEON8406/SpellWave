@@ -33,22 +33,13 @@ public class ProjectileBehavior_Homing : ProjectileBehavior
             return;
         }
 
-        // 발사체 개수 체크 추가
-        var countModifier = context.Caster.GetComponent<ProjectileCountModifier>();
-        if (countModifier != null)
-        {
-            string skillName = "Missile"; // 또는 context에서 가져오기
-            int totalProjectiles = countModifier.GetTotalCount(skillName);
+        // Context에서 개수 가져오기, 없으면 기본값 사용
+        int totalMissiles = context.BaseProjectileCount > 0 ?
+                           context.BaseProjectileCount :
+                           missileCount;
 
-            if (totalProjectiles > 1)
-            {
-                // 다중 발사체 처리
-                LaunchMultipleProjectiles(context, nearbyEnemies, totalProjectiles);
-                return;
-            }
-        }
+        DebugManager.LogImportant($"[Missile] 발사 개수: {totalMissiles} (Context: {context.BaseProjectileCount}, Default: {missileCount})");
 
-        // 기존 로직
         if (singleShot)
         {
             Transform closestTarget = GetClosestEnemy(nearbyEnemies, context.Caster.transform);
@@ -59,7 +50,7 @@ public class ProjectileBehavior_Homing : ProjectileBehavior
         }
         else
         {
-            List<Transform> targets = AssignTargets(nearbyEnemies, missileCount);
+            List<Transform> targets = AssignTargets(nearbyEnemies, totalMissiles);
             context.Caster.GetComponent<MonoBehaviour>().StartCoroutine(
                 LaunchMissiles(context, targets)
             );

@@ -145,7 +145,7 @@ public class HomingComponent : MonoBehaviour
         if (closestEnemy != null)
         {
             target = closestEnemy;
-            Debug.Log($"[Projectile] 새 타겟 발견: {target.name}");
+            DebugManager.LogSkill($"[Projectile] 새 타겟 발견: {target.name}");
         }
     }
 

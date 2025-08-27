@@ -23,7 +23,7 @@ public class SkillStatEffect : CardEffect
 
     public override void ApplyEffect(Player player, float value)
     {
-        // 다중시전 처리
+        // 다중시전 처리는 기존 코드 유지
         if (statToModify == StatType.ProjectileMultiCast ||
             statToModify == StatType.AreaMultiCast ||
             statToModify == StatType.DOTMultiCast ||
@@ -33,14 +33,15 @@ public class SkillStatEffect : CardEffect
             return;
         }
 
-        // 발사체 개수는 별도 처리
-        if (statToModify == StatType.ProjectileCount)
+        // 개수 증가 처리는 기존 코드 유지
+        if (statToModify == StatType.ProjectileCount ||
+            statToModify == StatType.AreaCount)
         {
-            ApplyProjectileCount(player, value);
+            ApplyCountIncrease(player, value);
             return;
         }
 
-        // 기존 글로벌 스탯 처리
+        // 일반 스탯 처리 - 개선된 방식
         var statModifier = SkillStatModifier.Instance;
         if (statModifier == null)
         {
@@ -48,21 +49,10 @@ public class SkillStatEffect : CardEffect
             return;
         }
 
+        // 글로벌 보너스 적용 및 즉시 갱신
         statModifier.ApplyStatBoost(statToModify, value);
 
-        SkillManager skillManager = player.GetComponent<SkillManager>();
-        if (skillManager != null)
-        {
-            var skills = skillManager.GetAllSkills();
-            if (skills.Count > 0)
-            {
-                DebugManager.LogImportant($"{effectName}: {skills.Count}개 스킬에 즉시 적용");
-            }
-            else
-            {
-                DebugManager.LogImportant($"{effectName}: 글로벌 보너스 저장 (나중에 획득할 스킬에 적용)");
-            }
-        }
+        DebugManager.LogImportant($"{effectName} 효과 적용 완료: {GetStatDescription()} +{value}%");
     }
 
     private void ApplyMultiCastWithType(Player player, float value)
@@ -92,7 +82,6 @@ public class SkillStatEffect : CardEffect
             switch (statToModify)
             {
                 case StatType.AllSkillMultiCast:
-                    // 모든 스킬에 적용
                     shouldApply = true;
                     castType = skill.skillData.HasTag(SkillTag.Projectile) ?
                         StatType.ProjectileMultiCast : StatType.AreaMultiCast;
@@ -128,9 +117,6 @@ public class SkillStatEffect : CardEffect
             string[] defaultSkills = { "Bolt", "Arrow", "Missile", "Explosion" };
             foreach (string skillName in defaultSkills)
             {
-                if (!multiCast.GetMultiCastChance(skillName).Equals(0))
-                    continue;
-
                 StatType type = (skillName == "Explosion") ?
                     StatType.AreaMultiCast : StatType.ProjectileMultiCast;
                 multiCast.AddMultiCastChance(skillName, value, type);
@@ -147,7 +133,7 @@ public class SkillStatEffect : CardEffect
         }
     }
 
-    private void ApplyProjectileCount(Player player, float value)
+    private void ApplyCountIncrease(Player player, float value)
     {
         var countMod = player.GetComponent<ProjectileCountModifier>();
         if (countMod == null)
@@ -160,50 +146,41 @@ public class SkillStatEffect : CardEffect
         var skills = skillManager.GetAllSkills();
         int affectedCount = 0;
 
-        // 타겟 모드에 따라 적용
-        if (targetMode == SkillTargetMode.All)
+        // 현재 보유한 스킬에 적용
+        foreach (var skill in skills)
         {
-            // 오라 제외한 모든 스킬
-            foreach (var skill in skills)
+            bool shouldApply = false;
+            string skillName = skill.skillData.baseSkillType;
+
+            switch (statToModify)
             {
-                if (skill.skillData.baseSkillType != "Aura")
-                {
-                    countMod.AddProjectileCount(skill.skillData.baseSkillType, (int)value);
-                    affectedCount++;
-                }
+                case StatType.ProjectileCount:
+                    shouldApply = skill.skillData.HasTag(SkillTag.Projectile) ||
+                                 skillName == "Bolt" || skillName == "Arrow" || skillName == "Missile";
+                    break;
+                case StatType.AreaCount:
+                    shouldApply = skill.skillData.HasTag(SkillTag.Area) ||
+                                 skillName == "Explosion";
+                    break;
             }
-        }
-        else
-        {
-            // 태그별 적용
-            foreach (var skill in skills)
+
+            if (shouldApply)
             {
-                if (ShouldApplyToSkill(skill))
-                {
-                    countMod.AddProjectileCount(skill.skillData.baseSkillType, (int)value);
-                    affectedCount++;
-                }
+                countMod.AddProjectileCount(skillName, (int)value);
+                affectedCount++;
+                DebugManager.LogImportant($"{skillName} 개수 +{(int)value}");
             }
         }
 
-        // 미래 스킬을 위한 기본값 설정
-        if (targetMode == SkillTargetMode.All || affectedCount == 0)
+        // Bolt가 없으면 미래를 위해 추가
+        if (!countMod.HasSkill("Bolt"))
         {
-            string[] defaultSkills = { "Bolt", "Arrow", "Missile", "Explosion" };
-            foreach (string skillName in defaultSkills)
-            {
-                if (!countMod.HasSkill(skillName))
-                {
-                    countMod.AddProjectileCount(skillName, (int)value);
-                }
-            }
-            DebugManager.LogSkill($"발사체/영역 개수 +{(int)value} (미래 스킬에도 적용)");
+            countMod.AddProjectileCount("Bolt", (int)value);
+            DebugManager.LogImportant($"Bolt(미래) 개수 +{(int)value}");
         }
 
-        if (affectedCount > 0)
-        {
-            DebugManager.LogImportant($"{affectedCount}개 스킬에 개수 +{(int)value}개 적용");
-        }
+        string typeText = statToModify == StatType.ProjectileCount ? "발사체" : "영역";
+        DebugManager.LogImportant($"{typeText} 스킬 {affectedCount}개에 개수 +{(int)value} 적용");
     }
 
     private bool ShouldApplyToSkill(SkillInstance skill)
@@ -238,6 +215,9 @@ public class SkillStatEffect : CardEffect
             case StatType.AreaDamage:
             case StatType.AreaCooldown:
             case StatType.AreaRange:
+            case StatType.AreaCount:
+                return skill.skillData.HasTag(SkillTag.Area) ||
+                       skill.skillData.baseSkillType == "Explosion";
             case StatType.AreaMultiCast:
                 return skill.skillData.HasTag(SkillTag.Area) ||
                        skill.skillData.baseSkillType == "Explosion" ||
@@ -266,7 +246,7 @@ public class SkillStatEffect : CardEffect
         string statText = GetStatDescription();
 
         // 특수 케이스 처리
-        if (statToModify == StatType.ProjectileCount)
+        if (statToModify == StatType.ProjectileCount || statToModify == StatType.AreaCount)
         {
             return $"{targetText} 개수 +{(int)value}개";
         }
@@ -281,6 +261,10 @@ public class SkillStatEffect : CardEffect
         {
             return $"{targetText} {statText} -{value}%";
         }
+        else if (statToModify == StatType.DOTTickRate)
+        {
+            return $"{targetText} 틱 속도 +{value}%";
+        }
         else
         {
             return $"{targetText} {statText} +{value}%";
@@ -289,6 +273,10 @@ public class SkillStatEffect : CardEffect
 
     private string GetTargetDescription()
     {
+        if (statToModify == StatType.AllSkillMultiCast) return "모든 스킬";
+        if (statToModify == StatType.ProjectileCount) return "발사체 스킬";
+        if (statToModify == StatType.AreaCount) return "영역 스킬";
+
         if (targetMode == SkillTargetMode.All)
             return "모든 스킬";
 
@@ -302,7 +290,6 @@ public class SkillStatEffect : CardEffect
         if (statToModify.ToString().Contains("Projectile")) return "발사체 스킬";
         if (statToModify.ToString().Contains("Area")) return "영역 스킬";
         if (statToModify.ToString().Contains("DOT")) return "지속 스킬";
-        if (statToModify == StatType.AllSkillMultiCast) return "모든 스킬";
 
         return "특정 스킬";
     }
@@ -321,37 +308,5 @@ public class SkillStatEffect : CardEffect
         return statToModify.ToString();
     }
 
-    private void UpdateAuraSize(SkillInstance auraSkill)
-    {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null) return;
-
-        Transform aura = player.transform.Find("PermanentAura");
-        if (aura == null) return;
-
-        float newRadius = auraSkill.CurrentRange;
-
-        var dotArea = aura.GetComponent<ElementalDOTArea>();
-        if (dotArea != null)
-        {
-            dotArea.radius = newRadius;
-        }
-
-        var collider = aura.GetComponent<SphereCollider>();
-        if (collider != null)
-        {
-            collider.radius = newRadius;
-        }
-
-        foreach (Transform child in aura)
-        {
-            if (child.name.Contains("Freeze") || child.name.Contains("Visual"))
-            {
-                float scale = newRadius * 2f;
-                child.localScale = new Vector3(scale, child.localScale.y, scale);
-            }
-        }
-
-        DebugManager.LogSkill($"오라 크기 업데이트: {newRadius:F1}m");
-    }
+   
 }

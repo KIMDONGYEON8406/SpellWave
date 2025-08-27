@@ -25,7 +25,7 @@ public enum StatType
     // 발사체 타입 강화
     ProjectileDamage,      // 발사체 데미지
     ProjectileCooldown,    // 발사체 쿨타임
-    ProjectileCount,       // 발사체 개수
+    ProjectileCount,       // 발사체 개수 +1
     ProjectileSpeed,       // 발사체 속도
     ProjectileMultiCast,   // 발사체 다중시전
 
@@ -34,12 +34,13 @@ public enum StatType
     AreaCooldown,         // 영역 쿨타임
     AreaRange,            // 영역 범위
     AreaMultiCast,        // 영역 다중시전
+    AreaCount,            // 영역 개수 +1
 
     // DOT 타입 강화
     DOTDamage,            // 지속 데미지
     DOTTickRate,          // 틱 간격 (데미지 주기)
-    DOTDuration,           // 지속 시간
-    DOTMultiCast           // DOT 다중시전
+    DOTDuration,          // 지속 시간
+    DOTMultiCast          // DOT 다중시전
 }
 
 // 카드 등급

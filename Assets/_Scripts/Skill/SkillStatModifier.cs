@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-// 플레이어에 붙어서 전역 스킬 스탯 관리
 public class SkillStatModifier : MonoBehaviour
 {
     private static SkillStatModifier instance;
@@ -25,27 +24,7 @@ public class SkillStatModifier : MonoBehaviour
         }
     }
 
-    [System.Serializable]
-    public class StatModifiers
-    {
-        public float allDamageBonus = 0f;        // 모든 스킬 데미지 보너스 (%)
-        public float allCooldownReduction = 0f;   // 모든 스킬 쿨타임 감소 (%)
-        public float allRangeBonus = 0f;         // 모든 스킬 범위 보너스 (%)
-
-        public float projectileDamageBonus = 0f;
-        public float projectileCooldownReduction = 0f;
-        public float projectileSpeedBonus = 0f;
-
-        public float areaDamageBonus = 0f;
-        public float areaCooldownReduction = 0f;
-        public float areaRangeBonus = 0f;
-
-        public float dotDamageBonus = 0f;
-        public float dotDurationBonus = 0f;
-    }
-
-    [Header("글로벌 스킬 스탯 보너스")]
-    public StatModifiers globalModifiers = new StatModifiers();
+    private Dictionary<StatType, float> globalStatBoosts = new Dictionary<StatType, float>();
 
     void Awake()
     {
@@ -57,57 +36,20 @@ public class SkillStatModifier : MonoBehaviour
         instance = this;
     }
 
-    // 스탯 증가 적용
     public void ApplyStatBoost(StatType statType, float percentage)
     {
-        DebugManager.LogSkill($"글로벌 스탯 증가: {statType} +{percentage}%");
+        if (!globalStatBoosts.ContainsKey(statType))
+            globalStatBoosts[statType] = 0f;
 
-        switch (statType)
-        {
-            case StatType.AllSkillDamage:
-                globalModifiers.allDamageBonus += percentage;
-                break;
-            case StatType.AllSkillCooldown:
-                globalModifiers.allCooldownReduction += percentage;
-                break;
-            case StatType.AllSkillRange:
-                globalModifiers.allRangeBonus += percentage;
-                break;
+        globalStatBoosts[statType] += percentage;
 
-            case StatType.ProjectileDamage:
-                globalModifiers.projectileDamageBonus += percentage;
-                break;
-            case StatType.ProjectileCooldown:
-                globalModifiers.projectileCooldownReduction += percentage;
-                break;
-            case StatType.ProjectileSpeed:
-                globalModifiers.projectileSpeedBonus += percentage;
-                break;
+        DebugManager.LogSkill($"글로벌 스탯 증가: {statType} +{percentage}% (총: {globalStatBoosts[statType]}%)");
 
-            case StatType.AreaDamage:
-                globalModifiers.areaDamageBonus += percentage;
-                break;
-            case StatType.AreaCooldown:
-                globalModifiers.areaCooldownReduction += percentage;
-                break;
-            case StatType.AreaRange:
-                globalModifiers.areaRangeBonus += percentage;
-                break;
-
-            case StatType.DOTDamage:
-                globalModifiers.dotDamageBonus += percentage;
-                break;
-            case StatType.DOTDuration:
-                globalModifiers.dotDurationBonus += percentage;
-                break;
-        }
-
-        // 현재 있는 스킬들에 즉시 적용
-        ApplyToExistingSkills();
+        // 즉시 모든 스킬 갱신
+        RefreshAllSkills();
     }
 
-    // 현재 보유한 스킬들에 적용
-    private void ApplyToExistingSkills()
+    private void RefreshAllSkills()
     {
         var skillManager = GetComponent<SkillManager>();
         if (skillManager != null)
@@ -115,75 +57,99 @@ public class SkillStatModifier : MonoBehaviour
             var skills = skillManager.GetAllSkills();
             foreach (var skill in skills)
             {
-                ApplyModifiersToSkill(skill);
+                RecalculateSkillStats(skill);
             }
 
-            if (skills.Count > 0)
-            {
-                DebugManager.LogSkill($"{skills.Count}개 스킬에 글로벌 보너스 적용");
-            }
+            DebugManager.LogImportant($"모든 스킬 스탯 갱신 완료 ({skills.Count}개)");
         }
     }
 
-    // 새 스킬 획득 시 호출
     public void OnSkillAdded(SkillInstance skill)
     {
         if (skill == null) return;
-
-        ApplyModifiersToSkill(skill);
-        DebugManager.LogSkill($"{skill.skillData.baseSkillType}에 글로벌 보너스 적용");
+        RecalculateSkillStats(skill);
+        DebugManager.LogSkill($"{skill.skillData.baseSkillType}에 글로벌 보너스 적용 완료");
     }
 
-    // 개별 스킬에 보너스 적용
-    private void ApplyModifiersToSkill(SkillInstance skill)
+    private void RecalculateSkillStats(SkillInstance skill)
     {
         if (skill == null || skill.skillData == null) return;
 
-        // 초기화 (중복 방지)
+        // 초기화
         skill.damageMultiplier = 1f;
         skill.cooldownMultiplier = 1f;
         skill.rangeMultiplier = 1f;
         skill.projectileSpeedMultiplier = 1f;
         skill.durationMultiplier = 1f;
 
-        // 전체 스킬 보너스
-        skill.damageMultiplier += globalModifiers.allDamageBonus / 100f;
-        skill.cooldownMultiplier *= (1f - globalModifiers.allCooldownReduction / 100f);
-        skill.rangeMultiplier += globalModifiers.allRangeBonus / 100f;
+        // 전체 스킬 보너스 적용
+        ApplyBonus(skill, StatType.AllSkillDamage, ref skill.damageMultiplier, false);
+        ApplyBonus(skill, StatType.AllSkillCooldown, ref skill.cooldownMultiplier, true);
+        ApplyBonus(skill, StatType.AllSkillRange, ref skill.rangeMultiplier, false);
 
-        // 타입별 보너스
+        // 발사체 타입 보너스
         if (skill.skillData.HasTag(SkillTag.Projectile))
         {
-            skill.damageMultiplier += globalModifiers.projectileDamageBonus / 100f;
-            skill.cooldownMultiplier *= (1f - globalModifiers.projectileCooldownReduction / 100f);
-            skill.projectileSpeedMultiplier += globalModifiers.projectileSpeedBonus / 100f;
+            ApplyBonus(skill, StatType.ProjectileDamage, ref skill.damageMultiplier, false);
+            ApplyBonus(skill, StatType.ProjectileCooldown, ref skill.cooldownMultiplier, true);
+            ApplyBonus(skill, StatType.ProjectileSpeed, ref skill.projectileSpeedMultiplier, false);
         }
 
+        // 영역 타입 보너스
         if (skill.skillData.HasTag(SkillTag.Area) || skill.skillData.baseSkillType == "Aura")
         {
-            skill.damageMultiplier += globalModifiers.areaDamageBonus / 100f;
-            skill.cooldownMultiplier *= (1f - globalModifiers.areaCooldownReduction / 100f);
-            skill.rangeMultiplier += globalModifiers.areaRangeBonus / 100f;
+            ApplyBonus(skill, StatType.AreaDamage, ref skill.damageMultiplier, false);
+            ApplyBonus(skill, StatType.AreaCooldown, ref skill.cooldownMultiplier, true);
+            ApplyBonus(skill, StatType.AreaRange, ref skill.rangeMultiplier, false);
         }
 
+        // DOT 타입 보너스
         if (skill.skillData.HasTag(SkillTag.DOT))
         {
-            skill.damageMultiplier += globalModifiers.dotDamageBonus / 100f;
-            skill.durationMultiplier += globalModifiers.dotDurationBonus / 100f;
+            ApplyBonus(skill, StatType.DOTDamage, ref skill.damageMultiplier, false);
+            ApplyBonus(skill, StatType.DOTDuration, ref skill.durationMultiplier, false);
+        }
+
+        DebugManager.LogSkill($"{skill.skillData.baseSkillType} 최종 배율 - DMG:{skill.damageMultiplier:F2} CD:{skill.cooldownMultiplier:F2} RNG:{skill.rangeMultiplier:F2}");
+    }
+
+    private void ApplyBonus(SkillInstance skill, StatType statType, ref float multiplier, bool isReduction)
+    {
+        if (globalStatBoosts.ContainsKey(statType))
+        {
+            float bonus = globalStatBoosts[statType] / 100f;
+
+            if (isReduction)
+                multiplier *= (1f - bonus);  // 쿨타임 감소
+            else
+                multiplier += bonus;  // 증가
         }
     }
 
-    // 디버그용 상태 출력
+    public float GetStatBoost(StatType statType)
+    {
+        return globalStatBoosts.ContainsKey(statType) ? globalStatBoosts[statType] : 0f;
+    }
+
     public void PrintGlobalStats()
     {
-        DebugManager.LogSeparator("글로벌 스킬 스탯");
-        DebugManager.LogSkill($"전체 데미지: +{globalModifiers.allDamageBonus}%");
-        DebugManager.LogSkill($"전체 쿨타임: -{globalModifiers.allCooldownReduction}%");
-        DebugManager.LogSkill($"전체 범위: +{globalModifiers.allRangeBonus}%");
+        if (globalStatBoosts.Count == 0)
+        {
+            DebugManager.LogSkill("글로벌 스탯 보너스 없음");
+            return;
+        }
 
-        if (globalModifiers.projectileDamageBonus > 0)
-            DebugManager.LogSkill($"발사체 데미지: +{globalModifiers.projectileDamageBonus}%");
-        if (globalModifiers.areaDamageBonus > 0)
-            DebugManager.LogSkill($"영역 데미지: +{globalModifiers.areaDamageBonus}%");
+        DebugManager.LogSeparator("글로벌 스킬 스탯");
+        foreach (var kvp in globalStatBoosts)
+        {
+            string sign = kvp.Key.ToString().Contains("Cooldown") ? "-" : "+";
+            DebugManager.LogSkill($"{kvp.Key}: {sign}{kvp.Value}%");
+        }
+    }
+
+    [ContextMenu("디버그/모든 스킬 스탯 갱신")]
+    void DebugRefreshAllSkills()
+    {
+        RefreshAllSkills();
     }
 }

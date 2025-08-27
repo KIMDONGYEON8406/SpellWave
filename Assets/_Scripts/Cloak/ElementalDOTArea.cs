@@ -37,7 +37,7 @@ public class ElementalDOTArea : MonoBehaviour
 
         baseRadius = radius;
 
-        Debug.Log($"[Aura Init] Final Radius: {radius}");
+        DebugManager.LogSkill($"[Aura Init] Final Radius: {radius}");
 
         FindComponents();
         SetInitialSize();  // 초기 크기 설정
@@ -77,7 +77,7 @@ public class ElementalDOTArea : MonoBehaviour
         {
             sphereCollider.isTrigger = true;
             sphereCollider.radius = radius / 2f;
-            Debug.Log($"[Size] Collider Radius: {sphereCollider.radius}");
+            DebugManager.LogSkill($"[Size] Collider Radius: {sphereCollider.radius}");
         }
 
         // 2. 파티클: 프리팹이 Start Size 2로 설정되어 있다고 가정
@@ -90,7 +90,7 @@ public class ElementalDOTArea : MonoBehaviour
             freezeCircleTransform.localScale = Vector3.one * targetScale;
             freezeCircleTransform.localPosition = Vector3.zero;
 
-            Debug.Log($"[Size] Assumed StartSize: {assumedStartSize}, Target Scale: {targetScale}");
+            DebugManager.LogSkill($"[Size] Assumed StartSize: {assumedStartSize}, Target Scale: {targetScale}");
         }
     }
 
@@ -142,7 +142,7 @@ public class ElementalDOTArea : MonoBehaviour
 
         baseRadius = radius;
 
-        Debug.Log($"[DOT Init] Radius: {radius}");
+        DebugManager.LogSkill($"[DOT Init] Radius: {radius}");
 
         FindComponents();
         SetInitialSize();
@@ -164,7 +164,7 @@ public class ElementalDOTArea : MonoBehaviour
             currentMultiplier = newMultiplier;
             radius = baseRadius * currentMultiplier;
 
-            Debug.Log($"[Range Update] New Radius: {radius:F1}");
+            DebugManager.LogSkill($"[Range Update] New Radius: {radius:F1}");
 
             UpdateVisualScale();
         }
@@ -186,7 +186,7 @@ public class ElementalDOTArea : MonoBehaviour
             freezeCircleTransform.localScale = Vector3.one * targetScale;
         }
 
-        Debug.Log($"[Scale Update] Radius: {radius}, Collider: {sphereCollider?.radius}, Particle Scale: {freezeCircleTransform?.localScale.x}");
+        DebugManager.LogSkill($"[Scale Update] Radius: {radius}, Collider: {sphereCollider?.radius}, Particle Scale: {freezeCircleTransform?.localScale.x}");
     }
 
     void UpdateVisualByElement()

@@ -55,27 +55,7 @@ public class SkillManager : MonoBehaviour
             skill.Initialize(owner, skillData);
             equippedSkills[skillData.baseSkillType] = skill;
 
-            DebugManager.LogImportant($"새 스킬 추가: {skillData.baseSkillType}");
-
-            // 오라면 즉시 생성!
-            if (skillData.baseSkillType == "Aura")
-            {
-                CreateAuraImmediately(skill);
-            }
-
-            return true;
-        }
-        if (equippedSkills.Count < maxSkills)
-        {
-            GameObject skillObj = new GameObject($"Skill_{skillData.baseSkillType}");
-            skillObj.transform.SetParent(transform, false);
-            skillObj.transform.localPosition = Vector3.zero;
-
-            SkillInstance skill = skillObj.AddComponent<SkillInstance>();
-            skill.Initialize(owner, skillData);
-            equippedSkills[skillData.baseSkillType] = skill;
-
-            // 글로벌 보너스 적용!
+            // 글로벌 보너스 즉시 적용
             var statModifier = SkillStatModifier.Instance;
             if (statModifier != null)
             {

@@ -14,16 +14,41 @@ public class ProjectileCountModifier : MonoBehaviour
 
     private Dictionary<string, ProjectileModifiers> skillModifiers = new Dictionary<string, ProjectileModifiers>();
 
-    // 발사체 개수 증가
+    void Awake()
+    {
+        // Bolt 기본값 설정
+        if (!skillModifiers.ContainsKey("Bolt"))
+        {
+            skillModifiers["Bolt"] = new ProjectileModifiers { baseCount = 1, additionalCount = 0 };
+        }
+    }
+
     public void AddProjectileCount(string skillName, int count)
     {
         if (!skillModifiers.ContainsKey(skillName))
         {
-            skillModifiers[skillName] = new ProjectileModifiers();
+            int defaultBase = 1;
+
+            // 스킬별 기본값 설정
+            if (skillName == "Missile") defaultBase = 5;
+            else if (skillName == "Arrow") defaultBase = 3;
+            else if (skillName == "Bolt") defaultBase = 1;
+
+            skillModifiers[skillName] = new ProjectileModifiers
+            {
+                baseCount = defaultBase,
+                additionalCount = 0,
+                spreadAngle = 15f,
+                useCircularPattern = false
+            };
+
+            DebugManager.LogSkill($"[{skillName}] 초기 설정 - base: {defaultBase}");
         }
 
         skillModifiers[skillName].additionalCount += count;
-        DebugManager.LogSkill($"{skillName} 발사체 +{count}개 (총: {GetTotalCount(skillName)}개)");
+
+        int total = GetTotalCount(skillName);
+        DebugManager.LogImportant($"[{skillName}] 개수 증가: {skillModifiers[skillName].baseCount}(base) + {skillModifiers[skillName].additionalCount}(add) = {total}개");
     }
     public bool HasSkill(string skillName)
     {
@@ -64,14 +89,18 @@ public class ProjectileCountModifier : MonoBehaviour
         Debug.Log($"모든 스킬 개수 +{count} (오라 제외)");
     }
 
-    // 총 발사체 개수 가져오기
+    // 총 발사체 개수 가져오기 - 로그 추가
     public int GetTotalCount(string skillName)
     {
         if (skillModifiers.ContainsKey(skillName))
         {
             var mod = skillModifiers[skillName];
-            return mod.baseCount + mod.additionalCount;
+            int total = mod.baseCount + mod.additionalCount;
+            DebugManager.LogSkill($"[GetTotalCount] {skillName}: base={mod.baseCount}, additional={mod.additionalCount}, total={total}");
+            return total;
         }
+
+        DebugManager.LogSkill($"[GetTotalCount] {skillName}: 기본값 1 반환");
         return 1;
     }
 

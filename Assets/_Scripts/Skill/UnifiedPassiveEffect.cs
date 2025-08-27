@@ -45,7 +45,7 @@ public class UnifiedPassiveEffect : MonoBehaviour
         if (newEffect != null)
         {
             activeEffects.Add(newEffect);
-            Debug.Log($"{type} 효과 적용!");
+            DebugManager.LogSkill($"{type} 효과 적용!");
         }
     }
 
@@ -111,7 +111,7 @@ public class BurnEffect : ActiveEffect
             if (enemy != null)
             {
                 enemy.TakeDamage(damagePerSecond);
-                Debug.Log($"화상 데미지: {damagePerSecond}");
+                DebugManager.LogSkill($"화상 데미지: {damagePerSecond}");
             }
             lastDamageTime = Time.time;
         }
@@ -119,7 +119,7 @@ public class BurnEffect : ActiveEffect
 
     public override void OnRemove()
     {
-        Debug.Log("화상 효과 종료");
+        DebugManager.LogSkill("화상 효과 종료");
     }
 }
 
@@ -156,7 +156,7 @@ public class SlowEffect : ActiveEffect
             var stats = targetEnemy.GetRuntimeStats();
             stats.moveSpeed = originalSpeed;
         }
-        Debug.Log("둔화 효과 종료");
+        DebugManager.LogSkill("둔화 효과 종료");
     }
 }
 
@@ -179,7 +179,7 @@ public class PoisonEffect : ActiveEffect
             if (enemy != null)
             {
                 enemy.TakeDamage(damagePerSecond);
-                Debug.Log($"독 데미지: {damagePerSecond}");
+                DebugManager.LogSkill($"독 데미지: {damagePerSecond}");
             }
             lastDamageTime = Time.time;
         }

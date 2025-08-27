@@ -17,4 +17,5 @@ MonoBehaviour:
     \uC99D\uAC00\uC2DC\uD0B5\uB2C8\uB2E4"
   targetMode: 1
   requiredTags: 10000000
-  statToModify: 16
+  statToModify: 17
+  verboseLogging: 0

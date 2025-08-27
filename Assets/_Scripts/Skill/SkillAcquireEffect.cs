@@ -43,11 +43,11 @@ public class SkillAcquireEffect : CardEffect
             if (levelUpIfOwned)
             {
                 existingSkill.LevelUp();
-                Debug.Log($"[CardEffect] {skillToAdd.baseSkillType} 레벨업! (Lv.{existingSkill.currentLevel})");
+                DebugManager.LogSkill($"[CardEffect] {skillToAdd.baseSkillType} 레벨업! (Lv.{existingSkill.currentLevel})");
             }
             else
             {
-                Debug.Log($"[CardEffect] {skillToAdd.baseSkillType}는 이미 보유 중");
+                DebugManager.LogSkill($"[CardEffect] {skillToAdd.baseSkillType}는 이미 보유 중");
             }
             return;
         }
@@ -56,7 +56,7 @@ public class SkillAcquireEffect : CardEffect
         if (!inventory.ownedSkills.Contains(skillToAdd))
         {
             inventory.ownedSkills.Add(skillToAdd);
-            Debug.Log($"[CardEffect] 인벤토리에 {skillToAdd.baseSkillType} 추가");
+            DebugManager.LogSkill($"[CardEffect] 인벤토리에 {skillToAdd.baseSkillType} 추가");
         }
 
         // 자동 장착
@@ -71,7 +71,7 @@ public class SkillAcquireEffect : CardEffect
                     // SkillManager 업데이트
                     StaffManager.Instance.UpdateEquippedSkills(inventory.equippedSkills);
 
-                    Debug.Log($"[CardEffect] {skillToAdd.baseSkillType} 장착 완료! " +
+                    DebugManager.LogSkill($"[CardEffect] {skillToAdd.baseSkillType} 장착 완료! " +
                              $"(슬롯 {inventory.equippedSkills.Count}/5)");
 
                     // 오라 특별 처리
@@ -83,7 +83,7 @@ public class SkillAcquireEffect : CardEffect
             }
             else
             {
-                Debug.LogWarning($"[CardEffect] 스킬 슬롯이 가득 참! (5/5) - {skillToAdd.baseSkillType} 장착 실패");
+                DebugManager.LogError(LogCategory.Card, $"[CardEffect] 스킬 슬롯이 가득 참! (5/5) - {skillToAdd.baseSkillType} 장착 실패");
             }
         }
 
@@ -98,7 +98,7 @@ public class SkillAcquireEffect : CardEffect
                 {
                     newSkill.LevelUp();
                 }
-                Debug.Log($"[CardEffect] {skillToAdd.baseSkillType} 초기 레벨 {newSkill.currentLevel} 설정");
+                DebugManager.LogCard($"[CardEffect] {skillToAdd.baseSkillType} 초기 레벨 {newSkill.currentLevel} 설정");
             }
         }
     }
@@ -109,7 +109,7 @@ public class SkillAcquireEffect : CardEffect
         var auraSkill = skillManager.GetSkill("Aura");
         if (auraSkill != null)
         {
-            Debug.Log("[CardEffect] 오라 스킬 획득 - 즉시 생성 트리거");
+            DebugManager.LogCard("[CardEffect] 오라 스킬 획득 - 즉시 생성 트리거");
 
             // AutoSkillCaster가 있으면 강제 시전
             var autoCaster = skillManager.GetComponent<AutoSkillCaster>();

@@ -43,7 +43,7 @@ public class ProjectileBehavior_Pierce : ProjectileBehavior
                 CreatePierceProjectile(context, directions[i], i);
             }
 
-            Debug.Log($"[Pierce] {totalProjectiles}개 관통 발사체 발사!");
+            DebugManager.LogSkill($"[Pierce] {totalProjectiles}개 관통 발사체 발사!");
         }
         else
         {
@@ -120,7 +120,7 @@ public class ProjectileBehavior_Pierce : ProjectileBehavior
         // 속도 설정
         rb.velocity = direction * projectileSpeed;
 
-        Debug.Log($"[Pierce #{index + 1}] 발사! 관통: {pierceCount}회");
+        DebugManager.LogSkill($"[Pierce #{index + 1}] 발사! 관통: {pierceCount}회");
     }
 
     // 새로 추가: 기본 관통 발사체 생성

@@ -60,7 +60,7 @@ public class ProjectileBehavior_Arrow : ProjectileBehavior
             FireSingleArrow(context, direction, i);
         }
 
-        Debug.Log($"[Arrow] 부채꼴 패턴: {count}개 발사!");
+        DebugManager.LogSkill($"[Arrow] 부채꼴 패턴: {count}개 발사!");
     }
 
     void FireSingleArrow(SkillExecutionContext context, Vector3 direction, int index)
@@ -126,7 +126,7 @@ public class ProjectileBehavior_Arrow : ProjectileBehavior
 
         rb.velocity = direction * arrowSpeed;
 
-        Debug.Log($"[Arrow #{index + 1}] 발사! 방향: {direction}");
+        DebugManager.LogSkill($"[Arrow #{index + 1}] 발사! 방향: {direction}");
     }
 
     // 다중시전 체크 함수 추가

@@ -33,7 +33,7 @@ public class PierceComponent : MonoBehaviour
         piercedEnemies.Add(enemy);
         currentPierceCount++;
 
-        Debug.Log($"[Pierce] 관통 {currentPierceCount}/{maxPierceCount}");
+        DebugManager.LogSkill($"[Pierce] 관통 {currentPierceCount}/{maxPierceCount}");
 
         var projectile = GetComponent<ElementalProjectile>();
         if (projectile != null && damageReductionPerPierce < 1f)

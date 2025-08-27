@@ -162,7 +162,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ee7014f8b1e81f04cba8cafd8482801a, type: 2}
   - {fileID: 11400000, guid: 717e6027954c8c94987e8baf78c31000, type: 2}
   - {fileID: 11400000, guid: 2cef1d983ec92754fa9a861c2e129d71, type: 2}
-  - {fileID: 11400000, guid: fb49e29447f26074ba6aabbab3b4ad90, type: 2}
   - {fileID: 11400000, guid: ee8598884c5cdca48a065a5984f671c3, type: 2}
   - {fileID: 11400000, guid: a33cec40176a6f2418fc4bbfbaa59835, type: 2}
   - {fileID: 11400000, guid: 7a3dd5995a12a854b8dc5518fad7fb2d, type: 2}
@@ -1698,15 +1697,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5651a4866fda45e46bd5b7824bb9edb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  settings:
-    enableCardLogs: 1
-    enableSkillLogs: 1
-    enableCombatLogs: 1
-    enableUILogs: 0
-    enableAILogs: 0
   masterSwitch: 1
+  globalLogLevel: 3
+  enableCardSystem: 1
+  enableSkillSystem: 1
+  enableCombatSystem: 1
+  enablePoolSystem: 0
+  enableSpawnSystem: 0
+  enableUISystem: 0
+  detailSettings:
+    skillExecution: 1
+    skillCooldown: 1
+    skillDamage: 1
+    skillEffects: 1
+    enemyDamage: 0
+    playerDamage: 0
+    passiveEffects: 0
+    cardSelection: 1
+    cardEffectApply: 1
   useColors: 1
   showTimestamp: 0
+  maxLogsPerSecond: 10
 --- !u!4 &1331638263
 Transform:
   m_ObjectHideFlags: 0

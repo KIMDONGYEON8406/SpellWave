@@ -182,34 +182,28 @@ public class AutoSkillCaster : MonoBehaviour
         var element = cloakManager?.GetCurrentElement() ?? ElementType.Energy;
         var passive = cloakManager?.GetCurrentPassive() ?? new PassiveEffect();
 
-        // 오라 중복 체크
         if (skill.skillData.baseSkillType == "Aura")
         {
-            // 플레이어 자식에서 오라 찾기
             Transform existingAura = transform.Find("PermanentAura");
             if (existingAura != null && existingAura.gameObject.activeInHierarchy)
             {
-                // 이미 활성화된 오라가 있으면 스킵
                 return;
             }
+        }
 
-            // 전체 씬에서도 체크 (안전장치)
-            var allAuras = GameObject.FindObjectsOfType<ElementalDOTArea>();
-            foreach (var aura in allAuras)
-            {
-                if (aura.name.Contains("PermanentAura") && aura.gameObject.activeInHierarchy)
-                {
-                    Debug.LogWarning("오라가 이미 존재합니다. 스킵!");
-                    return;
-                }
-            }
+        // 디버그: 스킬별 스탯 확인
+        if (skill.skillData.baseSkillType == "Explosion" || skill.skillData.baseSkillType == "Missile")
+        {
+            DebugManager.LogImportant($"[{skill.skillData.baseSkillType}] 시전 준비:");
+            DebugManager.LogImportant($"  - Range: {skill.CurrentRange:F1}m (Multi: {skill.rangeMultiplier:F2}x)");
+            DebugManager.LogImportant($"  - Damage: {skill.CurrentDamage:F1} (Multi: {skill.damageMultiplier:F2}x)");
         }
 
         if (skill.skillData.skillBehavior != null)
         {
-            // Context 생성
             SkillExecutionContext context = new SkillExecutionContext
             {
+                SkillName = skill.skillData.baseSkillType,
                 Caster = gameObject,
                 Target = currentTarget,
                 Damage = skill.CurrentDamage,
@@ -223,14 +217,18 @@ public class AutoSkillCaster : MonoBehaviour
                 IsMultiCastInstance = false
             };
 
-            // 발사체/영역 개수 설정
             var countModifier = GetComponent<ProjectileCountModifier>();
             if (countModifier != null)
             {
-                context.BaseProjectileCount = countModifier.GetTotalCount(skill.skillData.baseSkillType);
+                int totalCount = countModifier.GetTotalCount(skill.skillData.baseSkillType);
+                context.BaseProjectileCount = totalCount;
+
+                if (totalCount > 1)
+                {
+                    DebugManager.LogImportant($"[{skill.skillData.baseSkillType}] 개수: {totalCount}개");
+                }
             }
 
-            // 다중시전 확률 설정
             var multiCast = GetComponent<MultiCastSystem>();
             if (multiCast != null)
             {
@@ -239,18 +237,11 @@ public class AutoSkillCaster : MonoBehaviour
 
             if (skill.skillData.skillBehavior.CanExecute(context))
             {
-                // 스킬 실행
                 skill.skillData.skillBehavior.Execute(context);
 
-                // 다중시전 체크 (Behavior가 처리 안 하면 여기서)
                 if (context.MultiCastChance > 0 && !context.IsMultiCastInstance)
                 {
-                    float roll = Random.Range(0f, 100f);
-                    if (roll <= context.MultiCastChance)
-                    {
-                        // 0.2초 후 복제 시전
-                        StartCoroutine(DelayedMultiCast(skill, context, 0.2f));
-                    }
+                    multiCast?.ProcessMultiCast(skill, context, null);
                 }
 
                 slot.Cast();
