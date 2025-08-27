@@ -1,34 +1,34 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 /*
-[¸ñÀû]
-- ÇÏ³ªÀÇ Àû ÇÁ¸®ÆÕÀ» ¹Ì¸® »ı¼ºÇØ µÎ°í(SetActive(false)) Àç»ç¿ë(Ç®¸µ)ÇÑ´Ù.
-- Get()À¸·Î ²¨³¾ ¶§ À§Ä¡/È¸ÀüÀ» ¼³Á¤ÇÏ°í È°¼ºÈ­ÇÑ´Ù.
-- Return()À¸·Î µÇµ¹¸®¸é ºñÈ°¼ºÈ­ÇÏ¿© Å¥¿¡ ³Ö´Â´Ù.
+[ëª©ì ]
+- í•˜ë‚˜ì˜ ì  í”„ë¦¬íŒ¹ì„ ë¯¸ë¦¬ ìƒì„±í•´ ë‘ê³ (SetActive(false)) ì¬ì‚¬ìš©(í’€ë§)í•œë‹¤.
+- Get()ìœ¼ë¡œ êº¼ë‚¼ ë•Œ ìœ„ì¹˜/íšŒì „ì„ ì„¤ì •í•˜ê³  í™œì„±í™”í•œë‹¤.
+- Return()ìœ¼ë¡œ ë˜ëŒë¦¬ë©´ ë¹„í™œì„±í™”í•˜ì—¬ íì— ë„£ëŠ”ë‹¤.
 
-[ÀÎ½ºÆåÅÍ]
-- enemyPrefab : Ç®¸µÇÒ "Àû ÇÁ¸®ÆÕ"(PooledEnemy, EnemyAI Æ÷ÇÔ)
-- initialSize : ½ÃÀÛ ½Ã ¹Ì¸® ¸¸µé¾î µÑ °³¼ö
+[ì¸ìŠ¤í™í„°]
+- enemyPrefab : í’€ë§í•  "ì  í”„ë¦¬íŒ¹"(PooledEnemy, EnemyAI í¬í•¨)
+- initialSize : ì‹œì‘ ì‹œ ë¯¸ë¦¬ ë§Œë“¤ì–´ ë‘˜ ê°œìˆ˜
 
-[¿¬°á ¼ø¼­]
-1) Empty ¡æ "EnemyPool" »ı¼º ¡æ º» ½ºÅ©¸³Æ® ºÎÂø
-2) enemyPrefab ½½·Ô¿¡ Àû ÇÁ¸®ÆÕ µå·¡±×
-3) Àû ÇÁ¸®ÆÕ¿¡´Â ¹İµå½Ã "PooledEnemy" ÄÄÆ÷³ÍÆ® Ãß°¡
+[ì—°ê²° ìˆœì„œ]
+1) Empty â†’ "EnemyPool" ìƒì„± â†’ ë³¸ ìŠ¤í¬ë¦½íŠ¸ ë¶€ì°©
+2) enemyPrefab ìŠ¬ë¡¯ì— ì  í”„ë¦¬íŒ¹ ë“œë˜ê·¸
+3) ì  í”„ë¦¬íŒ¹ì—ëŠ” ë°˜ë“œì‹œ "PooledEnemy" ì»´í¬ë„ŒíŠ¸ ì¶”ê°€
 */
 public class EnemyPool : MonoBehaviour
 {
-    [Header("Ç®¸µ ´ë»ó ÇÁ¸®ÆÕ (PooledEnemy, EnemyAI Æ÷ÇÔ)")]
+    [Header("í’€ë§ ëŒ€ìƒ í”„ë¦¬íŒ¹ (PooledEnemy, EnemyAI í¬í•¨)")]
     [SerializeField] private GameObject enemyPrefab;
 
-    [Header("½ÃÀÛ ½Ã ¹Ì¸® ¸¸µé¾îµÑ °³¼ö")]
+    [Header("ì‹œì‘ ì‹œ ë¯¸ë¦¬ ë§Œë“¤ì–´ë‘˜ ê°œìˆ˜")]
     [SerializeField] private int initialSize = 20;
 
     private readonly Queue<GameObject> pool = new Queue<GameObject>();
 
     private void Awake()
     {
-        // ÃÊ±â ÇÁ¸®¿ö¹Ö
+        // ì´ˆê¸° í”„ë¦¬ì›Œë°
         for (int i = 0; i < initialSize; i++)
         {
             var obj = Instantiate(enemyPrefab, transform);
@@ -37,22 +37,22 @@ public class EnemyPool : MonoBehaviour
         }
     }
 
-    /// <summary>Ç®¿¡¼­ ÇÏ³ª ²¨³» È°¼ºÈ­ ÈÄ ¹İÈ¯. ¾øÀ¸¸é »õ·Î ¸¸µç´Ù.</summary>
+    /// <summary>í’€ì—ì„œ í•˜ë‚˜ êº¼ë‚´ í™œì„±í™” í›„ ë°˜í™˜. ì—†ìœ¼ë©´ ìƒˆë¡œ ë§Œë“ ë‹¤.</summary>
     public GameObject Get(Vector3 position, Quaternion rotation)
     {
         GameObject obj = pool.Count > 0 ? pool.Dequeue() : Instantiate(enemyPrefab);
         obj.transform.SetPositionAndRotation(position, rotation);
-        obj.transform.SetParent(null, true); // Ç® ¿ÀºêÁ§Æ® ÀÚ½Ä¿¡¼­ ºĞ¸®
+        obj.transform.SetParent(null, true); // í’€ ì˜¤ë¸Œì íŠ¸ ìì‹ì—ì„œ ë¶„ë¦¬
         obj.SetActive(true);
 
-        // Ç® ÂüÁ¶ ÁÖÀÔ(¾ø¾îµµ µ¿ÀÛÇÏÁö¸¸ ÀÖÀ¸¸é ¹İÈ¯ °æ·Î°¡ Á¤È®ÇÔ)
+        // í’€ ì°¸ì¡° ì£¼ì…(ì—†ì–´ë„ ë™ì‘í•˜ì§€ë§Œ ìˆìœ¼ë©´ ë°˜í™˜ ê²½ë¡œê°€ ì •í™•í•¨)
         var pe = obj.GetComponent<PooledEnemy>();
         if (pe != null) pe.SetPool(this);
 
         return obj;
     }
 
-    /// <summary>Àû ¿ÀºêÁ§Æ®¸¦ Ç®·Î µÇµ¹¸°´Ù.</summary>
+    /// <summary>ì  ì˜¤ë¸Œì íŠ¸ë¥¼ í’€ë¡œ ë˜ëŒë¦°ë‹¤.</summary>
     public void Return(GameObject obj)
     {
         obj.SetActive(false);

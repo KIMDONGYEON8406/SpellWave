@@ -1,23 +1,23 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Collections;
 
 public class CardSelectionUI : MonoBehaviour
 {
-    [Header("UI ÆĞ³Î")]
+    [Header("UI íŒ¨ë„")]
     public GameObject cardSelectionPanel;
-    public CanvasGroup cardPanelCanvasGroup; // ÆäÀÌµå È¿°ú¿ë
+    public CanvasGroup cardPanelCanvasGroup; // í˜ì´ë“œ íš¨ê³¼ìš©
 
-    [Header("Ä«µå ÄÁÅ×ÀÌ³Ê")]
+    [Header("ì¹´ë“œ ì»¨í…Œì´ë„ˆ")]
     public Transform cardContainer;
     public GameObject cardPrefab;
 
-    [Header("¹è°æ ¹× Á¦¸ñ")]
+    [Header("ë°°ê²½ ë° ì œëª©")]
     public Text titleText;
-    public Button backgroundButton; // Ä«µå ¿ÜºÎ Å¬¸¯ ¹æÁö¿ë
+    public Button backgroundButton; // ì¹´ë“œ ì™¸ë¶€ í´ë¦­ ë°©ì§€ìš©
 
-    [Header("¾Ö´Ï¸ŞÀÌ¼Ç ¼³Á¤")]
+    [Header("ì• ë‹ˆë©”ì´ì…˜ ì„¤ì •")]
     public float fadeInDuration = 0.3f;
     public float cardAppearDelay = 0.1f;
 
@@ -25,22 +25,22 @@ public class CardSelectionUI : MonoBehaviour
 
     void Start()
     {
-        // ÃÊ±â »óÅÂ ¼³Á¤
+        // ì´ˆê¸° ìƒíƒœ ì„¤ì •
         if (cardSelectionPanel != null)
         {
             cardSelectionPanel.SetActive(false);
         }
 
-        // ¹è°æ ¹öÆ° ¼³Á¤ (Å¬¸¯ ¹æÁö)
+        // ë°°ê²½ ë²„íŠ¼ ì„¤ì • (í´ë¦­ ë°©ì§€)
         if (backgroundButton != null)
         {
             backgroundButton.onClick.AddListener(() => {
-                Debug.Log("Ä«µå¸¦ ¼±ÅÃÇØÁÖ¼¼¿ä!");
+                DebugManager.LogUI("ì¹´ë“œë¥¼ ì„ íƒí•´ì£¼ì„¸ìš”!");
             });
         }
     }
 
-    // Ä«µåµé Ç¥½Ã
+    // ì¹´ë“œë“¤ í‘œì‹œ
     public void DisplayCards(List<CardData> cards)
     {
         cardSelectionPanel.SetActive(true);
@@ -48,27 +48,27 @@ public class CardSelectionUI : MonoBehaviour
         StartCoroutine(DisplayCardsCoroutine(cards));
     }
 
-    // DisplayCardsCoroutine¿¡¼­
+    // DisplayCardsCoroutineì—ì„œ
     private IEnumerator DisplayCardsCoroutine(List<CardData> cards)
     {
         ClearCards();
-        // ÆĞ³Î È°¼ºÈ­
+        // íŒ¨ë„ í™œì„±í™”
         cardSelectionPanel.SetActive(true);
         Time.timeScale = 0f;
 
-        // Á¦¸ñ ¼³Á¤ (Title Text°¡ ÀÖÀ» ¶§¸¸)
+        // ì œëª© ì„¤ì • (Title Textê°€ ìˆì„ ë•Œë§Œ)
         if (titleText != null)
         {
             SetTitle(cards);
         }
 
-        // ÆäÀÌµå ÀÎ È¿°ú (Canvas GroupÀÌ ÀÖÀ» ¶§¸¸)
+        // í˜ì´ë“œ ì¸ íš¨ê³¼ (Canvas Groupì´ ìˆì„ ë•Œë§Œ)
         if (cardPanelCanvasGroup != null)
         {
             yield return StartCoroutine(FadeIn());
         }
 
-        // Ä«µå »ı¼º
+        // ì¹´ë“œ ìƒì„±
         for (int i = 0; i < cards.Count; i++)
         {
             if (cardPrefab != null)
@@ -79,22 +79,22 @@ public class CardSelectionUI : MonoBehaviour
         }
     }
 
-    // Á¦¸ñ ¼³Á¤
+    // ì œëª© ì„¤ì •
     private void SetTitle(List<CardData> cards)
     {
         if (titleText == null) return;
 
         if (cards.Count > 0 && cards[0].cardType == CardType.SkillCard)
         {
-            titleText.text = "»õ·Î¿î ½ºÅ³À» ¼±ÅÃÇÏ¼¼¿ä!";
+            titleText.text = "ìƒˆë¡œìš´ ìŠ¤í‚¬ì„ ì„ íƒí•˜ì„¸ìš”!";
         }
         else
         {
-            titleText.text = "´É·ÂÀ» °­È­ÇÏ¼¼¿ä!";
+            titleText.text = "ëŠ¥ë ¥ì„ ê°•í™”í•˜ì„¸ìš”!";
         }
     }
 
-    // ÆäÀÌµå ÀÎ È¿°ú
+    // í˜ì´ë“œ ì¸ íš¨ê³¼
     private IEnumerator FadeIn()
     {
         if (cardPanelCanvasGroup == null) yield break;
@@ -112,13 +112,13 @@ public class CardSelectionUI : MonoBehaviour
         cardPanelCanvasGroup.alpha = 1f;
     }
 
-    // °³º° Ä«µå »ı¼º
+    // ê°œë³„ ì¹´ë“œ ìƒì„±
     private void CreateCard(CardData cardData, int index)
     {
-        // cardContainer¸¦ Á¤È®È÷ ÁöÁ¤
+        // cardContainerë¥¼ ì •í™•íˆ ì§€ì •
         GameObject cardObj = Instantiate(cardPrefab, cardContainer);
 
-        Debug.Log($"Ä«µå »ı¼º À§Ä¡: {cardContainer.name}"); // µğ¹ö±× Ãß°¡
+        //Debug.Log($"ì¹´ë“œ ìƒì„± ìœ„ì¹˜: {cardContainer.name}"); // ë””ë²„ê·¸ ì¶”ê°€
 
         CardUI cardUI = cardObj.GetComponent<CardUI>();
 
@@ -130,7 +130,7 @@ public class CardSelectionUI : MonoBehaviour
         currentCardObjects.Add(cardObj);
     }
 
-    // Ä«µå ¼±ÅÃ ¿Ï·á ÈÄ UI ´İ±â
+    // ì¹´ë“œ ì„ íƒ ì™„ë£Œ í›„ UI ë‹«ê¸°
     public void HideCards()
     {
         StartCoroutine(HideCardsCoroutine());
@@ -138,24 +138,30 @@ public class CardSelectionUI : MonoBehaviour
 
     private IEnumerator HideCardsCoroutine()
     {
-        // ÆäÀÌµå ¾Æ¿ô È¿°ú (¼±ÅÃ»çÇ×)
+        // í˜ì´ë“œ ì•„ì›ƒ íš¨ê³¼ (ì„ íƒì‚¬í•­)
         yield return new WaitForSecondsRealtime(0.2f);
 
-        // Ä«µåµé Á¦°Å
+        // ì¹´ë“œë“¤ ì œê±°
         ClearCards();
 
-        // ÆĞ³Î ºñÈ°¼ºÈ­
+        // íŒ¨ë„ ë¹„í™œì„±í™”
         cardSelectionPanel.SetActive(false);
 
-        // ½Ã°£ Àç°³
+        // ì‹œê°„ ì¬ê°œ
         Time.timeScale = 1f;
 
-        Debug.Log("Ä«µå ¼±ÅÃ UI ´İÈû");
+        DebugManager.LogUI("ì¹´ë“œ ì„ íƒ UI ë‹«í˜");
     }
 
-    // ±âÁ¸ Ä«µåµé Á¦°Å
+    // ê¸°ì¡´ ì¹´ë“œë“¤ ì œê±°
     private void ClearCards()
     {
+        // ë” í™•ì‹¤í•œ ì œê±°
+        foreach (Transform child in cardContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
         foreach (GameObject cardObj in currentCardObjects)
         {
             if (cardObj != null)

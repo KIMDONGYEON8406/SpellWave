@@ -1,50 +1,124 @@
-using UnityEngine;
+ï»¿using UnityEngine;
+using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "New Card Data", menuName = "Game/Card Data")]
 public class CardData : ScriptableObject
 {
-    [Header("Ä«µå ±âº» Á¤º¸")]
+    [Header("ì¹´ë“œ ê¸°ë³¸ ì •ë³´")]
     public string cardName;
     [TextArea(2, 4)]
     public string description;
     public Sprite cardIcon;
     public Sprite cardBackground;
 
-    [Header("Ä«µå Å¸ÀÔ")]
+    [Header("ì¹´ë“œ íƒ€ì…")]
     public CardType cardType;
 
-    [Header("½ºÅÈ Ä«µå¿ë (StatCardÀÏ ¶§¸¸ »ç¿ë)")]
-    public StatType statType;
-    public float increasePercentage = 10f; // ±âº» 10% Áõ°¡
+    [Header("ì¹´ë“œ íš¨ê³¼")]
+    public List<CardEffectEntry> cardEffects = new List<CardEffectEntry>();
 
-    [Header("½ºÅ³ Ä«µå¿ë (SkillCardÀÏ ¶§¸¸ »ç¿ë)")]
-    public SkillData skillToAdd;
-
-    [Header("Ä«µå µî±Ş")]
+    [Header("ì¹´ë“œ ë“±ê¸‰")]
     public CardRarity rarity = CardRarity.Common;
     public Color rarityColor = Color.white;
+
+    [Header("ë””ë²„ê·¸")]
+    [SerializeField] private bool showApplyLogs = false;
+
+    public void ApplyCardEffects(Player player)
+    {
+        if (cardEffects == null || cardEffects.Count == 0)
+        {
+            DebugManager.Log(LogCategory.Card, $"{cardName}ì— íš¨ê³¼ê°€ ì„¤ì •ë˜ì§€ ì•ŠìŒ!", LogLevel.Warning);
+            return;
+        }
+
+        DebugManager.LogImportant($"{cardName} ì ìš© ì‹œì‘");
+
+        int appliedCount = 0;
+        foreach (var entry in cardEffects)
+        {
+            if (entry.effect == null)
+            {
+                DebugManager.Log(LogCategory.Card, "íš¨ê³¼ê°€ nullì…ë‹ˆë‹¤!", LogLevel.Warning);
+                continue;
+            }
+
+            if (entry.effect.CanApply(player))
+            {
+                entry.effect.ApplyEffect(player, entry.value);
+                appliedCount++;
+
+                if (showApplyLogs)
+                {
+                    DebugManager.LogCard($"  â†’ {entry.effect.effectName} ì ìš©");
+                }
+            }
+            else
+            {
+                if (showApplyLogs)
+                {
+                    DebugManager.LogCard($"  â†’ {entry.effect.effectName} ì¡°ê±´ ë¯¸ì¶©ì¡±");
+                }
+            }
+        }
+
+        if (appliedCount > 0)
+        {
+            DebugManager.LogImportant($"{cardName} ì™„ë£Œ ({appliedCount}ê°œ íš¨ê³¼)");
+        }
+    }
+
+    public string GetFullDescription()
+    {
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendLine(description);
+
+        if (cardEffects.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("íš¨ê³¼:");
+
+            foreach (var entry in cardEffects)
+            {
+                if (entry.effect != null)
+                {
+                    sb.AppendLine($"- {entry.effect.GetPreviewText(entry.value)}");
+                }
+            }
+        }
+
+        sb.Append(GetRarityText());
+        return sb.ToString();
+    }
+
+    private string GetRarityText()
+    {
+        switch (rarity)
+        {
+            case CardRarity.Common:
+                return "\n<color=white>[ì¼ë°˜]</color>";
+            case CardRarity.Rare:
+                return "\n<color=#3366ff>[ë ˆì–´]</color>";
+            case CardRarity.Epic:
+                return "\n<color=#9933ff>[ì—í”½]</color>";
+            case CardRarity.Legendary:
+                return "\n<color=#ff9900>[ì „ì„¤]</color>";
+            default:
+                return "";
+        }
+    }
 }
 
-// Ä«µå °ü·Ã Enumµé
-public enum CardType
+// ì´ í´ë˜ìŠ¤ê°€ ëˆ„ë½ë˜ì—ˆìŠµë‹ˆë‹¤! ì¶”ê°€í•´ì•¼ í•©ë‹ˆë‹¤
+[System.Serializable]
+public class CardEffectEntry
 {
-    StatCard,    // ½ºÅÈ Áõ°¡ Ä«µå
-    SkillCard    // ½ºÅ³ È¹µæ Ä«µå
-}
+    [Tooltip("ì ìš©í•  íš¨ê³¼ (CardEffect ScriptableObject)")]
+    public CardEffect effect;
 
-public enum StatType
-{
-    AttackPower,    // °ø°İ·Â
-    MoveSpeed,      // ÀÌµ¿¼Óµµ
-    AttackRange,    // °ø°İ ¹üÀ§
-    Health,         // Ã¼·Â
-    AttackSpeed     // °ø°İ ¼Óµµ
-}
+    [Tooltip("íš¨ê³¼ ìˆ˜ì¹˜ (í¼ì„¼íŠ¸ ë˜ëŠ” ë ˆë²¨)")]
+    public float value = 10f;
 
-public enum CardRarity
-{
-    Common,     // ÀÏ¹İ
-    Rare,       // Èñ±Í
-    Epic,       // ¿¡ÇÈ
-    Legendary   // Àü¼³
+    [Tooltip("ë©”ëª¨ (ì—ë””í„°ìš©)")]
+    public string note = "";
 }

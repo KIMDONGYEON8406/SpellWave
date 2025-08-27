@@ -1,30 +1,30 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /// <summary>
-/// ÇÃ·¹ÀÌ¾î¸¦ ºÎµå·´°Ô µû¶ó°¡´Â Ä«¸Ş¶ó(°£´Ü ¹öÀü):
-/// - Rigidbody·Î ÀÌµ¿ÇÏ´Â Å¸°ÙÀ» LateUpdate¿¡¼­ ÃßÀû
-/// - offset¸¸Å­ ¶³¾îÁ® SmoothDamp·Î ÀÌµ¿
-/// - ÅÚ·¹Æ÷Æ® ¹ß»ı ½Ã °°Àº ÇÁ·¹ÀÓ¿¡ Áï½Ã ½º³À(²÷±è Á¦°Å)
-/// - Å¬·¥ÇÁ(À§Ä¡ Á¦ÇÑ) °ü·Ã ±â´ÉÀº ÀüºÎ Á¦°Å
+/// í”Œë ˆì´ì–´ë¥¼ ë¶€ë“œëŸ½ê²Œ ë”°ë¼ê°€ëŠ” ì¹´ë©”ë¼(ê°„ë‹¨ ë²„ì „):
+/// - Rigidbodyë¡œ ì´ë™í•˜ëŠ” íƒ€ê²Ÿì„ LateUpdateì—ì„œ ì¶”ì 
+/// - offsetë§Œí¼ ë–¨ì–´ì ¸ SmoothDampë¡œ ì´ë™
+/// - í…”ë ˆí¬íŠ¸ ë°œìƒ ì‹œ ê°™ì€ í”„ë ˆì„ì— ì¦‰ì‹œ ìŠ¤ëƒ…(ëŠê¹€ ì œê±°)
+/// - í´ë¨í”„(ìœ„ì¹˜ ì œí•œ) ê´€ë ¨ ê¸°ëŠ¥ì€ ì „ë¶€ ì œê±°
 /// </summary>
 [DisallowMultipleComponent]
 public class CameraFollow : MonoBehaviour
 {
     [Header("Target")]
-    public Transform target;                // µû¶ó°¥ ´ë»ó(ÇÃ·¹ÀÌ¾î)
+    public Transform target;                // ë”°ë¼ê°ˆ ëŒ€ìƒ(í”Œë ˆì´ì–´)
 
     [Header("Position")]
-    public bool useInitialOffset = true;    // Start¿¡¼­ ÇöÀç ¿ÀÇÁ¼Â ÀÚµ¿ °è»ê
+    public bool useInitialOffset = true;    // Startì—ì„œ í˜„ì¬ ì˜¤í”„ì…‹ ìë™ ê³„ì‚°
     public Vector3 offset = new Vector3(0f, 12f, -10f);
-    public float smoothTime = 0.15f;        // 0ÀÌ¸é Áï½Ã ÃßÀû
+    public float smoothTime = 0.15f;        // 0ì´ë©´ ì¦‰ì‹œ ì¶”ì 
     private Vector3 _vel;
 
     [Header("Teleport / Big Jump Snap")]
-    public bool autoSnapOnTeleport = true;  // ÅÚ·¹Æ÷Æ® ½Ã °°Àº ÇÁ·¹ÀÓ¿¡ Áï½Ã ½º³À
-    public float snapDistance = 8f;         // ÇÑ ÇÁ·¹ÀÓ ÀÌµ¿ÀÌ ÀÌ °ªº¸´Ù Å©¸é Áï½Ã ½º³À
+    public bool autoSnapOnTeleport = true;  // í…”ë ˆí¬íŠ¸ ì‹œ ê°™ì€ í”„ë ˆì„ì— ì¦‰ì‹œ ìŠ¤ëƒ…
+    public float snapDistance = 8f;         // í•œ í”„ë ˆì„ ì´ë™ì´ ì´ ê°’ë³´ë‹¤ í¬ë©´ ì¦‰ì‹œ ìŠ¤ëƒ…
 
     [Header("Rotation")]
-    public bool keepCameraRotation = true;  // true¸é È¸Àü °íÁ¤, false¸é Å¸°ÙÀ» ¹Ù¶óº½
+    public bool keepCameraRotation = true;  // trueë©´ íšŒì „ ê³ ì •, falseë©´ íƒ€ê²Ÿì„ ë°”ë¼ë´„
 
     private Vector3 _lastTargetPos;
 
@@ -54,7 +54,7 @@ public class CameraFollow : MonoBehaviour
 
         Vector3 desired = target.position + offset;
 
-        // ÅÚ·¹Æ÷Æ® ¿Ü¿¡µµ Å« Á¡ÇÁ°¡ °¨ÁöµÇ¸é Áï½Ã ½º³À
+        // í…”ë ˆí¬íŠ¸ ì™¸ì—ë„ í° ì í”„ê°€ ê°ì§€ë˜ë©´ ì¦‰ì‹œ ìŠ¤ëƒ…
         float moved = Vector3.Distance(target.position, _lastTargetPos);
         bool doSnap = moved > snapDistance;
 
@@ -71,15 +71,15 @@ public class CameraFollow : MonoBehaviour
     }
 
     /// <summary>
-    /// ÅÚ·¹Æ÷Æ® ¹ß»ı ½Ã °°Àº ÇÁ·¹ÀÓ¿¡ Áï½Ã ½º³À
+    /// í…”ë ˆí¬íŠ¸ ë°œìƒ ì‹œ ê°™ì€ í”„ë ˆì„ì— ì¦‰ì‹œ ìŠ¤ëƒ…
     /// </summary>
     private void HandleTeleportSnap(Transform t)
     {
         if (!autoSnapOnTeleport || target == null || t != target) return;
 
         Vector3 desired = target.position + offset;
-        transform.position = desired;   // Áï½Ã ½º³À
-        _vel = Vector3.zero;            // SmoothDamp °ü¼º ÃÊ±âÈ­
+        transform.position = desired;   // ì¦‰ì‹œ ìŠ¤ëƒ…
+        _vel = Vector3.zero;            // SmoothDamp ê´€ì„± ì´ˆê¸°í™”
         _lastTargetPos = target.position;
     }
 }

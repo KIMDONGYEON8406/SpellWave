@@ -1,85 +1,110 @@
+ï»¿
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
 public class SkillManager : MonoBehaviour
 {
-    [Header("½ºÅ³ ¼³Á¤")]
-    public int maxSkills = 3;
+    [Header("ìŠ¤í‚¬ ì„¤ì •")]
+    public int maxSkills = 5;
+
+    [Header("ë””ë²„ê·¸")]
+    [SerializeField] private bool showDebugLogs = false;
 
     private Dictionary<string, SkillInstance> equippedSkills = new Dictionary<string, SkillInstance>();
-    private Character owner;
+    private Player owner;
 
     void Start()
     {
-        owner = GetComponent<Character>();
+        owner = GetComponent<Player>();
 
         if (owner == null)
         {
-            Debug.LogError("Character ÄÄÆ÷³ÍÆ®¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù!");
+            DebugManager.LogError(LogCategory.Skill, "[skillInitialization] Player ì»´í¬ë„ŒíŠ¸ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
+            owner = gameObject.AddComponent<Player>();
+            DebugManager.LogWarning(LogCategory.Skill, "[skillInitialization] Player ì»´í¬ë„ŒíŠ¸ ìë™ ìƒì„±");
         }
+
+        DebugManager.LogSkillInitialization($"SkillManager ì´ˆê¸°í™” ì™„ë£Œ (ìµœëŒ€ ìŠ¬ë¡¯: {maxSkills})");
     }
 
     public bool AddSkillFromData(SkillData skillData)
     {
         if (skillData == null)
         {
-            Debug.LogError("SkillData°¡ nullÀÔ´Ï´Ù!");
+            DebugManager.LogError(LogCategory.Skill, "[skillManagement] SkillDataê°€ nullì…ë‹ˆë‹¤!");
             return false;
         }
 
-        // ÀÌ¹Ì °¡Áø ½ºÅ³ÀÌ¸é ·¹º§¾÷
-        if (equippedSkills.ContainsKey(skillData.skillName))
+        if (owner == null)
         {
-            equippedSkills[skillData.skillName].LevelUp();
-            Debug.Log($"½ºÅ³ ·¹º§¾÷: {skillData.skillName}");
-            return true;
+            owner = GetComponent<Player>();
+            if (owner == null)
+            {
+                owner = gameObject.AddComponent<Player>();
+                DebugManager.LogSkillInitialization("Player ì»´í¬ë„ŒíŠ¸ ìë™ ì¶”ê°€");
+            }
         }
 
-        // »õ·Î¿î ½ºÅ³ Ãß°¡
+        // ì´ë¯¸ ìˆëŠ” ìŠ¤í‚¬ì¸ì§€ ì²´í¬
+        if (equippedSkills.ContainsKey(skillData.baseSkillType))
+        {
+            DebugManager.LogSkillManagement($"{skillData.baseSkillType}ëŠ” ì´ë¯¸ ì¥ì°©ë¨");
+            return false;
+        }
+
         if (equippedSkills.Count < maxSkills)
         {
-            // ÇÁ¸®ÆÕÀÌ ÀÖÀ¸¸é ÇÁ¸®ÆÕ »ç¿ë, ¾øÀ¸¸é ºó GameObject¿¡ SkillInstance Ãß°¡
-            GameObject skillObj;
+            GameObject skillObj = new GameObject($"Skill_{skillData.baseSkillType}");
+            skillObj.transform.SetParent(transform, false);
+            skillObj.transform.localPosition = Vector3.zero;
 
-            if (skillData.skillPrefab != null)
-            {
-                skillObj = Instantiate(skillData.skillPrefab, transform);
-            }
-            else
-            {
-                // ÇÁ¸®ÆÕÀÌ ¾ø´Â °æ¿ì ºó GameObject »ı¼º
-                skillObj = new GameObject($"Skill_{skillData.skillName}");
-                skillObj.transform.SetParent(transform);
-            }
-
-            SkillInstance skill = skillObj.GetComponent<SkillInstance>();
-            if (skill == null)
-            {
-                skill = skillObj.AddComponent<SkillInstance>();
-            }
-
+            SkillInstance skill = skillObj.AddComponent<SkillInstance>();
             skill.Initialize(owner, skillData);
-            equippedSkills[skillData.skillName] = skill;
+            equippedSkills[skillData.baseSkillType] = skill;
 
-            Debug.Log($"»õ ½ºÅ³ Ãß°¡: {skillData.skillName} (ÃÑ {equippedSkills.Count}°³)");
+            // ê¸€ë¡œë²Œ ë³´ë„ˆìŠ¤ ì¦‰ì‹œ ì ìš©
+            var statModifier = SkillStatModifier.Instance;
+            if (statModifier != null)
+            {
+                statModifier.OnSkillAdded(skill);
+                DebugManager.LogSkillStats($"{skillData.baseSkillType}ì— ê¸€ë¡œë²Œ ë³´ë„ˆìŠ¤ ì ìš©");
+            }
+
+            DebugManager.LogSkillManagement($"ìƒˆ ìŠ¤í‚¬ ì¶”ê°€: {skillData.baseSkillType} (í˜„ì¬ {equippedSkills.Count}/{maxSkills})");
+
+            if (skillData.baseSkillType == "Aura")
+            {
+                CreateAuraImmediately(skill);
+            }
+
             return true;
         }
-        else
-        {
-            Debug.LogWarning($"½ºÅ³ ½½·ÔÀÌ °¡µæÂü! ÃÖ´ë {maxSkills}°³");
-            return false;
-        }
+
+        DebugManager.LogWarning(LogCategory.Skill, $"[skillManagement] ìŠ¤í‚¬ ìŠ¬ë¡¯ ê°€ë“ ì°¸ ({equippedSkills.Count}/{maxSkills})");
+        return false;
     }
 
     public SkillInstance GetSkill(string skillName)
     {
-        return equippedSkills.ContainsKey(skillName) ? equippedSkills[skillName] : null;
+        bool found = equippedSkills.ContainsKey(skillName);
+        if (showDebugLogs)
+        {
+            DebugManager.LogSkillManagement($"ìŠ¤í‚¬ ì¡°íšŒ: {skillName} ({(found ? "ë°œê²¬" : "ì—†ìŒ")})");
+        }
+
+        return found ? equippedSkills[skillName] : null;
     }
 
     public List<SkillInstance> GetAllSkills()
     {
-        return equippedSkills.Values.ToList();
+        var skillList = equippedSkills.Values.ToList();
+        if (showDebugLogs)
+        {
+            DebugManager.LogSkillManagement($"ëª¨ë“  ìŠ¤í‚¬ ì¡°íšŒ: {skillList.Count}ê°œ");
+        }
+
+        return skillList;
     }
 
     public int GetSkillCount()
@@ -87,7 +112,6 @@ public class SkillManager : MonoBehaviour
         return equippedSkills.Count;
     }
 
-    // Æ¯Á¤ ½ºÅ³ Á¦°Å (ÇÊ¿äÇÑ °æ¿ì)
     public bool RemoveSkill(string skillName)
     {
         if (equippedSkills.ContainsKey(skillName))
@@ -100,16 +124,18 @@ public class SkillManager : MonoBehaviour
                 Destroy(skillToRemove.gameObject);
             }
 
-            Debug.Log($"½ºÅ³ Á¦°Å: {skillName}");
+            DebugManager.LogSkillManagement($"ìŠ¤í‚¬ ì œê±°: {skillName} (ë‚¨ì€ ìŠ¤í‚¬: {equippedSkills.Count}/{maxSkills})");
             return true;
         }
 
+        DebugManager.LogWarning(LogCategory.Skill, $"[skillManagement] ì œê±°í•  ìŠ¤í‚¬ì„ ì°¾ì„ ìˆ˜ ì—†ìŒ: {skillName}");
         return false;
     }
 
-    // ¸ğµç ½ºÅ³ Á¦°Å (°ÔÀÓ Àç½ÃÀÛ ½Ã)
     public void ClearAllSkills()
     {
+        int removedCount = equippedSkills.Count;
+
         foreach (var skill in equippedSkills.Values)
         {
             if (skill != null)
@@ -119,34 +145,211 @@ public class SkillManager : MonoBehaviour
         }
 
         equippedSkills.Clear();
-        Debug.Log("¸ğµç ½ºÅ³ Á¦°Å");
+        DebugManager.LogSkillManagement($"ëª¨ë“  ìŠ¤í‚¬ ì œê±° ({removedCount}ê°œ ìŠ¤í‚¬)");
     }
 
-    // ½ºÅ³ Á¤º¸ Ãâ·Â (µğ¹ö±×¿ë)
     public void PrintSkillInfo()
     {
-        Debug.Log($"=== º¸À¯ ½ºÅ³ ({equippedSkills.Count}/{maxSkills}) ===");
+        DebugManager.LogSeparator($"ë³´ìœ  ìŠ¤í‚¬ ({equippedSkills.Count}/{maxSkills})");
+
         foreach (var kvp in equippedSkills)
         {
             SkillInstance skill = kvp.Value;
-            Debug.Log($"- {skill.skillData.skillName} Lv.{skill.currentLevel} " +
-                     $"(µ¥¹ÌÁö: {skill.CurrentDamage:F1}, ÄğÅ¸ÀÓ: {skill.CurrentCooldown:F1}ÃÊ)");
+
+            DebugManager.LogSkillStats($"{skill.skillData.baseSkillType} Lv.{skill.currentLevel}");
+
+            if (showDebugLogs)
+            {
+                DebugManager.LogSkillStats($"  ë°ë¯¸ì§€: {skill.CurrentDamage:F1}");
+                DebugManager.LogSkillStats($"  ì¿¨íƒ€ì„: {skill.CurrentCooldown:F1}ì´ˆ");
+                DebugManager.LogSkillStats($"  ë²”ìœ„: {skill.CurrentRange:F1}m");
+            }
         }
     }
 
-    // PlayerStats¿¡¼­ °ø°İ °ü·Ã ½ºÅÈ °¡Á®¿À±â
+    private void CreateAuraImmediately(SkillInstance auraSkill)
+    {
+        DebugManager.LogSkillExecution("ì˜¤ë¼ ìŠ¤í‚¬ íšë“! ì¦‰ì‹œ ìƒì„± ì‹œì‘");
+
+        // ì´ë¯¸ ì˜¤ë¼ê°€ ìˆëŠ”ì§€ í™•ì¸
+        Transform existingAura = transform.Find("PermanentAura");
+        if (existingAura != null)
+        {
+            DebugManager.LogWarning(LogCategory.Skill, "[skillExecution] ì˜¤ë¼ê°€ ì´ë¯¸ ì¡´ì¬í•©ë‹ˆë‹¤.");
+            return;
+        }
+
+        var element = CloakManager.Instance?.GetCurrentElement() ?? ElementType.Energy;
+        var passive = CloakManager.Instance?.GetCurrentPassive() ?? new PassiveEffect();
+
+        if (auraSkill.skillData.skillBehavior != null)
+        {
+            SkillExecutionContext context = new SkillExecutionContext
+            {
+                Caster = gameObject,
+                Target = null,
+                Damage = auraSkill.CurrentDamage,
+                Range = auraSkill.CurrentRange,
+                Element = element,
+                Passive = passive,
+                SkillPrefab = auraSkill.skillData.skillPrefab,
+                HitEffectPrefab = auraSkill.skillData.hitEffectPrefab
+            };
+
+            // ì˜¤ë¼ ì‹¤í–‰
+            auraSkill.skillData.skillBehavior.Execute(context);
+            auraSkill.RecordSkillUse();
+
+            DebugManager.LogSkillExecution($"ì˜¤ë¼ ìƒì„± ì™„ë£Œ! ë²”ìœ„: {auraSkill.CurrentRange:F1}m, ë°ë¯¸ì§€: {auraSkill.CurrentDamage:F1}");
+        }
+        else
+        {
+            DebugManager.LogError(LogCategory.Skill, "[skillExecution] ì˜¤ë¼ ìŠ¤í‚¬ì— Behaviorê°€ ì—†ìŠµë‹ˆë‹¤!");
+        }
+    }
+
+    // ìŠ¤í‚¬ ë ˆë²¨ì—… ì²˜ë¦¬
+    public bool LevelUpSkill(string skillName)
+    {
+        if (equippedSkills.ContainsKey(skillName))
+        {
+            var skill = equippedSkills[skillName];
+            if (skill.currentLevel < skill.skillData.maxLevel)
+            {
+                int oldLevel = skill.currentLevel;
+                skill.LevelUp();
+
+                DebugManager.LogSkillLevelUp($"{skillName} ë ˆë²¨ì—…: Lv.{oldLevel} â†’ Lv.{skill.currentLevel}");
+                DebugManager.LogSkillStats($"  ìƒˆ ìŠ¤íƒ¯ - ë°ë¯¸ì§€:{skill.CurrentDamage:F1} ì¿¨íƒ€ì„:{skill.CurrentCooldown:F1} ë²”ìœ„:{skill.CurrentRange:F1}");
+
+                return true;
+            }
+            else
+            {
+                DebugManager.LogWarning(LogCategory.Skill, $"[skillLevelUp] {skillName}ì€ ì´ë¯¸ ìµœëŒ€ ë ˆë²¨ì…ë‹ˆë‹¤ (Lv.{skill.skillData.maxLevel})");
+                return false;
+            }
+        }
+
+        DebugManager.LogError(LogCategory.Skill, $"[skillLevelUp] ë ˆë²¨ì—…í•  ìŠ¤í‚¬ì„ ì°¾ì„ ìˆ˜ ì—†ìŒ: {skillName}");
+        return false;
+    }
+
+    // í”Œë ˆì´ì–´ ìŠ¤íƒ¯ ì ‘ê·¼ ë©”ì„œë“œë“¤
     public float GetPlayerAttackDamage()
     {
-        return owner != null ? owner.AttackPower : 0f;
+        float damage = owner != null ? owner.AttackPower : 0f;
+        if (showDebugLogs)
+        {
+            DebugManager.LogSkillStats($"í”Œë ˆì´ì–´ ê³µê²©ë ¥ ì¡°íšŒ: {damage:F1}");
+        }
+        return damage;
     }
 
     public float GetPlayerAttackRange()
     {
-        return owner != null ? owner.AttackRange : 0f;
+        float range = owner != null ? owner.AttackRange : 0f;
+        if (showDebugLogs)
+        {
+            DebugManager.LogSkillStats($"í”Œë ˆì´ì–´ ê³µê²© ë²”ìœ„ ì¡°íšŒ: {range:F1}");
+        }
+        return range;
     }
 
     public float GetPlayerAttackSpeed()
     {
-        return owner != null ? owner.AttackSpeed : 0f;
+        return 1f;  // ê³ ì •ê°’
+    }
+
+    // ë””ë²„ê·¸ ì „ìš© ë©”ì„œë“œë“¤
+    [ContextMenu("ë””ë²„ê·¸/ìŠ¤í‚¬ ì •ë³´ ì¶œë ¥")]
+    void DebugPrintSkillInfo()
+    {
+        PrintSkillInfo();
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ëª¨ë“  ìŠ¤í‚¬ ë ˆë²¨ì—…")]
+    void DebugLevelUpAllSkills()
+    {
+        DebugManager.LogSkillLevelUp("[skillLevelUp] ë””ë²„ê·¸ ëª…ë ¹: ëª¨ë“  ìŠ¤í‚¬ ë ˆë²¨ì—…");
+
+        int leveledUpCount = 0;
+        foreach (var skillName in equippedSkills.Keys.ToList())
+        {
+            if (LevelUpSkill(skillName))
+            {
+                leveledUpCount++;
+            }
+        }
+
+        DebugManager.LogSkillLevelUp($"[skillLevelUp] {leveledUpCount}ê°œ ìŠ¤í‚¬ ë ˆë²¨ì—… ì™„ë£Œ");
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ìŠ¤í‚¬ ìŠ¬ë¡¯ ìƒíƒœ")]
+    void DebugPrintSlotStatus()
+    {
+        DebugManager.LogSeparator("ìŠ¤í‚¬ ìŠ¬ë¡¯ ìƒíƒœ");
+        DebugManager.LogSkillManagement($"ì‚¬ìš© ì¤‘: {equippedSkills.Count}/{maxSkills}");
+        DebugManager.LogSkillManagement($"ë‚¨ì€ ìŠ¬ë¡¯: {maxSkills - equippedSkills.Count}");
+
+        if (equippedSkills.Count > 0)
+        {
+            DebugManager.LogSkillManagement("ì¥ì°©ëœ ìŠ¤í‚¬ ëª©ë¡:");
+            foreach (var skillName in equippedSkills.Keys)
+            {
+                DebugManager.LogSkillManagement($"  - {skillName}");
+            }
+        }
+    }
+
+    [ContextMenu("ë””ë²„ê·¸/ìŠ¤í‚¬ ìƒì„¸ ìŠ¤íƒ¯")]
+    void DebugPrintDetailedStats()
+    {
+        DebugManager.LogSeparator("ìŠ¤í‚¬ ìƒì„¸ ìŠ¤íƒ¯");
+
+        foreach (var kvp in equippedSkills)
+        {
+            var skill = kvp.Value;
+            DebugManager.LogSkillStats($"=== {skill.skillData.baseSkillType} ===");
+            DebugManager.LogSkillStats($"ë ˆë²¨: {skill.currentLevel}/{skill.skillData.maxLevel}");
+            DebugManager.LogSkillStats($"ê¸°ë³¸ ë°ë¯¸ì§€: {skill.skillData.GetDamageAtLevel(skill.currentLevel):F1}");
+            DebugManager.LogSkillStats($"ìµœì¢… ë°ë¯¸ì§€: {skill.CurrentDamage:F1} (ë°°ìœ¨: {skill.damageMultiplier:F2}x)");
+            DebugManager.LogSkillStats($"ê¸°ë³¸ ì¿¨íƒ€ì„: {skill.skillData.GetCooldownAtLevel(skill.currentLevel):F1}ì´ˆ");
+            DebugManager.LogSkillStats($"ìµœì¢… ì¿¨íƒ€ì„: {skill.CurrentCooldown:F1}ì´ˆ (ë°°ìœ¨: {skill.cooldownMultiplier:F2}x)");
+            DebugManager.LogSkillStats($"ê¸°ë³¸ ë²”ìœ„: {skill.skillData.GetRangeAtLevel(skill.currentLevel):F1}");
+            DebugManager.LogSkillStats($"ìµœì¢… ë²”ìœ„: {skill.CurrentRange:F1} (ë°°ìœ¨: {skill.rangeMultiplier:F2}x)");
+        }
+    }
+
+    // ìŠ¤í‚¬ ì¡´ì¬ ì—¬ë¶€ ì²´í¬
+    public bool HasSkill(string skillName)
+    {
+        return equippedSkills.ContainsKey(skillName);
+    }
+
+    // íŠ¹ì • íƒœê·¸ë¥¼ ê°€ì§„ ìŠ¤í‚¬ë“¤ ê°€ì ¸ì˜¤ê¸°
+    public List<SkillInstance> GetSkillsByTag(SkillTag tag)
+    {
+        var matchingSkills = equippedSkills.Values.Where(skill => skill.skillData.HasTag(tag)).ToList();
+
+        if (showDebugLogs)
+        {
+            DebugManager.LogSkillManagement($"{tag} íƒœê·¸ ìŠ¤í‚¬ ì¡°íšŒ: {matchingSkills.Count}ê°œ");
+        }
+
+        return matchingSkills;
+    }
+
+    // ìŠ¤í‚¬ íƒ€ì…ë³„ ê°œìˆ˜ ì¡°íšŒ
+    public int GetSkillCountByTag(SkillTag tag)
+    {
+        int count = equippedSkills.Values.Count(skill => skill.skillData.HasTag(tag));
+
+        if (showDebugLogs)
+        {
+            DebugManager.LogSkillManagement($"{tag} íƒœê·¸ ìŠ¤í‚¬ ê°œìˆ˜: {count}");
+        }
+
+        return count;
     }
 }

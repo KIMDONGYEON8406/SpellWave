@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9a079b3de6817447886c25f430263cd, type: 3}
+  m_Name: Projectile Pierce
+  m_EditorClassIdentifier: 
+  behaviorName: "\uAD00\uD1B5 \uD2B9\uD654 \uBC1C\uC0AC\uCCB4"
+  description: "- defaultSpeed: 15f (\uBE60\uB978 \uC18D\uB3C4)\n- defaultPierceCount:
+    3 (\uAD00\uD1B5 \uD69F\uC218)\n- damageReductionPerPierce: 0.8f"
+  projectileSpeed: 10
+  isHoming: 0
+  pierceCount: 0
+  defaultSpeed: 15
+  defaultPierceCount: 3
+  damageReductionPerPierce: 0.8

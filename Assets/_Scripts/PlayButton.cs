@@ -1,9 +1,9 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class PlayButton : MonoBehaviour
 {
-    // ¹öÆ°¿¡¼­ È£ÃâÇÒ ¸Ş¼­µå
+    // ë²„íŠ¼ì—ì„œ í˜¸ì¶œí•  ë©”ì„œë“œ
     public void LoadPlayScene()
     {
         SceneManager.LoadScene("KDY");

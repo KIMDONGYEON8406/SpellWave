@@ -1,10 +1,10 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 /// <summary>
-/// ´ë»óÀÇ Rigidbody¸¦ ÀÚµ¿À¸·Î Æ©´×:
-/// - Interpolation = Interpolate  (ÇÁ·¹ÀÓ »çÀÌ º¸°£À¸·Î ½Ã°¢Àû ²÷±è °¨¼Ò)
-/// - Collision Detection = Continuous (ºü¸¥ ÀÌµ¿ Áß Ãæµ¹ ´©¶ô ¹æÁö)
-/// ÇÃ·¹ÀÌ¾î/Àû ¿ÀºêÁ§Æ®¿¡ ºÙÀÌ¸é µË´Ï´Ù.
+/// ëŒ€ìƒì˜ Rigidbodyë¥¼ ìë™ìœ¼ë¡œ íŠœë‹:
+/// - Interpolation = Interpolate  (í”„ë ˆì„ ì‚¬ì´ ë³´ê°„ìœ¼ë¡œ ì‹œê°ì  ëŠê¹€ ê°ì†Œ)
+/// - Collision Detection = Continuous (ë¹ ë¥¸ ì´ë™ ì¤‘ ì¶©ëŒ ëˆ„ë½ ë°©ì§€)
+/// í”Œë ˆì´ì–´/ì  ì˜¤ë¸Œì íŠ¸ì— ë¶™ì´ë©´ ë©ë‹ˆë‹¤.
 /// </summary>
 [RequireComponent(typeof(Rigidbody))]
 public class RigidbodyTuning : MonoBehaviour

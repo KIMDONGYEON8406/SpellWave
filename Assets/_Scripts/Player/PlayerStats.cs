@@ -1,73 +1,60 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
-[CreateAssetMenu(fileName = "New PlayerStats", menuName = "SpellWave/Player Stats")]
+[CreateAssetMenu(fileName = "PlayerStats", menuName = "SpellWave/Player Stats")]
 public class PlayerStats : ScriptableObject
 {
-    [Header("ÀÌµ¿ ¼³Á¤")]
-    public float moveSpeed = 5f;
-    public float rotationSpeed = 10f;
-
-    [Header("Ã¼·Â ¼³Á¤")]
+    [Header("ì²´ë ¥ ì„¤ì •")]
     public float maxHP = 100f;
     public float currentHP = 100f;
 
-    [Header("°ø°İ ¼³Á¤")]
-    public float attackRange = 8f;
-    public float attackSpeed = 1f; // ÃÊ´ç °ø°İ È½¼ö
-    public float attackDamage = 25f;
+    [Header("ì´ë™ ì„¤ì •")]
+    public float moveSpeed = 5f;
+    public float rotationSpeed = 10f;
 
-    [Header("Åõ»çÃ¼ ¼³Á¤")]
-    public float projectileSpeed = 10f;
-    public float projectileLifetime = 3f;
+    [Header("ì „íˆ¬ ì„¤ì •")]
+    public float attackPower = 10f;    // ìŠ¤í‚¬ ë°ë¯¸ì§€ ê³„ì‚°ìš©
+    public float attackRange = 10f;    // ìŠ¤í‚¬ ìë™ì‹œì „ ë²”ìœ„
 
-    // ·±Å¸ÀÓ¿¡ ½ºÅÈÀ» ¸®¼ÂÇÏ´Â ÇÔ¼ö (°ÔÀÓ ½ÃÀÛ ½Ã »ç¿ë)
+    // ê²Œì„ ì‹œì‘ ì‹œ ì´ˆê¸°í™”
     public void ResetToDefault()
     {
         currentHP = maxHP;
     }
 
-    // Ä«µå ½Ã½ºÅÛ¿¡¼­ »ç¿ëÇÒ ½ºÅÈ Áõ°¡ ÇÔ¼öµé
-    public void IncreaseAttackSpeed(float percentage)
+    // ë°ë¯¸ì§€ ë°›ê¸°
+    public void TakeDamage(float damage)
     {
-        attackSpeed *= (1f + percentage / 100f);
+        currentHP -= damage;
+        if (currentHP <= 0)
+        {
+            currentHP = 0;
+        }
     }
 
+    // ì²´ë ¥ íšŒë³µ
+    public void Heal(float amount)
+    {
+        currentHP = Mathf.Min(currentHP + amount, maxHP);
+    }
+
+    // ìµœëŒ€ ì²´ë ¥ ì¦ê°€ (ì¹´ë“œ íš¨ê³¼ìš© - ë‚˜ì¤‘ì— ì‚¬ìš©)
+    public void IncreaseMaxHP(float percentage)
+    {
+        float oldMaxHP = maxHP;
+        maxHP *= (1f + percentage / 100f);
+        // í˜„ì¬ ì²´ë ¥ë„ ë¹„ë¡€ ì¦ê°€
+        currentHP = (currentHP / oldMaxHP) * maxHP;
+    }
+
+    // ì´ë™ì†ë„ ì¦ê°€ (ì¹´ë“œ íš¨ê³¼ìš© - ë‚˜ì¤‘ì— ì‚¬ìš©)
     public void IncreaseMoveSpeed(float percentage)
     {
         moveSpeed *= (1f + percentage / 100f);
     }
 
-    public void IncreaseMaxHP(float percentage)
+    // ê³µê²©ë ¥ ì¦ê°€ (ì¹´ë“œ íš¨ê³¼ìš© - ë‚˜ì¤‘ì— ì‚¬ìš©)
+    public void IncreaseAttackPower(float percentage)
     {
-        float oldMaxHP = maxHP;
-        maxHP *= (1f + percentage / 100f);
-        // ÃÖ´ë Ã¼·ÂÀÌ Áõ°¡ÇÏ¸é ÇöÀç Ã¼·Âµµ ºñ·ÊÇØ¼­ Áõ°¡
-        currentHP = (currentHP / oldMaxHP) * maxHP;
-    }
-
-    public void IncreaseAttackDamage(float percentage)
-    {
-        attackDamage *= (1f + percentage / 100f);
-    }
-
-    public void HealPercentage(float percentage)
-    {
-        currentHP = Mathf.Min(currentHP + (maxHP * percentage / 100f), maxHP);
-    }
-
-    // °íÁ¤°ª Áõ°¡ ÇÔ¼öµé
-    public void AddAttackSpeed(float value)
-    {
-        attackSpeed += value;
-    }
-
-    public void AddMoveSpeed(float value)
-    {
-        moveSpeed += value;
-    }
-
-    public void AddAttackDamage(float value)
-    {
-        attackDamage += value;
+        attackPower *= (1f + percentage / 100f);
     }
 }

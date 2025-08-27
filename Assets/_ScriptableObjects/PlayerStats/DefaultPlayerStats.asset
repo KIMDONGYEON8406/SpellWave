@@ -12,12 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3f7b5001bbafa64eb7c2d25d9bae04e, type: 3}
   m_Name: DefaultPlayerStats
   m_EditorClassIdentifier: 
-  moveSpeed: 25
-  rotationSpeed: 10
   maxHP: 100
   currentHP: 100
+  moveSpeed: 20
+  rotationSpeed: 10
+  attackPower: 10
   attackRange: 8
-  attackSpeed: 1
-  attackDamage: 25
-  projectileSpeed: 10
-  projectileLifetime: 3

@@ -1,78 +1,78 @@
-// EnemyManager.cs - ¹é ¸¶¸® ¸ó½ºÅÍµµ ·º ¾È °É¸®´Â ÃÖÀûÈ­ ½Ã½ºÅÛ
+ï»¿// EnemyManager.cs - ë°± ë§ˆë¦¬ ëª¬ìŠ¤í„°ë„ ë ‰ ì•ˆ ê±¸ë¦¬ëŠ” ìµœì í™” ì‹œìŠ¤í…œ
 using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyManager : MonoBehaviour
 {
-    // ½Ì±ÛÅæ ÆĞÅÏ - °ÔÀÓ ÀüÃ¼¿¡¼­ ÇÏ³ª¸¸ Á¸Àç
+    // ì‹±ê¸€í†¤ íŒ¨í„´ - ê²Œì„ ì „ì²´ì—ì„œ í•˜ë‚˜ë§Œ ì¡´ì¬
     public static EnemyManager instance;
 
-    // ¸ğµç ÀûµéÀÇ ¸®½ºÆ® (°ÔÀÓ ½ÃÀÛºÎÅÍ ³¡±îÁö)
+    // ëª¨ë“  ì ë“¤ì˜ ë¦¬ìŠ¤íŠ¸ (ê²Œì„ ì‹œì‘ë¶€í„° ëê¹Œì§€)
     private List<EnemyAI> allEnemies = new List<EnemyAI>();
 
-    // ÇÃ·¹ÀÌ¾î °ø°İ ¹üÀ§ ¾È¿¡ ÀÖ´Â Àûµé¸¸ µû·Î °ü¸® (ÇÙ½É ÃÖÀûÈ­!)
-    // 100¸¶¸® Áß¿¡ 5¸¶¸®¸¸ ¹üÀ§¿¡ ÀÖ´Ù¸é, 5¸¶¸®¸¸ °Ë»çÇÏ¸é µÊ
+    // í”Œë ˆì´ì–´ ê³µê²© ë²”ìœ„ ì•ˆì— ìˆëŠ” ì ë“¤ë§Œ ë”°ë¡œ ê´€ë¦¬ (í•µì‹¬ ìµœì í™”!)
+    // 100ë§ˆë¦¬ ì¤‘ì— 5ë§ˆë¦¬ë§Œ ë²”ìœ„ì— ìˆë‹¤ë©´, 5ë§ˆë¦¬ë§Œ ê²€ì‚¬í•˜ë©´ ë¨
     private List<EnemyAI> enemiesInRange = new List<EnemyAI>();
 
     void Awake()
     {
-        // ½Ì±ÛÅæ ¼³Á¤ - ´Ù¸¥ ½ºÅ©¸³Æ®¿¡¼­ EnemyManager.instance·Î Á¢±Ù °¡´É
+        // ì‹±ê¸€í†¤ ì„¤ì • - ë‹¤ë¥¸ ìŠ¤í¬ë¦½íŠ¸ì—ì„œ EnemyManager.instanceë¡œ ì ‘ê·¼ ê°€ëŠ¥
         instance = this;
     }
 
-    // ÀûÀÌ »ı¼ºµÉ ¶§ È£Ãâ - ÀüÃ¼ ¸®½ºÆ®¿¡ µî·Ï
+    // ì ì´ ìƒì„±ë  ë•Œ í˜¸ì¶œ - ì „ì²´ ë¦¬ìŠ¤íŠ¸ì— ë“±ë¡
     public void RegisterEnemy(EnemyAI enemy)
     {
         allEnemies.Add(enemy);
-        Debug.Log($"Àû µî·Ï: ÃÑ {allEnemies.Count}¸¶¸®");
+        DebugManager.LogTargetingSystem($"ì  ë“±ë¡: ì´ {allEnemies.Count}ë§ˆë¦¬");
     }
 
-    // ÀûÀÌ Á×À» ¶§ È£Ãâ - ¸ğµç ¸®½ºÆ®¿¡¼­ Á¦°Å
+    // ì ì´ ì£½ì„ ë•Œ í˜¸ì¶œ - ëª¨ë“  ë¦¬ìŠ¤íŠ¸ì—ì„œ ì œê±°
     public void UnregisterEnemy(EnemyAI enemy)
     {
         allEnemies.Remove(enemy);
         enemiesInRange.Remove(enemy);
-        Debug.Log($"Àû Á¦°Å: ³²Àº Àû {allEnemies.Count}¸¶¸®");
+        DebugManager.LogTargetingSystem($"ì  ì œê±°: ë‚¨ì€ ì  {allEnemies.Count}ë§ˆë¦¬");
     }
 
-    // ÀûÀÌ ÇÃ·¹ÀÌ¾î °ø°İ ¹üÀ§¿¡ µé¾î¿ÔÀ» ¶§ È£Ãâ
-    // ÀÌ·¸°Ô ÇÏ¸é ¸Ö¸® ÀÖ´Â 99¸¶¸®´Â ½Å°æ ¾È ½áµµ µÊ!
+    // ì ì´ í”Œë ˆì´ì–´ ê³µê²© ë²”ìœ„ì— ë“¤ì–´ì™”ì„ ë•Œ í˜¸ì¶œ
+    // ì´ë ‡ê²Œ í•˜ë©´ ë©€ë¦¬ ìˆëŠ” 99ë§ˆë¦¬ëŠ” ì‹ ê²½ ì•ˆ ì¨ë„ ë¨!
     public void AddToAttackRange(EnemyAI enemy)
     {
         if (!enemiesInRange.Contains(enemy))
         {
             enemiesInRange.Add(enemy);
-            Debug.Log($"°ø°İ ¹üÀ§ ÁøÀÔ: {enemy.name}");
+            DebugManager.LogTargetingSystem($"ê³µê²© ë²”ìœ„ ì§„ì…: {enemy.name}");
         }
     }
 
-    // ÀûÀÌ ÇÃ·¹ÀÌ¾î °ø°İ ¹üÀ§¿¡¼­ ³ª°¬À» ¶§ È£Ãâ
+    // ì ì´ í”Œë ˆì´ì–´ ê³µê²© ë²”ìœ„ì—ì„œ ë‚˜ê°”ì„ ë•Œ í˜¸ì¶œ
     public void RemoveFromAttackRange(EnemyAI enemy)
     {
         enemiesInRange.Remove(enemy);
-        Debug.Log($"°ø°İ ¹üÀ§ ÀÌÅ»: {enemy.name}");
+        DebugManager.LogTargetingSystem($"ê³µê²© ë²”ìœ„ ì´íƒˆ: {enemy.name}");
     }
 
-    // ÇÃ·¹ÀÌ¾î°¡ È£Ãâ - °ø°İ ¹üÀ§ ³» °¡Àå °¡±î¿î Àû ¹İÈ¯
-    // ÇÙ½É: ¹üÀ§ ¾È¿¡ ÀÖ´Â ¸î ¸¶¸®¸¸ °Ë»ç! (Find ¾È ¾¸)
+    // í”Œë ˆì´ì–´ê°€ í˜¸ì¶œ - ê³µê²© ë²”ìœ„ ë‚´ ê°€ì¥ ê°€ê¹Œìš´ ì  ë°˜í™˜
+    // í•µì‹¬: ë²”ìœ„ ì•ˆì— ìˆëŠ” ëª‡ ë§ˆë¦¬ë§Œ ê²€ì‚¬! (Find ì•ˆ ì”€)
     public EnemyAI GetNearestEnemy(Vector3 playerPos)
     {
-        // ¹üÀ§ ³» ÀûÀÌ ¾øÀ¸¸é null ¹İÈ¯
+        // ë²”ìœ„ ë‚´ ì ì´ ì—†ìœ¼ë©´ null ë°˜í™˜
         if (enemiesInRange.Count == 0) return null;
 
         EnemyAI nearest = null;
-        float shortestSqrDist = float.MaxValue; // °¡Àå °¡±î¿î °Å¸® ÀúÀå
+        float shortestSqrDist = float.MaxValue; // ê°€ì¥ ê°€ê¹Œìš´ ê±°ë¦¬ ì €ì¥
 
-        // ¹üÀ§ ³» Àûµé¸¸ ¹İº¹ (100¸¶¸®°¡ ¾Æ´Ï¶ó 5¸¶¸®¸¸!)
+        // ë²”ìœ„ ë‚´ ì ë“¤ë§Œ ë°˜ë³µ (100ë§ˆë¦¬ê°€ ì•„ë‹ˆë¼ 5ë§ˆë¦¬ë§Œ!)
         for (int i = 0; i < enemiesInRange.Count; i++)
         {
-            // È¤½Ã ÆÄ±«µÈ ÀûÀÌ ÀÖÀ¸¸é °Ç³Ê¶Ù±â
+            // í˜¹ì‹œ íŒŒê´´ëœ ì ì´ ìˆìœ¼ë©´ ê±´ë„ˆë›°ê¸°
             if (enemiesInRange[i] == null) continue;
 
-            // °Å¸® Á¦°öÀ¸·Î °è»ê (Sqrt ¾È ½á¼­ ºü¸§)
+            // ê±°ë¦¬ ì œê³±ìœ¼ë¡œ ê³„ì‚° (Sqrt ì•ˆ ì¨ì„œ ë¹ ë¦„)
             float sqrDist = (enemiesInRange[i].transform.position - playerPos).sqrMagnitude;
 
-            // ´õ °¡±î¿î Àû ¹ß°ß½Ã ¾÷µ¥ÀÌÆ®
+            // ë” ê°€ê¹Œìš´ ì  ë°œê²¬ì‹œ ì—…ë°ì´íŠ¸
             if (sqrDist < shortestSqrDist)
             {
                 shortestSqrDist = sqrDist;
@@ -83,13 +83,13 @@ public class EnemyManager : MonoBehaviour
         return nearest;
     }
 
-    // µğ¹ö±×¿ë - ÇöÀç »óÅÂ Ãâ·Â
+    // ë””ë²„ê·¸ìš© - í˜„ì¬ ìƒíƒœ ì¶œë ¥
     public void PrintStatus()
     {
-        Debug.Log($"ÀüÃ¼ Àû: {allEnemies.Count}¸¶¸®, °ø°İ ¹üÀ§ ³»: {enemiesInRange.Count}¸¶¸®");
+        DebugManager.LogTargetingSystem($"ì „ì²´ ì : {allEnemies.Count}ë§ˆë¦¬, ê³µê²© ë²”ìœ„ ë‚´: {enemiesInRange.Count}ë§ˆë¦¬");
     }
 
-    // EnemyManager.cs ³»ºÎ ¾îµò°¡¿¡ À¯Æ¿¸®Æ¼ Ãß°¡(¼±ÅÃ)
+    // EnemyManager.cs ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ò°¡¿ï¿½ ï¿½ï¿½Æ¿ï¿½ï¿½Æ¼ ï¿½ß°ï¿½(ï¿½ï¿½ï¿½ï¿½)
     public int GetAllEnemiesCountSafe()
     {
         int c = 0;

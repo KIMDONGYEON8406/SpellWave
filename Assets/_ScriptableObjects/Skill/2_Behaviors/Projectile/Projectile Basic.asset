@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb866e0185ea01e4eb00179f005a8cbd, type: 3}
+  m_Name: Projectile Basic
+  m_EditorClassIdentifier: 
+  behaviorName: "\uBAA8\uB4E0 \uBC1C\uC0AC\uCCB4\uC758 \uAE30\uBCF8 \uBCA0\uC774\uC2A4"
+  description: "- projectileSpeed: \uBC1C\uC0AC\uCCB4 \uC18D\uB3C4\n- isHoming: \uC720\uB3C4
+    \uC5EC\uBD80\n- pierceCount: \uAD00\uD1B5 \uD69F\uC218"
+  projectileSpeed: 10
+  isHoming: 1
+  pierceCount: 0
+  defaultSpeed: 10
+  defaultLifetime: 3

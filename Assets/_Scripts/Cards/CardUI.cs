@@ -1,11 +1,11 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
 
 public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("Ä«µå UI ¿ä¼Ò")]
+    [Header("ì¹´ë“œ UI ìš”ì†Œ")]
     public Image cardBackground;
     public Image cardIcon;
     public Text cardTitle;
@@ -13,7 +13,14 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public Button cardButton;
     public Image rarityBorder;
 
-    [Header("È£¹ö È¿°ú")]
+    [Header("ìŠ¤í‚¬ ì¹´ë“œ ì „ìš©")]
+    public GameObject skillStatsPanel;
+    public Text skillTypeText;
+    public Text damageText;
+    public Text cooldownText;
+    public Text rangeText;
+
+    [Header("í˜¸ë²„ íš¨ê³¼")]
     public Vector3 hoverScale = new Vector3(1.1f, 1.1f, 1f);
     public float hoverSpeed = 5f;
 
@@ -26,7 +33,6 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         originalScale = transform.localScale;
 
-        // ¹öÆ° ÀÌº¥Æ® µî·Ï
         if (cardButton != null)
         {
             cardButton.onClick.AddListener(OnCardClicked);
@@ -35,13 +41,11 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     void Update()
     {
-        // È£¹ö È¿°ú ¾Ö´Ï¸ŞÀÌ¼Ç
         Vector3 targetScale = isHovered ? hoverScale : originalScale;
         transform.localScale = Vector3.Lerp(transform.localScale, targetScale,
                                            hoverSpeed * Time.unscaledDeltaTime);
     }
 
-    // Ä«µå µ¥ÀÌÅÍ·Î UI ÃÊ±âÈ­
     public void Initialize(CardData data, int index)
     {
         cardData = data;
@@ -51,62 +55,143 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         SetupCardContent();
     }
 
-    // Ä«µå ºñÁÖ¾ó ¼³Á¤
     private void SetupCardVisuals()
     {
-        // ¹è°æ ÀÌ¹ÌÁö
+        // ë°°ê²½ ì´ë¯¸ì§€
         if (cardBackground != null && cardData.cardBackground != null)
         {
             cardBackground.sprite = cardData.cardBackground;
         }
 
-        // µî±Ş Å×µÎ¸® »ö»ó
+        // ì•„ì´ì½˜
+        if (cardIcon != null && cardData.cardIcon != null)
+        {
+            cardIcon.sprite = cardData.cardIcon;
+        }
+
+        // ë“±ê¸‰ í…Œë‘ë¦¬ ìƒ‰ìƒ
         if (rarityBorder != null)
         {
             rarityBorder.color = cardData.rarityColor;
         }
     }
 
-    // Ä«µå ³»¿ë ¼³Á¤
     private void SetupCardContent()
     {
-        // ¾ÆÀÌÄÜ
-        if (cardIcon != null && cardData.cardIcon != null)
-        {
-            cardIcon.sprite = cardData.cardIcon;
-        }
-
-        // Á¦¸ñ
+        // ì œëª©
         if (cardTitle != null)
         {
             cardTitle.text = cardData.cardName;
         }
 
-        // ¼³¸í
+        // ì„¤ëª… - ìƒˆ ì‹œìŠ¤í…œ ì‚¬ìš©
         if (cardDescription != null)
         {
             cardDescription.text = GetFormattedDescription();
         }
+
+        // ìŠ¤í‚¬ ì¹´ë“œì¸ ê²½ìš° ìŠ¤í‚¬ ì •ë³´ í‘œì‹œ
+        ShowSkillInfoIfNeeded();
     }
 
-    // Ä«µå ¼³¸í Æ÷¸ËÆÃ (½ºÅÈ ¼öÄ¡ Æ÷ÇÔ)
     private string GetFormattedDescription()
     {
-        string description = cardData.description;
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendLine(cardData.description);
 
-        if (cardData.cardType == CardType.StatCard)
+        // ì¹´ë“œ íš¨ê³¼ í‘œì‹œ
+        if (cardData.cardEffects != null && cardData.cardEffects.Count > 0)
         {
-            description += $"\n+{cardData.increasePercentage}% Áõ°¡";
+            sb.AppendLine();
+            foreach (var entry in cardData.cardEffects)
+            {
+                if (entry.effect != null)
+                {
+                    sb.AppendLine($"<b>{entry.effect.GetPreviewText(entry.value)}</b>");
+                }
+            }
         }
 
-        return description;
+        // ë“±ê¸‰ í‘œì‹œ
+        sb.Append(GetRarityText());
+
+        return sb.ToString();
     }
 
-    // ¸¶¿ì½º È£¹ö ÀÌº¥Æ®
+    private void ShowSkillInfoIfNeeded()
+    {
+        // ìŠ¤í‚¬ íšë“ íš¨ê³¼ê°€ ìˆëŠ”ì§€ í™•ì¸
+        SkillData targetSkill = null;
+
+        foreach (var entry in cardData.cardEffects)
+        {
+            if (entry.effect is SkillAcquireEffect skillEffect)
+            {
+                targetSkill = skillEffect.skillToAdd;
+                break;
+            }
+        }
+
+        if (targetSkill != null && skillStatsPanel != null)
+        {
+            skillStatsPanel.SetActive(true);
+
+            // ìŠ¤í‚¬ íƒ€ì… í‘œì‹œ
+            if (skillTypeText != null)
+            {
+                skillTypeText.text = $"íƒ€ì…: {targetSkill.GetTypeDescription()}";
+            }
+
+            // ìŠ¤í‚¬ ìŠ¤íƒ¯ í‘œì‹œ
+            if (damageText != null)
+                damageText.text = $"DMG: {targetSkill.baseDamage}";
+
+            if (cooldownText != null)
+                cooldownText.text = $"CD: {targetSkill.baseCooldown}s";
+
+            if (rangeText != null)
+                rangeText.text = $"RNG: {targetSkill.baseRange}m";
+
+            // ì´ë¯¸ ë³´ìœ í•œ ìŠ¤í‚¬ì¸ì§€ ì²´í¬
+            var skillManager = GameManager.Instance?.player?.GetComponent<SkillManager>();
+            if (skillManager != null)
+            {
+                var existingSkill = skillManager.GetSkill(targetSkill.baseSkillType);
+                if (existingSkill != null)
+                {
+                    if (cardDescription != null)
+                    {
+                        cardDescription.text += $"\n\n<color=yellow>ì´ë¯¸ ë³´ìœ  ì¤‘ (Lv.{existingSkill.currentLevel})</color>";
+                    }
+                }
+            }
+        }
+        else if (skillStatsPanel != null)
+        {
+            skillStatsPanel.SetActive(false);
+        }
+    }
+
+    private string GetRarityText()
+    {
+        switch (cardData.rarity)
+        {
+            case CardRarity.Common:
+                return "\n<color=white>[ì¼ë°˜]</color>";
+            case CardRarity.Rare:
+                return "\n<color=#3366ff>[ë ˆì–´]</color>";
+            case CardRarity.Epic:
+                return "\n<color=#9933ff>[ì—í”½]</color>";
+            case CardRarity.Legendary:
+                return "\n<color=#ff9900>[ì „ì„¤]</color>";
+            default:
+                return "";
+        }
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         isHovered = true;
-        Debug.Log($"Ä«µå È£¹ö: {cardData.cardName}");
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -114,30 +199,26 @@ public class CardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         isHovered = false;
     }
 
-    // Ä«µå Å¬¸¯ ÀÌº¥Æ®
     private void OnCardClicked()
     {
-        Debug.Log($"Ä«µå ¼±ÅÃ: {cardData.cardName}");
-
-        // CardManager¿¡°Ô ¼±ÅÃ ¾Ë¸²
+        DebugManager.LogCard($"ì¹´ë“œ ì„ íƒ: {cardData.cardName}");
         CardManager.Instance.SelectCard(cardData);
-
-        // ¼±ÅÃ È¿°ú (¼±ÅÃ»çÇ×)
         StartCoroutine(SelectionEffect());
     }
 
-    // ¼±ÅÃ È¿°ú ¾Ö´Ï¸ŞÀÌ¼Ç
     private IEnumerator SelectionEffect()
     {
-        // Ä«µå°¡ ºû³ª´Â È¿°ú µî
         float duration = 0.3f;
         float elapsedTime = 0f;
 
         while (elapsedTime < duration)
         {
             elapsedTime += Time.unscaledDeltaTime;
-            // ¼±ÅÃ È¿°ú ¾Ö´Ï¸ŞÀÌ¼Ç (¿¹: »ö»ó º¯°æ, ½ºÄÉÀÏ º¯°æ µî)
+            float scale = 1f + Mathf.Sin(elapsedTime * 10f) * 0.1f;
+            transform.localScale = originalScale * scale;
             yield return null;
         }
+
+        transform.localScale = originalScale;
     }
 }
