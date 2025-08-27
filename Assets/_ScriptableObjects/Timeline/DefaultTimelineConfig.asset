@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0ec1b055be518f468403b3b5f53f319, type: 3}
+  m_Name: DefaultTimelineConfig
+  m_EditorClassIdentifier: 
+  totalDuration: 600
+  baseExpToLevelUp: 100
+  expIncreasePerLevel: 1.2
+  maxLevel: 50
+  monsterBase: {fileID: 11400000, guid: 2922aabd845313e4cbb7f5685ad66f98, type: 2}
+  difficultyScaleOverTime: 1.5
+  initialEnemies: 3
+  spawnRatePerSec: 0.3
+  spawnRateIncrease: 1.3
+  spawnRadius: 15
+  minDistanceFromPlayer: 8
