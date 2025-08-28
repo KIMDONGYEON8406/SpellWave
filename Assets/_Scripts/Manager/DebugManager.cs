@@ -121,6 +121,13 @@ public class DebugManager : MonoBehaviour
             lastResetTime = Time.time;
         }
     }
+    void OnDestroy()
+    {
+        if (instance == this)
+        {
+            instance = null;
+        }
+    }
 
     void OnValidate()
     {
