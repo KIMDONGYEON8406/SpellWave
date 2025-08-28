@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 097c995529bb6714cbae2271c6aacabc, type: 3}
   m_Name: Card_AreaCooldown
   m_EditorClassIdentifier: 
-  cardName: "\uC5F0\uC1C4 \uD3ED\uBC1C"
+  cardName: "\uC601\uC5ED \uD0C0\uC785 \uCFE8\uB2E4\uC6B4"
   description: "\uC601\uC5ED \uD0C0\uC785 \uACF5\uACA9\uC18D\uB3C4 25% \uC99D\uAC00"
   cardIcon: {fileID: 0}
   cardBackground: {fileID: 0}

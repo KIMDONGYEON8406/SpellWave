@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class SkillStatModifier : MonoBehaviour
 {
@@ -75,54 +76,92 @@ public class SkillStatModifier : MonoBehaviour
     {
         if (skill == null || skill.skillData == null) return;
 
-        // 초기화
+        // 초기화 (1.0부터 시작)
         skill.damageMultiplier = 1f;
         skill.cooldownMultiplier = 1f;
         skill.rangeMultiplier = 1f;
         skill.projectileSpeedMultiplier = 1f;
         skill.durationMultiplier = 1f;
 
-        // 전체 스킬 보너스 적용
-        ApplyBonus(skill, StatType.AllSkillDamage, ref skill.damageMultiplier, false);
-        ApplyBonus(skill, StatType.AllSkillCooldown, ref skill.cooldownMultiplier, true);
-        ApplyBonus(skill, StatType.AllSkillRange, ref skill.rangeMultiplier, false);
-
-        // 발사체 타입 보너스
-        if (skill.skillData.HasTag(SkillTag.Projectile))
+        // 모든 글로벌 스탯에 대해 체크
+        foreach (var statBoost in globalStatBoosts)
         {
-            ApplyBonus(skill, StatType.ProjectileDamage, ref skill.damageMultiplier, false);
-            ApplyBonus(skill, StatType.ProjectileCooldown, ref skill.cooldownMultiplier, true);
-            ApplyBonus(skill, StatType.ProjectileSpeed, ref skill.projectileSpeedMultiplier, false);
-        }
+            StatType statType = statBoost.Key;
+            float bonusValue = statBoost.Value;
 
-        // 영역 타입 보너스
-        if (skill.skillData.HasTag(SkillTag.Area) || skill.skillData.baseSkillType == "Aura")
-        {
-            ApplyBonus(skill, StatType.AreaDamage, ref skill.damageMultiplier, false);
-            ApplyBonus(skill, StatType.AreaCooldown, ref skill.cooldownMultiplier, true);
-            ApplyBonus(skill, StatType.AreaRange, ref skill.rangeMultiplier, false);
-        }
-
-        // DOT 타입 보너스
-        if (skill.skillData.HasTag(SkillTag.DOT))
-        {
-            ApplyBonus(skill, StatType.DOTDamage, ref skill.damageMultiplier, false);
-            ApplyBonus(skill, StatType.DOTDuration, ref skill.durationMultiplier, false);
+            // 이 스킬에 적용되어야 하는 스탯인지 확인
+            if (ShouldApplyToSkill(skill, statType))
+            {
+                ApplyStatToSkill(skill, statType, bonusValue);
+            }
         }
 
         DebugManager.LogSkill($"{skill.skillData.baseSkillType} 최종 배율 - DMG:{skill.damageMultiplier:F2} CD:{skill.cooldownMultiplier:F2} RNG:{skill.rangeMultiplier:F2}");
     }
 
-    private void ApplyBonus(SkillInstance skill, StatType statType, ref float multiplier, bool isReduction)
+    // 스킬이 특정 StatType의 대상인지 확인 (다중 주타입 지원)
+    private bool ShouldApplyToSkill(SkillInstance skill, StatType statType)
     {
-        if (globalStatBoosts.ContainsKey(statType))
-        {
-            float bonus = globalStatBoosts[statType] / 100f;
+        // AllSkill 계열은 모든 스킬에 적용
+        if (statType.ToString().Contains("AllSkill"))
+            return true;
 
-            if (isReduction)
-                multiplier *= (1f - bonus);  // 쿨타임 감소
-            else
-                multiplier += bonus;  // 증가
+        // StatType에 따른 주타입 매칭
+        if (statType.ToString().Contains("Projectile"))
+        {
+            return skill.skillData.HasPrimaryType(PrimarySkillType.Projectile);
+        }
+
+        if (statType.ToString().Contains("Area"))
+        {
+            return skill.skillData.HasPrimaryType(PrimarySkillType.Area);
+        }
+
+        if (statType.ToString().Contains("DOT"))
+        {
+            return skill.skillData.HasPrimaryType(PrimarySkillType.DOT);
+        }
+
+        return false;
+    }
+
+    // 개별 스탯을 스킬에 적용
+    private void ApplyStatToSkill(SkillInstance skill, StatType statType, float bonusValue)
+    {
+        float bonus = bonusValue / 100f;
+
+        switch (statType)
+        {
+            // 데미지 관련
+            case StatType.AllSkillDamage:
+            case StatType.ProjectileDamage:
+            case StatType.AreaDamage:
+            case StatType.DOTDamage:
+                skill.damageMultiplier *= (1f + bonus);
+                break;
+
+            // 쿨타임 관련
+            case StatType.AllSkillCooldown:
+            case StatType.ProjectileCooldown:
+            case StatType.AreaCooldown:
+                skill.cooldownMultiplier *= (1f - bonus);
+                break;
+
+            // 범위 관련
+            case StatType.AllSkillRange:
+            case StatType.AreaRange:
+                skill.rangeMultiplier *= (1f + bonus);
+                break;
+
+            // 속도 관련
+            case StatType.ProjectileSpeed:
+                skill.projectileSpeedMultiplier *= (1f + bonus);
+                break;
+
+            // 지속시간 관련
+            case StatType.DOTDuration:
+                skill.durationMultiplier *= (1f + bonus);
+                break;
         }
     }
 

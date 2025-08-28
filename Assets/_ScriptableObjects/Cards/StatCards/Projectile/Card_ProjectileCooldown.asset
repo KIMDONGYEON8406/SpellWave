@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 097c995529bb6714cbae2271c6aacabc, type: 3}
   m_Name: Card_ProjectileCooldown
   m_EditorClassIdentifier: 
-  cardName: "\uC18D\uC0AC"
+  cardName: "\uBC1C\uC0AC\uCCB4 \uD0C0\uC785 \uCFE8\uB2E4\uC6B4"
   description: "\uBC1C\uC0AC\uCCB4 \uD0C0\uC785 \uACF5\uACA9\uC18D\uB3C4 25% \uC99D\uAC00"
   cardIcon: {fileID: 0}
   cardBackground: {fileID: 0}
@@ -20,5 +20,7 @@ MonoBehaviour:
   cardEffects:
   - effect: {fileID: 11400000, guid: 857762d0d3287fc4daaced11ff56aa27, type: 2}
     value: 25
+    note: 
   rarity: 0
   rarityColor: {r: 1, g: 1, b: 1, a: 1}
+  showApplyLogs: 0

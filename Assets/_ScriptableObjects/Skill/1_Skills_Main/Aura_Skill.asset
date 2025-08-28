@@ -14,10 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillBehavior: {fileID: 11400000, guid: b7d3ef3768ba5d947bc7199699bd9d93, type: 2}
   baseSkillType: Aura
-  skillTags: 1a000000
+  primaryTypes: 0400000002000000
+  secondaryTypes: 02000000
+  baseProjectileCount: 1
+  baseAreaCount: 1
+  spreadAngle: 15
+  useCircularPattern: 0
   description: "\uC9C0\uC18D \uD53C\uD574\uB97C \uC8FC\uB294 \uC601\uC5ED\uC744 \uC0DD\uC131\uD569\uB2C8\uB2E4"
   skillIcon: {fileID: 0}
-  baseDamage: 30
+  baseDamage: 10
   baseCooldown: 2
   baseRange: 6
   maxLevel: 5

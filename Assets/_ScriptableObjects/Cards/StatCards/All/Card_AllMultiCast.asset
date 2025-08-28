@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 097c995529bb6714cbae2271c6aacabc, type: 3}
   m_Name: Card_AllMultiCast
   m_EditorClassIdentifier: 
-  cardName: "\uB2E4\uC911 \uC2DC\uC804"
+  cardName: "\uBAA8\uB4E0 \uC2A4\uD0AC \uB2E4\uC911 \uC2DC\uC804"
   description: "\uBAA8\uB4E0 \uC2A4\uD0AC\uC758 \uB2E4\uC911\uC2DC\uC804 \uD655\uB960\uC774
     \uC99D\uAC00\uD569\uB2C8\uB2E4"
   cardIcon: {fileID: 0}

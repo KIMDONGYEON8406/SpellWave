@@ -14,7 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   skillBehavior: {fileID: 11400000, guid: b14ff5e1be88ee942a31b840ed55f099, type: 2}
   baseSkillType: Arrow
-  skillTags: 46000000
+  primaryTypes: 01000000
+  secondaryTypes: 0800000002000000
+  baseProjectileCount: 3
+  baseAreaCount: 1
+  spreadAngle: 15
+  useCircularPattern: 0
   description: "\uBE60\uB978 \uC18D\uB3C4\uC758 \uB9C8\uBC95 \uD654\uC0B4\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4"
   skillIcon: {fileID: 0}
   baseDamage: 10

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 097c995529bb6714cbae2271c6aacabc, type: 3}
   m_Name: Card_ProjectileDamage
   m_EditorClassIdentifier: 
-  cardName: "\uBC1C\uC0AC\uCCB4 \uAC15\uD654"
+  cardName: "\uBC1C\uC0AC\uCCB4 \uD0C0\uC785 \uB370\uBBF8\uC9C0 \uC99D\uAC00"
   description: "\uBC1C\uC0AC\uCCB4 \uD0C0\uC785 \uACF5\uACA9\uB825 25% \uC99D\uAC00"
   cardIcon: {fileID: 0}
   cardBackground: {fileID: 0}
@@ -20,5 +20,7 @@ MonoBehaviour:
   cardEffects:
   - effect: {fileID: 11400000, guid: 0f1af26dd8e15f341ae98c84f5c5d61c, type: 2}
     value: 25
+    note: 
   rarity: 0
   rarityColor: {r: 1, g: 1, b: 1, a: 1}
+  showApplyLogs: 0
