@@ -22,6 +22,8 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: VFX_lab_HyperCasualFX_Player
   m_Shader: {fileID: -6465566751694194690, guid: aa585f401d3ec0a4881d0dd1abddbb93, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -30,6 +32,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -65,7 +68,7 @@ Material:
     m_Floats:
     - Vector1_4CDC3FF5: 1
     - Vector1_B45F52BC: -0.5
-    - _BUILTIN_QueueControl: -1
+    - _BUILTIN_QueueControl: 0
     - _BUILTIN_QueueOffset: 0
     - _Gradation_height: 0.25
     - _Gradation_thickness: 4

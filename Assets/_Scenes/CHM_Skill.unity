@@ -1832,65 +1832,65 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5651a4866fda45e46bd5b7824bb9edb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  masterSwitch: 1
-  globalLogLevel: 3
-  useColors: 1
-  showTimestamp: 0
-  maxLogsPerSecond: 10
-  enableCardSystem: 1
-  enableSkillSystem: 1
-  enableCombatSystem: 0
-  enablePoolSystem: 0
-  enableSpawnSystem: 0
-  enableUISystem: 0
-  enablePlayerSystem: 0
-  enableGameSystem: 0
-  detailSettings:
+  _masterSwitch: 1
+  _globalLogLevel: 3
+  _useColors: 1
+  _showTimestamp: 0
+  _maxLogsPerSecond: 10
+  _enableCardSystem: 1
+  _enableSkillSystem: 1
+  _enableCombatSystem: 1
+  _enablePoolSystem: 1
+  _enableSpawnSystem: 1
+  _enableUISystem: 1
+  _enablePlayerSystem: 1
+  _enableGameSystem: 1
+  _detailSettings:
     skillExecution: 1
     skillCooldown: 1
     skillDamage: 1
-    skillEffects: 1
-    skillManagement: 1
-    skillInitialization: 1
-    skillLevelUp: 1
-    skillStats: 1
-    enemyDamage: 0
-    playerDamage: 0
-    passiveEffects: 0
-    autoSkillCasting: 0
-    targetingSystem: 0
-    skillCooldowns: 0
-    multiCastSystem: 0
+    skillEffects: 0
+    skillManagement: 0
+    skillInitialization: 0
+    skillLevelUp: 0
+    skillStats: 0
+    enemyDamage: 1
+    playerDamage: 1
+    passiveEffects: 1
+    autoSkillCasting: 1
+    targetingSystem: 1
+    skillCooldowns: 1
+    multiCastSystem: 1
     cardSelection: 1
     cardEffectApply: 1
     cardDisplay: 1
     cardInventory: 1
     cardReward: 1
-    playerMovement: 0
-    playerInput: 0
-    playerStats: 0
-    playerHealth: 0
-    playerExperience: 0
-    playerComponents: 0
-    gameStateChanges: 0
-    experienceSystem: 0
-    levelUpSystem: 0
-    timelineProgress: 0
-    debugCommands: 0
-    waveSystem: 0
-    scoreSystem: 0
-    saveLoadSystem: 0
-    poolCreation: 0
-    poolExpansion: 0
-    poolReturn: 0
-    poolStatus: 0
-    enemySpawn: 0
-    enemyDeath: 0
-    enemyBehavior: 0
-    enemyTargeting: 0
-    spawnRate: 0
-    spawnPosition: 0
-    spawnWave: 0
+    playerMovement: 1
+    playerInput: 1
+    playerStats: 1
+    playerHealth: 1
+    playerExperience: 1
+    playerComponents: 1
+    gameStateChanges: 1
+    experienceSystem: 1
+    levelUpSystem: 1
+    timelineProgress: 1
+    debugCommands: 1
+    waveSystem: 1
+    scoreSystem: 1
+    saveLoadSystem: 1
+    poolCreation: 1
+    poolExpansion: 1
+    poolReturn: 1
+    poolStatus: 1
+    enemySpawn: 1
+    enemyDeath: 1
+    enemyBehavior: 1
+    enemyTargeting: 1
+    spawnRate: 1
+    spawnPosition: 1
+    spawnWave: 1
 --- !u!4 &1331638263
 Transform:
   m_ObjectHideFlags: 0
