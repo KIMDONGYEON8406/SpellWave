@@ -312,8 +312,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 916792065}
-        m_TargetAssemblyTypeName: PlayButton, Assembly-CSharp
+      - m_Target: {fileID: 916792067}
+        m_TargetAssemblyTypeName: Project.SceneManager, Assembly-CSharp
         m_MethodName: LoadPlayScene
         m_Mode: 1
         m_Arguments:
@@ -666,7 +666,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 916792066}
-  - component: {fileID: 916792065}
+  - component: {fileID: 916792067}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -674,18 +674,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &916792065
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 916792064}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2daa0cc0bec8174db5803be6df6b3f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &916792066
 Transform:
   m_ObjectHideFlags: 0
@@ -701,6 +689,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &916792067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 916792064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 09dd1f5761cbb9b4ba66986a6ec71498, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lobbySceneName: MainMenu
+  timeLimitSec: 480
+  useGameManagerEvents: 1
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
