@@ -44,8 +44,6 @@ public class StaffManager : MonoBehaviour
         }
     }
 
-    // 지팡이 해금
-
     public void UnlockStaff(StaffData staff)
     {
         if (!unlockedStaffs.Contains(staff))
@@ -61,7 +59,6 @@ public class StaffManager : MonoBehaviour
         }
     }
 
-    // 지팡이 장착
     public void EquipStaff(StaffData newStaff)
     {
         if (newStaff == null || !unlockedStaffs.Contains(newStaff))
@@ -71,14 +68,12 @@ public class StaffManager : MonoBehaviour
         }
 
         currentStaff = newStaff;
-
-        // 스킬매니저 업데이트
         UpdateSkillManager();
 
         DebugManager.LogSystem($"지팡이 장착: {newStaff.staffName}");
+        DebugManager.LogSystem($"패시브: {newStaff.passiveName} - {newStaff.passiveDescription}");
     }
 
-    // 현재 지팡이의 장착된 스킬들을 스킬매니저에 적용
     private void UpdateSkillManager()
     {
         if (skillManager == null)
@@ -91,7 +86,6 @@ public class StaffManager : MonoBehaviour
         var inventory = GetCurrentInventory();
         if (inventory != null)
         {
-
             foreach (var skill in inventory.equippedSkills)
             {
                 if (skill != null)
@@ -107,7 +101,6 @@ public class StaffManager : MonoBehaviour
         }
     }
 
-    // 현재 지팡이 인벤토리 가져오기
     public StaffInventory GetCurrentInventory()
     {
         if (currentStaff == null) return null;
@@ -120,7 +113,6 @@ public class StaffManager : MonoBehaviour
         return null;
     }
 
-    // 현재 지팡이에 스킬 추가
     public bool AddSkillToCurrentStaff(SkillData skill)
     {
         var inventory = GetCurrentInventory();
@@ -131,7 +123,6 @@ public class StaffManager : MonoBehaviour
         return false;
     }
 
-    // 스킬 슬롯 변경
     public bool UpdateEquippedSkills(List<SkillData> newEquippedSkills)
     {
         var inventory = GetCurrentInventory();
@@ -146,4 +137,14 @@ public class StaffManager : MonoBehaviour
         return false;
     }
 
+    // 망토 대체 메서드들
+    public ElementType GetCurrentElement()
+    {
+        return currentStaff != null ? currentStaff.GetCurrentElement() : ElementType.Energy;
+    }
+
+    public PassiveEffect GetCurrentPassive()
+    {
+        return currentStaff != null ? currentStaff.GetPassiveEffect() : new PassiveEffect();
+    }
 }

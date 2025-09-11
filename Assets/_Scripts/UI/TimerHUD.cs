@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using TMPro;
 
 public class TimerHUD : MonoBehaviour
@@ -9,22 +9,22 @@ public class TimerHUD : MonoBehaviour
 
     void Start()
     {
-        gm = GameManager.Instance; // ½Ì±ÛÅæ
+        gm = GameManager.Instance; // ì‹±ê¸€í†¤
     }
 
     void Update()
     {
         if (textTimer == null) return;
 
-        // GameManager°¡ ÀÖÀ¸¸é ½ºÅ×ÀÌÁö ½Ã°£ Æ÷¸Ë ±×´ë·Î »ç¿ë
+        // GameManagerê°€ ìˆìœ¼ë©´ ìŠ¤í…Œì´ì§€ ì‹œê°„ í¬ë§· ê·¸ëŒ€ë¡œ ì‚¬ìš©
         if (gm != null)
         {
-            // GameManager.GetFormattedStageTime() : mm:ss ¹İÈ¯
+            // GameManager.GetFormattedStageTime() : mm:ss ë°˜í™˜
             textTimer.text = gm.GetFormattedStageTime();
         }
         else
         {
-            // È¤½Ã GMÀÌ ¾øÀ» ¶§ ´ëºñ(¿¹ºñ): ¾À ·Îµå ÈÄ °æ°ú ½Ã°£À¸·Î Ç¥½Ã
+            // í˜¹ì‹œ GMì´ ì—†ì„ ë•Œ ëŒ€ë¹„(ì˜ˆë¹„): ì”¬ ë¡œë“œ í›„ ê²½ê³¼ ì‹œê°„ìœ¼ë¡œ í‘œì‹œ
             float t = Time.timeSinceLevelLoad;
             int m = Mathf.FloorToInt(t / 60f);
             int s = Mathf.FloorToInt(t % 60f);

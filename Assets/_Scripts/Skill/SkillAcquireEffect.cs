@@ -126,8 +126,8 @@ public class SkillAcquireEffect : CardEffect
         if (skillToAdd == null)
             return "스킬 획득";
 
-        var element = CloakManager.Instance?.GetCurrentElement() ?? ElementType.Energy;
-        string skillName = skillToAdd.GetDisplayName(element);
+        var element = StaffManager.Instance?.GetCurrentElement() ?? ElementType.Energy;
+        string skillName = skillToAdd.GetDisplayName();
 
         if (value > 1)
         {

@@ -179,8 +179,8 @@ public class SkillManager : MonoBehaviour
             return;
         }
 
-        var element = CloakManager.Instance?.GetCurrentElement() ?? ElementType.Energy;
-        var passive = CloakManager.Instance?.GetCurrentPassive() ?? new PassiveEffect();
+        var element = StaffManager.Instance?.GetCurrentElement() ?? ElementType.Energy;
+        var passive = StaffManager.Instance?.GetCurrentPassive() ?? new PassiveEffect();
 
         if (auraSkill.skillData.skillBehavior != null)
         {

@@ -2107,53 +2107,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1512737918}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1612836319
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1612836321}
-  - component: {fileID: 1612836320}
-  m_Layer: 0
-  m_Name: CloakManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1612836320
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1612836319}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 55ea79e669bb4bf439b72fc2acfed143, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentCloak: {fileID: 11400000, guid: 0d0f21a0e19f1d24fadc55a7ca66d7a4, type: 2}
-  unlockedCloaks:
-  - {fileID: 11400000, guid: 0d0f21a0e19f1d24fadc55a7ca66d7a4, type: 2}
---- !u!4 &1612836321
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1612836319}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1641985449
 GameObject:
   m_ObjectHideFlags: 0
@@ -3048,7 +3001,6 @@ SceneRoots:
   - {fileID: 677839856}
   - {fileID: 957946060}
   - {fileID: 653178480}
-  - {fileID: 1612836321}
   - {fileID: 104278415}
   - {fileID: 351331385}
   - {fileID: 1550034311}

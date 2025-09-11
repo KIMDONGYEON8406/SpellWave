@@ -18,15 +18,3 @@ public class PassiveEffect
     public bool stackable = false;       // 중첩 가능 여부
     public int maxStacks = 1;           // 최대 중첩 수
 }
-
-public enum PassiveType
-{
-    None,       // 없음
-    Burn,       // 화상 (도트)
-    Slow,       // 둔화
-    Freeze,     // 빙결
-    Chain,      // 연쇄
-    Poison,     // 중독
-    LifeSteal,  // 흡혈
-    Critical    // 치명타
-}

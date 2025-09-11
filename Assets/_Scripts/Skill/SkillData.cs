@@ -11,6 +11,9 @@ public class SkillData : ScriptableObject
     [Header("기본 정보")]
     public string baseSkillType = "Bolt";
 
+    [Header("원소 속성")]
+    public ElementType element = ElementType.Energy;
+
     [Header("주 타입 (여러 개 선택 가능)")]
     public List<PrimarySkillType> primaryTypes = new List<PrimarySkillType>();
 
@@ -43,7 +46,16 @@ public class SkillData : ScriptableObject
     [Header("스킬 프리팹")]
     public GameObject skillPrefab;
     public GameObject hitEffectPrefab;
-    public GameObject castEffectPrefab;
+
+    [Header("추가 이펙트 (선택사항)")]
+    public GameObject muzzleEffectPrefab;   // 머즐 이펙트
+    public GameObject castEffectPrefab;      // 시전 이펙트
+    public float muzzleEffectDuration = 1f;
+    public float hitEffectDuration = 2f;
+
+    [Header("진화 설정")]
+    public SkillData evolvedVersion;        // 6단계 진화 스킬
+    public ElementType fusionElement = ElementType.Energy;  // 융합 원소
 
     [Header("스킬 특성")]
     public bool canLevelUp = true;
@@ -93,7 +105,7 @@ public class SkillData : ScriptableObject
         return tags.Any(tag => HasTag(tag));
     }
 
-    public string GetDisplayName(ElementType element)
+    public string GetDisplayName()
     {
         return SkillNameGenerator.GetSkillName(baseSkillType, element);
     }
@@ -140,7 +152,7 @@ public class SkillData : ScriptableObject
         return string.Join(", ", types);
     }
 
-    public string GetCardDescription(ElementType element)
+    public string GetCardDescription()
     {
         string baseDesc = description;
         string typeInfo = GetTypeDescription();
@@ -166,38 +178,4 @@ public class SkillData : ScriptableObject
     {
         return baseRange + (rangeIncreasePerLevel * (level - 1));
     }
-}
-
-// 새로운 주 타입 열거형
-public enum PrimarySkillType
-{
-    Projectile = 1,  // 발사체
-    Area = 2,        // 영역
-    DOT = 4          // 지속 (비트 플래그로 나중에 확장 가능)
-}
-
-// 새로운 부 타입 열거형
-public enum SecondarySkillType
-{
-    SingleTarget = 1,   // 단일 대상
-    MultiTarget = 2,    // 다중 대상
-    Homing = 4,         // 유도
-    Pierce = 8,         // 관통
-    Instant = 16,       // 즉시
-    Chain = 32,         // 연쇄 (나중 추가)
-    Bounce = 64         // 튕김 (나중 추가)
-}
-
-// 기존 SkillTag는 호환성을 위해 유지
-[System.Flags]
-public enum SkillTag
-{
-    SingleTarget = 1 << 0,
-    MultiTarget = 1 << 1,
-    Projectile = 1 << 2,
-    Area = 1 << 3,
-    DOT = 1 << 4,
-    Homing = 1 << 5,
-    Pierce = 1 << 6,
-    Instant = 1 << 8,
 }

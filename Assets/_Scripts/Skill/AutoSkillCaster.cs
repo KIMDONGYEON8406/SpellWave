@@ -1,46 +1,4 @@
-﻿// 먼저 DebugManager.cs DetailedSettings에 추가할 부분:
-/*
-[Header("전투 시스템 세부")]
-public bool enemyDamage = true;
-public bool playerDamage = true;
-public bool passiveEffects = true;
-public bool autoSkillCasting = true;    // 새로 추가
-public bool targetingSystem = true;     // 새로 추가
-public bool skillCooldowns = true;      // 새로 추가
-public bool multiCastSystem = true;     // 새로 추가
-*/
-
-// DebugManager.cs 간편 메서드에 추가:
-/*
-public static void LogAutoSkillCasting(string message)
-{
-    if (Instance?.detailSettings.autoSkillCasting == true)
-        LogCombat($"[autoSkillCasting] {message}");
-}
-
-public static void LogTargetingSystem(string message)
-{
-    if (Instance?.detailSettings.targetingSystem == true)
-        LogCombat($"[targetingSystem] {message}");
-}
-
-public static void LogSkillCooldowns(string message)
-{
-    if (Instance?.detailSettings.skillCooldowns == true)
-        LogCombat($"[skillCooldowns] {message}");
-}
-
-public static void LogMultiCastSystem(string message)
-{
-    if (Instance?.detailSettings.multiCastSystem == true)
-        LogCombat($"[multiCastSystem] {message}");
-}
-*/
-
-// =======================================================================================
-// AutoSkillCaster.cs 수정 버전
-// =======================================================================================
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 
@@ -61,7 +19,7 @@ public class AutoSkillCaster : MonoBehaviour
     private int frameCounter = 0;
 
     private SkillManager skillManager;
-    private CloakManager cloakManager;
+    private StaffManager staffManager;  // CloakManager 대체
 
     private class SkillSlot
     {
@@ -80,7 +38,7 @@ public class AutoSkillCaster : MonoBehaviour
     void Start()
     {
         skillManager = GetComponent<SkillManager>();
-        cloakManager = CloakManager.Instance;
+        staffManager = StaffManager.Instance;  // 변경됨
 
         if (skillManager == null)
         {
@@ -240,8 +198,10 @@ public class AutoSkillCaster : MonoBehaviour
     void CastSkill(SkillSlot slot)
     {
         var skill = slot.skill;
-        var element = cloakManager?.GetCurrentElement() ?? ElementType.Energy;
-        var passive = cloakManager?.GetCurrentPassive() ?? new PassiveEffect();
+
+        // StaffManager에서 원소와 패시브 가져오기
+        var element = staffManager?.GetCurrentElement() ?? ElementType.Energy;
+        var passive = staffManager?.GetCurrentPassive() ?? new PassiveEffect();
 
         // 오라 중복 생성 방지
         if (skill.skillData.baseSkillType == "Aura")
@@ -257,14 +217,6 @@ public class AutoSkillCaster : MonoBehaviour
             }
         }
 
-        // 스킬별 상세 디버그 (특정 스킬만)
-        if (skill.skillData.baseSkillType == "Explosion" || skill.skillData.baseSkillType == "Missile")
-        {
-            DebugManager.LogAutoSkillCasting($"{skill.skillData.baseSkillType} 시전 준비:");
-            DebugManager.LogAutoSkillCasting($"  범위: {skill.CurrentRange:F1}m (배율: {skill.rangeMultiplier:F2}x)");
-            DebugManager.LogAutoSkillCasting($"  데미지: {skill.CurrentDamage:F1} (배율: {skill.damageMultiplier:F2}x)");
-        }
-
         if (skill.skillData.skillBehavior != null)
         {
             SkillExecutionContext context = new SkillExecutionContext
@@ -278,6 +230,13 @@ public class AutoSkillCaster : MonoBehaviour
                 Passive = passive,
                 SkillPrefab = skill.skillData.skillPrefab,
                 HitEffectPrefab = skill.skillData.hitEffectPrefab,
+
+                // 새로 추가된 이펙트 필드들
+                MuzzleEffectPrefab = skill.skillData.muzzleEffectPrefab,
+                CastEffectPrefab = skill.skillData.castEffectPrefab,
+                MuzzleEffectDuration = skill.skillData.muzzleEffectDuration,
+                HitEffectDuration = skill.skillData.hitEffectDuration,
+
                 BaseProjectileCount = 1,
                 MultiCastChance = 0f,
                 IsMultiCastInstance = false
@@ -340,7 +299,7 @@ public class AutoSkillCaster : MonoBehaviour
         }
     }
 
-    // 디버그 전용 메서드들
+    // 나머지 디버그 메서드들은 그대로 유지...
     [ContextMenu("디버그/타겟팅 정보")]
     void DebugPrintTargetInfo()
     {
@@ -420,22 +379,14 @@ public class AutoSkillCaster : MonoBehaviour
         DebugManager.LogSkillCooldowns($"{skillSlots.Count}개 스킬 쿨타임 리셋 완료");
     }
 
-    // 타겟 강제 설정 (디버그용)
     public void SetDebugTarget(Transform target)
     {
         currentTarget = target;
         DebugManager.LogTargetingSystem($"디버그 타겟 설정: {(target != null ? target.name : "null")}");
     }
 
-    // 현재 타겟 가져오기
     public Transform GetCurrentTarget()
     {
         return currentTarget;
     }
-
-    // 스킬 슬롯 정보 가져오기
-    //public List<SkillSlot> GetSkillSlots()
-    //{
-    //    return skillSlots;
-    //}
 }

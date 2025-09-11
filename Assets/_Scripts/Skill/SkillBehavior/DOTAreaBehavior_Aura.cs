@@ -86,8 +86,9 @@ public class DOTAreaBehavior_Aura : SkillBehavior
         var renderer = visual.GetComponent<Renderer>();
         if (renderer != null && renderer.material != null)
         {
+            // StaffManager로 변경
             Color elementColor = SkillNameGenerator.GetElementColor(
-                CloakManager.Instance?.GetCurrentElement() ?? ElementType.Energy
+                StaffManager.Instance?.GetCurrentElement() ?? ElementType.Energy
             );
             renderer.material.color = elementColor;
         }

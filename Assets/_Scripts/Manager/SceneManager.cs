@@ -1,19 +1,19 @@
-using UnityEngine;
-using UnityEngine.SceneManagement; // À¯´ÏÆ¼ ³»Àå SceneManager(¿ÏÀü ÇÑÁ¤¸í »ç¿ë)
+ï»¿using UnityEngine;
+using UnityEngine.SceneManagement; // ìœ ë‹ˆí‹° ë‚´ì¥ SceneManager(ì™„ì „ í•œì •ëª… ì‚¬ìš©)
 using System;
 
-namespace Project   // ¡Ú ³×ÀÓ½ºÆäÀÌ½º·Î ¿ì¸® Å¬·¡½º SceneManager ÀÌ¸§ Ãæµ¹ È¸ÇÇ
+namespace Project   // â˜… ë„¤ì„ìŠ¤í˜ì´ìŠ¤ë¡œ ìš°ë¦¬ í´ë˜ìŠ¤ SceneManager ì´ë¦„ ì¶©ëŒ íšŒí”¼
 {
     public class SceneManager : MonoBehaviour
     {
-        [Header("ÀüÈ¯ÇÒ ¸ŞÀÎ¸Ş´º(·Îºñ) ¾À ÀÌ¸§ (Build Settings µî·Ï ÇÊ¼ö)")]
-        public string lobbySceneName = "MainMenu"; // ½ÇÁ¦ ¾À ÀÌ¸§À¸·Î º¯°æ
+        [Header("ì „í™˜í•  ë©”ì¸ë©”ë‰´(ë¡œë¹„) ì”¬ ì´ë¦„ (Build Settings ë“±ë¡ í•„ìˆ˜)")]
+        public string lobbySceneName = "MainMenu"; // ì‹¤ì œ ì”¬ ì´ë¦„ìœ¼ë¡œ ë³€ê²½
 
-        [Header("½Ã°£ Á¦ÇÑ(ÃÊ). 8ºĞ = 480ÃÊ")]
+        [Header("ì‹œê°„ ì œí•œ(ì´ˆ). 8ë¶„ = 480ì´ˆ")]
         public float timeLimitSec = 60f;//480f;
 
-        [Header("Æ®¸®°Å ¹æ½Ä")]
-        public bool useGameManagerEvents = true;   // true: ÀÌº¥Æ® ±¸µ¶ / false: ½Ã°£ Æú¸µ
+        [Header("íŠ¸ë¦¬ê±° ë°©ì‹")]
+        public bool useGameManagerEvents = true;   // true: ì´ë²¤íŠ¸ êµ¬ë… / false: ì‹œê°„ í´ë§
 
         private bool _loading;
         private GameManager gm;
@@ -24,9 +24,9 @@ namespace Project   // ¡Ú ³×ÀÓ½ºÆäÀÌ½º·Î ¿ì¸® Å¬·¡½º SceneManager ÀÌ¸§ Ãæµ¹ È¸ÇÇ
 
             if (useGameManagerEvents)
             {
-                // ¡Ú GameManager°¡ ½ºÅ×ÀÌÁö ¿Ï·á/»óÅÂ º¯°æ ½Ã ÀÌº¥Æ®¸¦ ¹ß»ı½ÃÅ´
-                GameManager.OnStageCompleted += HandleStageCompleted;        // ¿Ï·á Áï½Ã È£Ãâ:contentReference[oaicite:1]{index=1}
-                GameManager.OnGameStateChanged += HandleStateChanged;        // Victory ÀüÈ¯ ½Ã È£Ãâ:contentReference[oaicite:2]{index=2}
+                // â˜… GameManagerê°€ ìŠ¤í…Œì´ì§€ ì™„ë£Œ/ìƒíƒœ ë³€ê²½ ì‹œ ì´ë²¤íŠ¸ë¥¼ ë°œìƒì‹œí‚´
+                GameManager.OnStageCompleted += HandleStageCompleted;        // ì™„ë£Œ ì¦‰ì‹œ í˜¸ì¶œ:contentReference[oaicite:1]{index=1}
+                GameManager.OnGameStateChanged += HandleStateChanged;        // Victory ì „í™˜ ì‹œ í˜¸ì¶œ:contentReference[oaicite:2]{index=2}
             }
         }
 
@@ -41,7 +41,7 @@ namespace Project   // ¡Ú ³×ÀÓ½ºÆäÀÌ½º·Î ¿ì¸® Å¬·¡½º SceneManager ÀÌ¸§ Ãæµ¹ È¸ÇÇ
 
         void Update()
         {
-            // Æú¸µ ¸ğµåÀÏ ¶§¸¸ ½Ã°£ Ã¼Å©
+            // í´ë§ ëª¨ë“œì¼ ë•Œë§Œ ì‹œê°„ ì²´í¬
             if (_loading || useGameManagerEvents) return;
 
             float t = (gm != null) ? gm.currentTime : Time.timeSinceLevelLoad;
@@ -51,13 +51,13 @@ namespace Project   // ¡Ú ³×ÀÓ½ºÆäÀÌ½º·Î ¿ì¸® Å¬·¡½º SceneManager ÀÌ¸§ Ãæµ¹ È¸ÇÇ
 
         private void HandleStageCompleted()
         {
-            // GameManager.UpdateTimeline() -> CompleteStage() Èå¸§¿¡¼­ È£ÃâµÊ:contentReference[oaicite:3]{index=3}
+            // GameManager.UpdateTimeline() -> CompleteStage() íë¦„ì—ì„œ í˜¸ì¶œë¨:contentReference[oaicite:3]{index=3}
             LoadLobby();
         }
 
         private void HandleStateChanged(GameState state)
         {
-            if (state == GameState.Victory)        // CompleteStage() ³»ºÎ¿¡¼­ Victory·Î ¹Ù²Ş:contentReference[oaicite:4]{index=4}
+            if (state == GameState.Victory)        // CompleteStage() ë‚´ë¶€ì—ì„œ Victoryë¡œ ë°”ê¿ˆ:contentReference[oaicite:4]{index=4}
                 LoadLobby();
         }
 
@@ -66,17 +66,17 @@ namespace Project   // ¡Ú ³×ÀÓ½ºÆäÀÌ½º·Î ¿ì¸® Å¬·¡½º SceneManager ÀÌ¸§ Ãæµ¹ È¸ÇÇ
             if (_loading) return;
             _loading = true;
 
-            // °á°ú UI°¡ »ı±â¸é ¿©±â¼­ Àá±ñ ¶ç¿î µÚ ÄÚ·çÆ¾À¸·Î ÀüÈ¯ÇÏ¸é µÊ
+            // ê²°ê³¼ UIê°€ ìƒê¸°ë©´ ì—¬ê¸°ì„œ ì ê¹ ë„ìš´ ë’¤ ì½”ë£¨í‹´ìœ¼ë¡œ ì „í™˜í•˜ë©´ ë¨
             UnityEngine.SceneManagement.SceneManager.LoadScene("KDY", LoadSceneMode.Single);
         }
 
         public void LoadPlayScene()
         {
-            // ÇÊ¿äÇÏ¸é Áßº¹ ÀüÈ¯ ¹æÁö¸¦ À§ÇØ _loading Ã¼Å© »ç¿ë °¡´É
+            // í•„ìš”í•˜ë©´ ì¤‘ë³µ ì „í™˜ ë°©ì§€ë¥¼ ìœ„í•´ _loading ì²´í¬ ì‚¬ìš© ê°€ëŠ¥
             UnityEngine.SceneManagement.SceneManager.LoadScene("KDY", LoadSceneMode.Single);
         }
 
-        //  (¹Ì·¡¿ë) 8ºĞ ¾È¿¡ º¸½º »ç¸Á ½Ã ¿ÜºÎ(º¸½º ½ºÅ©¸³Æ®)¿¡¼­ Á¶±â Å¬¸®¾î È£Ãâ °¡´É
+        //  (ë¯¸ë˜ìš©) 8ë¶„ ì•ˆì— ë³´ìŠ¤ ì‚¬ë§ ì‹œ ì™¸ë¶€(ë³´ìŠ¤ ìŠ¤í¬ë¦½íŠ¸)ì—ì„œ ì¡°ê¸° í´ë¦¬ì–´ í˜¸ì¶œ ê°€ëŠ¥
         public void NotifyBossKilled()
         {
             LoadLobby();

@@ -30,8 +30,14 @@ public class SkillExecutionContext
     public float Range;
     public ElementType Element;
     public PassiveEffect Passive;
+
+    // 이펙트 프리팹들
     public GameObject SkillPrefab;
     public GameObject HitEffectPrefab;
+    public GameObject MuzzleEffectPrefab;    // 추가!
+    public GameObject CastEffectPrefab;      // 추가!
+    public float MuzzleEffectDuration = 1f;  // 추가!
+    public float HitEffectDuration = 2f;     // 추가!
 
     // 발사체/영역 개수 (기본값)
     public int BaseProjectileCount = 1;

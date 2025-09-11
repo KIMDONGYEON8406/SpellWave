@@ -45,13 +45,32 @@ public static class SkillNameGenerator
         { ElementType.Light, Color.white }                     // 흰색
     };
 
-    // 완전한 스킬 이름 생성 (예: "파이어 볼")
-    public static string GetSkillName(string baseType, ElementType element)
+    public static string GetSkillName(string baseSkillType, ElementType element)
     {
-        string elementName = GetElementName(element);
-        string baseName = GetBaseSkillName(baseType);
+        // 원소별 접두어
+        string prefix = element switch
+        {
+            ElementType.Fire => "화염",
+            ElementType.Water => "물의",
+            ElementType.Wind => "바람의",
+            ElementType.Earth => "대지의",
+            ElementType.Lightning => "번개",
+            ElementType.Ice => "얼음",
+            _ => ""
+        };
 
-        return $"{elementName} {baseName}";
+        // 스킬명 변환
+        string skillName = baseSkillType switch
+        {
+            "Bolt" => "볼트",
+            "Arrow" => "화살",
+            "Missile" => "미사일",
+            "Explosion" => "폭발",
+            "Aura" => "오라",
+            _ => baseSkillType
+        };
+
+        return string.IsNullOrEmpty(prefix) ? skillName : $"{prefix} {skillName}";
     }
 
     // 속성 이름만 가져오기

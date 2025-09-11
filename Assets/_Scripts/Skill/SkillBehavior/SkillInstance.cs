@@ -12,6 +12,7 @@ public class SkillInstance : MonoBehaviour
     [HideInInspector] public float projectileSpeedMultiplier = 1f;
     [HideInInspector] public float durationMultiplier = 1f;
 
+    private StaffManager staffManager;
     private float lastUseTime;
     private Player owner;
 
@@ -124,8 +125,8 @@ public class SkillInstance : MonoBehaviour
 
     public string GetSkillInfo()
     {
-        var element = CloakManager.Instance?.GetCurrentElement() ?? ElementType.Energy;
-        string skillName = skillData.GetDisplayName(element);
+        var element = StaffManager.Instance?.GetCurrentElement() ?? ElementType.Energy;
+        string skillName = skillData.GetDisplayName();
 
         return $"{skillName} Lv.{currentLevel}\n" +
                $"데미지: {CurrentDamage:F1}\n" +
